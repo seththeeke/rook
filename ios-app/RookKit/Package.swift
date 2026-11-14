@@ -7,6 +7,7 @@ let package = Package(
     platforms: [.iOS(.v17), .macOS(.v14)],
     products: [
         .library(name: "RookModels", targets: ["RookModels"]),
+        .library(name: "RookFormatting", targets: ["RookFormatting"]),
     ],
     targets: [
         .target(name: "RookModels"),
@@ -15,5 +16,8 @@ let package = Package(
             dependencies: ["RookModels"],
             resources: [.copy("Fixtures")]
         ),
+
+        .target(name: "RookFormatting", dependencies: ["RookModels"]),
+        .testTarget(name: "RookFormattingTests", dependencies: ["RookFormatting", "RookModels"]),
     ]
 )

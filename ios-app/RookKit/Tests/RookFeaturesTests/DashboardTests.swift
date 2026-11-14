@@ -180,63 +180,6 @@ struct DashboardModelTests {
 }
 
 @MainActor
-@Suite("Calendar")
-struct CalendarModelTests {
-    let api = FakeAPI()
-
-    func makeModel(known: [WorkoutInstance] = []) -> CalendarModel {
-        CalendarModel(api: api, completedDates: ["2026-03-02", "2026-03-14"], knownWorkouts: known, clock: Clock { dashNow }, calendar: nyCalendar)
-    }
-
-    @Test func gridStartsOnMondayWithLeadingBlanks() {
-        let model = makeModel()
-        #expect(model.title == "March 2026")
-        let grid = model.grid
-        // March 1, 2026 is a Sunday → six blanks before it.
-        #expect(grid.prefix(6).allSatisfy { $0 == nil })
-        #expect(grid[6]?.dayNumber == 1)
-        #expect(grid.compactMap { $0 }.count == 31)
-        #expect(grid.compactMap { $0 }.filter(\.hasWorkout).map(\.dayNumber) == [2, 14])
-        #expect(grid.compactMap { $0 }.first { $0.isToday }?.dayNumber == 14)
-        #expect(grid.compactMap { $0 }.first { $0.dayNumber == 15 }?.isFuture == true)
-        #expect(!model.canGoForward)
-    }
-
-    @Test func selectingADayListsItsWorkouts() {
-        let late = WorkoutInstance.completed("late", completedAt: ISO8601.parse("2026-03-14T02:00:00Z")!) // Fri 10pm NY
-        let model = makeModel(known: [late, .completed("other", completedAt: daysAgo(5))])
-        model.selectedDay = DayKey("2026-03-14")
-        // Matches the server's UTC day, as documented in spec §6.7.
-        #expect(model.workoutsOnSelectedDay.map(\.id) == ["late"])
-    }
-
-    @Test func previousMonthLoadsOlderWorkouts() async {
-        api.workoutPages = [
-            nil: WorkoutListPage(items: [.completed("feb", completedAt: ISO8601.parse("2026-02-10T15:00:00Z")!)], nextToken: "p2"),
-            "p2": WorkoutListPage(items: [.completed("jan", completedAt: ISO8601.parse("2026-01-20T15:00:00Z")!)], nextToken: nil),
-        ]
-        let model = makeModel(known: [.completed("mar", completedAt: daysAgo(2))])
-        await model.showPreviousMonth()
-        #expect(model.title == "February 2026")
-        #expect(model.canGoForward)
-        #expect(model.grid.compactMap { $0 }.filter(\.hasWorkout).map(\.dayNumber) == [10])
-        model.selectedDay = DayKey("2026-02-10")
-        #expect(model.workoutsOnSelectedDay.map(\.id) == ["feb"])
-        model.showNextMonth()
-        #expect(model.title == "March 2026")
-        #expect(model.selectedDay == nil)
-    }
-
-    @Test func loadErrorIsReported() async {
-        api.fail(.workouts, with: APIError.server(status: 503))
-        let model = makeModel()
-        await model.showPreviousMonth()
-        #expect(model.errorMessage != nil)
-        #expect(!model.isLoading)
-    }
-}
-
-@MainActor
 @Suite("History")
 struct HistoryModelTests {
     @Test func loadsPagesAndStopsAtEnd() async {

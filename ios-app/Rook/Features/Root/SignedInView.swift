@@ -39,14 +39,7 @@ struct SignedInView: View {
                 model: dashboard,
                 profile: profile,
                 activeWorkoutBanner: banner,
-                onNewWorkout: newWorkout,
-                makeCalendar: {
-                    CalendarModel(
-                        api: dependencies.api,
-                        completedDates: dashboard.global.completedDates,
-                        knownWorkouts: dashboard.completedWorkouts
-                    )
-                }
+                onNewWorkout: newWorkout
             )
             .navigationDestination(for: AppRoute.self, destination: destination)
         }

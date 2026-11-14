@@ -11,9 +11,7 @@ struct DashboardView: View {
     var activeWorkoutBanner: AnyView?
     /// nil hides the "New workout" button and empty-state action.
     var onNewWorkout: (() -> Void)?
-    @State private var showingCalendar = false
     @Environment(\.scenePhase) private var scenePhase
-    let makeCalendar: () -> CalendarModel
 
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
@@ -48,9 +46,6 @@ struct DashboardView: View {
         .task { if model.state != .loaded { await model.load() } }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active { Task { await model.load() } }
-        }
-        .sheet(isPresented: $showingCalendar) {
-            CalendarSheet(model: makeCalendar(), unit: profile.preferredUnit)
         }
     }
 
@@ -119,12 +114,8 @@ struct DashboardView: View {
                 if !model.personalRecords.isEmpty {
                     PersonalRecordsCard(records: model.personalRecords)
                 }
-                Button { showingCalendar = true } label: {
-                    WeekStrip(days: model.currentWeek)
-                }
-                .buttonStyle(.plain)
-                .accessibilityHint("Opens your workout calendar")
-                .accessibilityIdentifier("dashboard.week")
+                WeekStrip(days: model.currentWeek)
+                    .accessibilityIdentifier("dashboard.week")
                 RecentWorkoutsCard(workouts: model.recentWorkouts, unit: profile.preferredUnit, onStart: onNewWorkout)
             }
         }
@@ -245,11 +236,7 @@ private struct WeekStrip: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: Theme.Spacing.m) {
-            HStack {
-                Text("This Week").font(.headline)
-                Spacer()
-                Image(systemName: "chevron.right").foregroundStyle(Theme.textTertiary)
-            }
+            Text("This Week").font(.headline)
             HStack(spacing: 6) {
                 ForEach(days) { day in
                     VStack(spacing: 8) {

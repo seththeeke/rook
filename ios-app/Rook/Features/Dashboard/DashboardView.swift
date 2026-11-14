@@ -6,6 +6,7 @@ import SwiftUI
 /// Home screen: streak, stats, PRs, this week, recent workouts.
 struct DashboardView: View {
     let model: DashboardModel
+    let steps: StepsModel
     let profile: UserProfile
     /// Slot above the cards (the "workout in progress" banner).
     var activeWorkoutBanner: AnyView?
@@ -46,6 +47,10 @@ struct DashboardView: View {
         .task { if model.state != .loaded { await model.load() } }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active { Task { await model.load() } }
+        }
+        // Live step count while the dashboard is in the foreground (re-read on each return to the app).
+        .task(id: scenePhase == .active) {
+            if scenePhase == .active { await steps.track() }
         }
     }
 
@@ -110,7 +115,7 @@ struct DashboardView: View {
                         .foregroundStyle(Theme.warning)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
-                StatsRow(stats: model.stats, unit: profile.preferredUnit)
+                StatsRow(stats: model.stats, steps: steps.state)
                 if !model.personalRecords.isEmpty {
                     PersonalRecordsCard(records: model.personalRecords)
                 }
@@ -160,14 +165,40 @@ private struct StreakCard: View {
 
 private struct StatsRow: View {
     let stats: DashboardModel.Stats
-    let unit: WeightUnit
+    let steps: StepsModel.State
+    @Environment(\.openURL) private var openURL
 
     var body: some View {
         HStack(spacing: Theme.Spacing.s) {
             tile(icon: "dumbbell.fill", tint: Theme.primaryLight, value: "\(stats.totalWorkouts)", label: "Workouts")
             tile(icon: "bolt.fill", tint: Theme.primaryLight, value: "\(stats.workoutsLast30Days)", label: "Last 30 days")
+            stepsTile
         }
         .accessibilityIdentifier("dashboard.stats")
+    }
+
+    @ViewBuilder
+    private var stepsTile: some View {
+        switch steps {
+        case .count(let count):
+            tile(icon: "figure.walk", tint: Theme.accentGreen, value: count.formatted(), label: "Steps today")
+                .accessibilityIdentifier("dashboard.steps")
+        case .loading, .unavailable:
+            tile(icon: "figure.walk", tint: Theme.accentGreen, value: "—", label: "Steps today")
+                .accessibilityLabel(steps == .loading ? "Steps today, loading" : "Steps today, not available on this device")
+                .accessibilityIdentifier("dashboard.steps")
+        case .denied:
+            // Motion & Fitness access is off: send the user to the app's Settings page to turn it on.
+            Button {
+                if let url = URL(string: UIApplication.openSettingsURLString) { openURL(url) }
+            } label: {
+                tile(icon: "figure.walk", tint: Theme.textSecondary, value: "Off", label: "Enable steps")
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Steps today, off")
+            .accessibilityHint("Opens Settings to allow Motion and Fitness access")
+            .accessibilityIdentifier("dashboard.steps")
+        }
     }
 
     private func tile(icon: String, tint: Color, value: String, label: String) -> some View {

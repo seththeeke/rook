@@ -19,6 +19,7 @@ struct SignedInView: View {
     let profile: UserProfile
     @State private var path: [AppRoute] = []
     @State private var dashboard: DashboardModel
+    @State private var steps: StepsModel
     @State private var showingBuilder = false
     @State private var showingExecution = false
     @Environment(ToastCenter.self) private var toasts
@@ -31,12 +32,14 @@ struct SignedInView: View {
         _dashboard = State(initialValue: DashboardModel(api: dependencies.api, unit: profile.preferredUnit) {
             await appModel.sessionExpired()
         })
+        _steps = State(initialValue: StepsModel(counter: dependencies.stepCounter))
     }
 
     var body: some View {
         NavigationStack(path: $path) {
             DashboardView(
                 model: dashboard,
+                steps: steps,
                 profile: profile,
                 activeWorkoutBanner: banner,
                 onNewWorkout: newWorkout

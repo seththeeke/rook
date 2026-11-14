@@ -15,6 +15,7 @@ struct AppDependencies {
     let sessionStore: SessionStoring
     let biometrics: BiometricAuthenticating
     let preferences: AppPreferences
+    let stepCounter: StepCounting
 
     @MainActor
     static func live(configuration: AppConfiguration) -> AppDependencies {
@@ -33,7 +34,8 @@ struct AppDependencies {
             aiStream: AIWorkoutStreamClient(url: configuration.aiStreamURL, tokenProvider: auth),
             sessionStore: sessionStore,
             biometrics: LocalBiometrics(),
-            preferences: UserDefaultsPreferences()
+            preferences: UserDefaultsPreferences(),
+            stepCounter: MotionStepCounter()
         )
     }
 

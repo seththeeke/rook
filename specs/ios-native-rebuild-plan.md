@@ -309,13 +309,14 @@ Each phase lists its scope, screens, the tests it must add, and its **exit crite
 
 ### Phase 2 — Dashboard (+ history read-only)
 
-**Data:** `GET /metrics/me/global`, `GET /metrics/me/exercises`, `GET /workout-instances` (paged, filtered to completed on the client, see §6.3), loaded in parallel. Loads on appear, on **pull to refresh**, and when the app returns to the foreground. This replaces the 30 s polling.
+**Data:** `GET /metrics/me/global`, `GET /metrics/me/exercises`, `GET /workout-instances` (paged, filtered to completed on the client, see §6.3), loaded in parallel. Loads on appear, on **pull to refresh**, and when the app returns to the foreground. This replaces the 30 s polling. Overlapping loads share one request, and a cancelled refresh (SwiftUI cancels `.refreshable` when the view updates mid-refresh) is never shown as an error.
 
 **Screen (top to bottom)**
 
 1. **Header:** "Welcome back" + display name, avatar (initials; `profilePhoto` URL if present) → Profile.
 2. **Streak card:** current streak and best (`currentStreak`, `longestStreak`).
 3. **Stats row:** Total workouts · Workouts (last 30 days) · Volume and minutes (last 30 days), corrected per §6.6.
+   - **Steps today** tile (right of "Last 30 days"): today's count from the device pedometer (CoreMotion `CMPedometer`, `NSMotionUsageDescription`), live while the dashboard is in the foreground and reset at local midnight. Shows "—" when the device has no pedometer; when Motion & Fitness access is off it reads "Off · Enable steps" and opens the app's Settings page. Device-only data: nothing is sent to the backend.
 4. **Personal records:** top 5 by `maxWeight` with each exercise's own unit and session count. Hidden when empty.
 5. **This week strip:** Mon–Sun, filled for days in `completedDates` (UTC day key, §6.7). Tap → **Calendar sheet** (month navigation, workout days marked, tap a day → that day's workouts → detail).
 6. **Recent workouts:** latest 5, each showing the first exercise names, count, minutes, relative date, and volume in the user's unit. "See all" → **History**. When empty: "No workouts yet", plus a "Start a workout" button that goes to the builder in Phase 3 and is hidden until then.

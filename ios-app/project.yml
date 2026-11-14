@@ -49,6 +49,7 @@ targets:
         ITSAppUsesNonExemptEncryption: false
         LSRequiresIPhoneOS: true
         NSFaceIDUsageDescription: Rook uses Face ID to unlock the app when you turn on biometric unlock.
+        NSMotionUsageDescription: Rook shows your step count for today on the dashboard.
         NSSupportsLiveActivities: true
         UIApplicationSceneManifest:
           UIApplicationSupportsMultipleScenes: false

@@ -9,6 +9,7 @@ let package = Package(
         .library(name: "RookModels", targets: ["RookModels"]),
         .library(name: "RookFormatting", targets: ["RookFormatting"]),
         .library(name: "RookNetworking", targets: ["RookNetworking"]),
+        .library(name: "RookSession", targets: ["RookSession"]),
     ],
     targets: [
         .target(name: "RookModels"),
@@ -23,5 +24,8 @@ let package = Package(
 
         .target(name: "RookNetworking", dependencies: ["RookModels"]),
         .testTarget(name: "RookNetworkingTests", dependencies: ["RookNetworking", "RookModels"]),
+
+        .target(name: "RookSession", dependencies: ["RookModels"]),
+        .testTarget(name: "RookSessionTests", dependencies: ["RookSession", "RookModels"]),
     ]
 )

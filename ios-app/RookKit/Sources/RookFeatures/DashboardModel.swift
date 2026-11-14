@@ -71,7 +71,26 @@ public final class DashboardModel {
 
     // MARK: - Loading
 
+    /// The load currently running, shared by overlapping callers (pull-to-refresh, foregrounding, first appear).
+    private var inFlight: Task<Void, Never>?
+
+    /// Loads (or refreshes) the dashboard.
+    ///
+    /// The fetch runs in its own task, so cancelling the caller doesn't abort it: SwiftUI's `.refreshable`
+    /// cancels its task when the view updates mid-refresh, which used to surface as an error on every pull.
+    /// Overlapping calls join the load already in flight instead of starting another.
     public func load() async {
+        if let inFlight {
+            await inFlight.value
+            return
+        }
+        let task = Task { await performLoad() }
+        inFlight = task
+        await task.value
+        inFlight = nil
+    }
+
+    private func performLoad() async {
         if state != .loaded { state = .loading } else { isRefreshing = true }
         refreshError = nil
         defer { isRefreshing = false }
@@ -85,6 +104,9 @@ public final class DashboardModel {
             exerciseMetrics = e
             completedWorkouts = h
             state = .loaded
+        } catch is CancellationError {
+            // Not a failure: keep whatever is shown, without an error message.
+            if state != .loaded { state = .failed(userMessage(for: APIError.network(.cancelled))) }
         } catch {
             if isSessionExpired(error) { await onSessionExpired(); return }
             if state == .loaded {

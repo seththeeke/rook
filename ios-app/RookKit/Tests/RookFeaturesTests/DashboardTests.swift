@@ -172,6 +172,40 @@ struct DashboardModelTests {
         #expect(!model.isRefreshing)
     }
 
+    @Test func cancelledRefreshIsNotAnError() async {
+        api.global = GlobalMetrics(totalWorkouts: 3)
+        let model = makeModel()
+        await model.load()
+        api.fail(.global, with: CancellationError())
+        await model.load()
+        #expect(model.state == .loaded)
+        #expect(model.refreshError == nil)
+        #expect(model.global.totalWorkouts == 3)
+    }
+
+    @Test func cancellingTheCallerDoesNotAbortTheLoad() async {
+        api.global = GlobalMetrics(totalWorkouts: 3)
+        let model = makeModel()
+        await model.load()
+        api.global = GlobalMetrics(totalWorkouts: 4)
+        // Like SwiftUI's .refreshable task being cancelled while the refresh is running.
+        let refresh = Task { await model.load() }
+        refresh.cancel()
+        await refresh.value
+        #expect(model.refreshError == nil)
+        #expect(model.global.totalWorkouts == 4)
+    }
+
+    @Test func overlappingLoadsShareOneFetch() async {
+        let model = makeModel()
+        let first = Task { await model.load() }
+        let second = Task { await model.load() }
+        await first.value
+        await second.value
+        #expect(api.count(.global) == 1)
+        #expect(model.state == .loaded)
+    }
+
     @Test func expiredSession() async {
         api.fail(.workouts, with: APIError.unauthorized)
         await makeModel().load()

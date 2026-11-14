@@ -227,6 +227,21 @@ struct ExecutionView: View {
                     .accessibilityIdentifier("execution.weight")
                 stepButton("plus", label: "Increase weight") { adjustWeight(by: step) }
             }
+            HStack(spacing: 6) {
+                ForEach(WeightAdjustment.quickDeltas, id: \.self) { delta in
+                    Button(WeightAdjustment.label(for: delta)) {
+                        weightText = RookFormat.weight(WeightAdjustment.apply(delta, to: RookFormat.parseWeight(weightText)))
+                    }
+                    .font(.subheadline.weight(.semibold).monospacedDigit())
+                    .foregroundStyle(delta < 0 ? Theme.textSecondary : Theme.textPrimary)
+                    .frame(maxWidth: .infinity, minHeight: 40)
+                    .background(Theme.surfaceElevated, in: RoundedRectangle(cornerRadius: 10))
+                    .overlay(RoundedRectangle(cornerRadius: 10).strokeBorder(Theme.border))
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("\(delta < 0 ? "Subtract" : "Add") \(RookFormat.weight(abs(delta))) \(unit.label)")
+                    .accessibilityIdentifier("execution.quick\(Int(delta))")
+                }
+            }
             if let last = exercise.lastUsedWeight, exercise.weight != last {
                 Button("Use previous (\(RookFormat.weight(last)))") { weightText = RookFormat.weight(last) }
                     .font(.subheadline.weight(.semibold))

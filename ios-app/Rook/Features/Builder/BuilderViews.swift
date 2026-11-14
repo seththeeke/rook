@@ -109,26 +109,27 @@ private struct OptionCard: View {
             HStack(spacing: Theme.Spacing.m) {
                 Image(systemName: icon)
                     .font(.title2.weight(.semibold))
-                    .foregroundStyle(prominent ? .white : Theme.primary)
+                    .foregroundStyle(prominent ? .white : Theme.primaryLight)
                     .frame(width: 52, height: 52)
-                    .background(prominent ? .white.opacity(0.2) : Theme.primary.opacity(0.12), in: RoundedRectangle(cornerRadius: 14))
+                    .background(prominent ? AnyShapeStyle(.white.opacity(0.18)) : AnyShapeStyle(Theme.surfaceElevated), in: RoundedRectangle(cornerRadius: 14))
                 VStack(alignment: .leading, spacing: 2) {
                     Text(title).font(.headline)
-                    Text(subtitle).font(.subheadline).opacity(0.8)
+                    Text(subtitle).font(.subheadline).foregroundStyle(prominent ? .white.opacity(0.8) : Theme.textSecondary)
                 }
                 Spacer()
                 Image(systemName: "chevron.right").opacity(0.6)
             }
-            .foregroundStyle(prominent ? .white : .primary)
+            .foregroundStyle(Theme.textPrimary)
             .padding(Theme.Spacing.m)
             .background {
                 if prominent {
-                    RoundedRectangle(cornerRadius: Theme.Radius.card).fill(Theme.headerGradient)
+                    RoundedRectangle(cornerRadius: Theme.Radius.card).fill(Theme.accentGradient)
                 } else {
                     RoundedRectangle(cornerRadius: Theme.Radius.card).fill(Theme.surface)
                 }
             }
-            .shadow(color: (prominent ? Theme.primary : .black).opacity(prominent ? 0.3 : 0.05), radius: 8, y: 3)
+            .overlay(RoundedRectangle(cornerRadius: Theme.Radius.card).strokeBorder(prominent ? .clear : Theme.border))
+            .shadow(color: Theme.primary.opacity(prominent ? 0.35 : 0), radius: 12, y: 4)
         }
         .buttonStyle(.plain)
     }
@@ -151,7 +152,7 @@ private struct GymPicker: View {
                     Image(systemName: "chevron.up.chevron.down").font(.caption)
                 }
                 .font(.subheadline.weight(.medium))
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Theme.textSecondary)
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
             .accessibilityLabel("Gym: \(model.selectedGym?.name ?? "none")")
@@ -176,6 +177,7 @@ private struct AIWorkoutView: View {
                     .lineLimit(3...6)
                     .padding(Theme.Spacing.m)
                     .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.Radius.control))
+                    .overlay(RoundedRectangle(cornerRadius: Theme.Radius.control).strokeBorder(promptFocused ? Theme.primary : Theme.border))
                     .focused($promptFocused)
                     .disabled(model.isGenerating)
                     .accessibilityIdentifier("ai.prompt")
@@ -196,7 +198,7 @@ private struct AIWorkoutView: View {
                                 if index == model.aiProgress.count - 1 {
                                     ProgressView().controlSize(.small)
                                 } else {
-                                    Image(systemName: "checkmark.circle.fill").foregroundStyle(Theme.accentGreen)
+                                    Image(systemName: "checkmark.circle.fill").foregroundStyle(Theme.primaryLight)
                                 }
                                 Text(message).font(.subheadline)
                             }
@@ -237,7 +239,7 @@ private struct AIWorkoutView: View {
                 }
             }
             .padding(Theme.Spacing.m)
-            .background(.bar)
+            .background(Theme.background.overlay(alignment: .top) { Rectangle().fill(Theme.border).frame(height: 1) })
         }
         .background(Theme.background.ignoresSafeArea())
         .navigationTitle("AI Workout")
@@ -283,22 +285,24 @@ private struct SelectExercisesView: View {
                         HStack {
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(item.name).font(.subheadline.weight(.semibold))
-                                Text(subtitle(for: item)).font(.caption).foregroundStyle(.secondary)
+                                Text(subtitle(for: item)).font(.caption).foregroundStyle(Theme.textSecondary)
                             }
                             Spacer()
                             Image(systemName: added ? "checkmark.circle.fill" : "plus.circle")
                                 .font(.title3)
-                                .foregroundStyle(added ? Theme.accentGreen : Theme.primary)
+                                .foregroundStyle(added ? Theme.primaryLight : Theme.textSecondary)
                         }
                         .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
                     .accessibilityAddTraits(added ? .isSelected : [])
                     .sensoryFeedback(.selection, trigger: added)
+                    .rookRow()
                 }
             }
         }
         .listStyle(.insetGrouped)
+        .rookListStyle()
         .overlay { if search.isLoading && search.results.isEmpty { ProgressView() } }
         .searchable(text: $search.query, placement: .navigationBarDrawer(displayMode: .always), prompt: "Search exercises")
         .navigationTitle("Choose Exercises")
@@ -308,7 +312,7 @@ private struct SelectExercisesView: View {
                 .buttonStyle(.rookPrimary)
                 .disabled(model.exercises.isEmpty)
                 .padding(Theme.Spacing.m)
-                .background(.bar)
+                .background(Theme.background.overlay(alignment: .top) { Rectangle().fill(Theme.border).frame(height: 1) })
                 .accessibilityIdentifier("manual.review")
         }
         .task { await search.loadIfNeeded() }
@@ -336,9 +340,10 @@ private struct ReviewWorkoutView: View {
                 if model.source == .aiGenerated, let prompt = model.aiPrompt {
                     Label(prompt, systemImage: "sparkles")
                         .font(.subheadline)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Theme.textSecondary)
                 }
             }
+            .rookRow()
             Section {
                 ForEach(Array(model.exercises.enumerated()), id: \.element.exerciseId) { index, exercise in
                     ReviewRow(
@@ -350,6 +355,7 @@ private struct ReviewWorkoutView: View {
                         onReps: { model.setReps($0, at: index) },
                         onDuration: { model.setDuration($0, at: index) }
                     )
+                    .rookRow()
                     .swipeActions(edge: .leading) {
                         Button("Swap") { swapIndex = index }.tint(Theme.primary)
                     }
@@ -393,6 +399,7 @@ private struct ReviewWorkoutView: View {
             }
         }
         .listStyle(.insetGrouped)
+        .rookListStyle()
         .navigationTitle("Review Workout")
         .navigationBarTitleDisplayMode(.inline)
         .safeAreaInset(edge: .bottom) {
@@ -400,7 +407,7 @@ private struct ReviewWorkoutView: View {
                 .buttonStyle(.rookSuccess)
                 .disabled(!model.canStart)
                 .padding(Theme.Spacing.m)
-                .background(.bar)
+                .background(Theme.background.overlay(alignment: .top) { Rectangle().fill(Theme.border).frame(height: 1) })
                 .accessibilityIdentifier("review.start")
         }
         .sheet(item: Binding(get: { swapIndex.map(SwapTarget.init) }, set: { swapIndex = $0?.index })) { target in
@@ -431,7 +438,7 @@ private struct ReviewRow: View {
                 Button(action: onToggleSelect) {
                     Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
                         .font(.title3)
-                        .foregroundStyle(isSelected ? Theme.primary : .secondary)
+                        .foregroundStyle(isSelected ? Theme.primaryLight : Theme.textTertiary)
                 }
                 .buttonStyle(.borderless)
                 .accessibilityLabel(isSelected ? "Selected for replacement" : "Select for replacement")
@@ -467,15 +474,17 @@ private struct SwapExerciseSheet: View {
                 Button { onChoose(item) } label: {
                     VStack(alignment: .leading) {
                         Text(item.name).font(.subheadline.weight(.semibold))
-                        Text((item.muscleGroup ?? "").capitalized).font(.caption).foregroundStyle(.secondary)
+                        Text((item.muscleGroup ?? "").capitalized).font(.caption).foregroundStyle(Theme.textSecondary)
                     }
                 }
                 .buttonStyle(.plain)
+                .rookRow()
             }
             .overlay {
                 if search.isLoading && search.results.isEmpty { ProgressView() }
                 if let error = search.errorMessage { ErrorStateView(message: error) { search.retry() } }
             }
+            .rookListStyle()
             .searchable(text: $search.query, prompt: "Search exercises")
             .navigationTitle("Swap Exercise")
             .navigationBarTitleDisplayMode(.inline)

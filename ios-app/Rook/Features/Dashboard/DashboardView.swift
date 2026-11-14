@@ -36,8 +36,8 @@ struct DashboardView: View {
                     .font(.system(size: 28, weight: .semibold))
                     .foregroundStyle(.white)
                     .frame(width: 64, height: 64)
-                    .background(Theme.primary, in: Circle())
-                    .shadow(color: Theme.primary.opacity(0.4), radius: 10, y: 4)
+                    .background(Theme.accentGradient, in: Circle())
+                    .shadow(color: Theme.primary.opacity(0.5), radius: 14, y: 6)
             }
             .padding(Theme.Spacing.l)
             .accessibilityLabel("New workout")
@@ -61,9 +61,9 @@ struct DashboardView: View {
         return VStack(alignment: .leading, spacing: Theme.Spacing.l) {
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Welcome back")
+                    Text("Welcome back,")
                         .font(.subheadline)
-                        .foregroundStyle(.white.opacity(0.8))
+                        .foregroundStyle(Theme.textSecondary)
                     Text(summary.displayName)
                         .font(.title.bold())
                         .foregroundStyle(.white)
@@ -71,8 +71,7 @@ struct DashboardView: View {
                 }
                 Spacer()
                 NavigationLink(value: AppRoute.profile) {
-                    AvatarView(initials: summary.initials, photoURL: profile.profilePhoto, size: 48)
-                        .overlay(Circle().strokeBorder(.white.opacity(0.3), lineWidth: 2))
+                    AvatarView(initials: summary.initials, photoURL: profile.profilePhoto, size: 44)
                 }
                 .accessibilityLabel("Profile")
                 .accessibilityIdentifier("dashboard.profile")
@@ -85,6 +84,16 @@ struct DashboardView: View {
         .padding(.top, 64)
         .padding(.bottom, Theme.Spacing.xl)
         .background(Theme.headerGradient)
+        .overlay(alignment: .topTrailing) {
+            // Soft purple glow, echoing the accent without filling the header.
+            Circle()
+                .fill(Theme.primary.opacity(0.18))
+                .frame(width: 260, height: 260)
+                .blur(radius: 80)
+                .offset(x: 80, y: -80)
+                .allowsHitTesting(false)
+                .accessibilityHidden(true)
+        }
     }
 
     // MARK: - Content
@@ -132,26 +141,25 @@ private struct StreakCard: View {
         HStack(spacing: Theme.Spacing.m) {
             Image(systemName: "flame.fill")
                 .font(.title)
-                .foregroundStyle(.white)
-                .frame(width: 56, height: 56)
-                .background(Theme.accentOrange, in: RoundedRectangle(cornerRadius: 14))
+                .foregroundStyle(LinearGradient(colors: [Color(hex: 0xFFC14D), Theme.accentOrange], startPoint: .top, endPoint: .bottom))
+                .frame(width: 52, height: 52)
+                .background(Theme.accentOrange.opacity(0.12), in: RoundedRectangle(cornerRadius: 14))
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 2) {
-                Text("Current streak")
-                    .font(.subheadline)
-                    .foregroundStyle(.white.opacity(0.8))
+                Text("Current Streak")
+                    .font(.caption)
+                    .foregroundStyle(Theme.textSecondary)
                 Text(days(current))
                     .font(.rookNumber(30))
                     .foregroundStyle(.white)
             }
             Spacer()
             VStack(alignment: .trailing, spacing: 2) {
-                Text("Best").font(.caption).foregroundStyle(.white.opacity(0.8))
-                Text(days(best)).font(.headline).foregroundStyle(.white)
+                Text("Best").font(.caption).foregroundStyle(Theme.textSecondary)
+                Text(days(best)).font(.headline).foregroundStyle(Theme.primaryLight)
             }
         }
-        .padding(Theme.Spacing.m)
-        .background(.white.opacity(0.12), in: RoundedRectangle(cornerRadius: Theme.Radius.card))
+        .rookCard()
         .accessibilityElement(children: .combine)
         .accessibilityIdentifier("dashboard.streak")
     }
@@ -165,10 +173,10 @@ private struct StatsRow: View {
 
     var body: some View {
         HStack(spacing: Theme.Spacing.s) {
-            tile(icon: "dumbbell.fill", tint: Theme.primary, value: "\(stats.totalWorkouts)", label: "Workouts")
-            tile(icon: "bolt.fill", tint: Theme.accentOrange, value: "\(stats.workoutsLast30Days)", label: "Last 30 days")
+            tile(icon: "dumbbell.fill", tint: Theme.primaryLight, value: "\(stats.totalWorkouts)", label: "Workouts")
+            tile(icon: "bolt.fill", tint: Theme.primaryLight, value: "\(stats.workoutsLast30Days)", label: "Last 30 days")
             tile(
-                icon: "chart.bar.fill", tint: Theme.accentGreen,
+                icon: "chart.bar.fill", tint: Theme.primaryLight,
                 value: RookFormat.compactVolume(stats.volumeLast30Days),
                 label: "\(unit.label) · \(stats.minutesLast30Days) min"
             )
@@ -182,21 +190,21 @@ private struct StatsRow: View {
                 .font(.footnote.weight(.semibold))
                 .foregroundStyle(tint)
                 .frame(width: 30, height: 30)
-                .background(tint.opacity(0.14), in: RoundedRectangle(cornerRadius: 8))
+                .background(Theme.surfaceElevated, in: RoundedRectangle(cornerRadius: 9))
             Text(value)
                 .font(.rookNumber(22))
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)
             Text(label)
                 .font(.caption)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Theme.textSecondary)
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(12)
         .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.Radius.card))
-        .shadow(color: .black.opacity(0.05), radius: 6, y: 2)
+        .overlay(RoundedRectangle(cornerRadius: Theme.Radius.card).strokeBorder(Theme.border))
         .accessibilityElement(children: .combine)
     }
 }
@@ -208,7 +216,7 @@ private struct PersonalRecordsCard: View {
         VStack(alignment: .leading, spacing: Theme.Spacing.s) {
             Label("Personal Records", systemImage: "trophy.fill")
                 .font(.headline)
-                .labelStyle(TintedIconLabelStyle(tint: .yellow))
+                .labelStyle(TintedIconLabelStyle(tint: Color(hex: 0xFBBF24)))
             ForEach(records) { record in
                 HStack {
                     VStack(alignment: .leading, spacing: 2) {
@@ -220,6 +228,7 @@ private struct PersonalRecordsCard: View {
                     Spacer()
                     Text(RookFormat.weight(record.weight, unit: record.unit))
                         .font(.rookNumber(17))
+                        .foregroundStyle(Theme.textPrimary)
                 }
                 .padding(.vertical, 6)
                 .accessibilityElement(children: .combine)
@@ -239,22 +248,23 @@ private struct WeekStrip: View {
             HStack {
                 Text("This Week").font(.headline)
                 Spacer()
-                Image(systemName: "chevron.right").foregroundStyle(.tertiary)
+                Image(systemName: "chevron.right").foregroundStyle(Theme.textTertiary)
             }
             HStack(spacing: 6) {
                 ForEach(days) { day in
-                    VStack(spacing: 6) {
-                        RoundedRectangle(cornerRadius: 10)
+                    VStack(spacing: 8) {
+                        Circle()
                             .fill(fill(for: day))
-                            .aspectRatio(1, contentMode: .fit)
+                            .overlay(Circle().strokeBorder(day.isToday && !day.hasWorkout ? Theme.primary : Theme.border, lineWidth: day.isToday ? 1.5 : 1))
+                            .frame(width: 34, height: 34)
                             .overlay {
                                 if day.hasWorkout {
-                                    Image(systemName: "dumbbell.fill").font(.caption).foregroundStyle(.white)
+                                    Image(systemName: "checkmark").font(.caption.weight(.heavy)).foregroundStyle(.white)
                                 }
                             }
                         Text(day.letter)
-                            .font(.caption.weight(day.isToday ? .bold : .regular))
-                            .foregroundStyle(day.isToday ? Theme.primary : .secondary)
+                            .font(.caption2.weight(day.isToday ? .bold : .medium))
+                            .foregroundStyle(day.isToday ? Theme.primaryLight : Theme.textSecondary)
                     }
                     .frame(maxWidth: .infinity)
                     .accessibilityElement(children: .ignore)
@@ -267,8 +277,8 @@ private struct WeekStrip: View {
 
     private func fill(for day: DashboardModel.WeekDay) -> Color {
         if day.hasWorkout { return Theme.primary }
-        if day.isToday { return Theme.primary.opacity(0.15) }
-        return Color.secondary.opacity(0.12)
+        if day.isToday { return Theme.primary.opacity(0.12) }
+        return Theme.surfaceElevated
     }
 
     private func accessibilityLabel(for day: DashboardModel.WeekDay) -> String {
@@ -287,7 +297,7 @@ private struct RecentWorkoutsCard: View {
             HStack {
                 Label("Recent Workouts", systemImage: "clock")
                     .font(.headline)
-                    .labelStyle(TintedIconLabelStyle(tint: .secondary))
+                    .labelStyle(TintedIconLabelStyle(tint: Theme.textSecondary))
                 Spacer()
                 if !workouts.isEmpty {
                     NavigationLink(value: AppRoute.history) {
@@ -296,6 +306,7 @@ private struct RecentWorkoutsCard: View {
                             Image(systemName: "chevron.right")
                         }
                         .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(Theme.primaryLight)
                     }
                     .accessibilityIdentifier("dashboard.seeAll")
                 }
@@ -330,9 +341,9 @@ struct WorkoutRow: View {
     var body: some View {
         HStack(spacing: Theme.Spacing.m) {
             Image(systemName: "dumbbell.fill")
-                .foregroundStyle(Theme.primary)
+                .foregroundStyle(Theme.primaryLight)
                 .frame(width: 40, height: 40)
-                .background(Theme.primary.opacity(0.12), in: RoundedRectangle(cornerRadius: 10))
+                .background(Theme.primary.opacity(0.16), in: RoundedRectangle(cornerRadius: 11))
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 2) {
                 Text(WorkoutPresentation.title(for: workout))
@@ -352,7 +363,7 @@ struct WorkoutRow: View {
             }
         }
         .padding(10)
-        .background(Color.secondary.opacity(0.06), in: RoundedRectangle(cornerRadius: 12))
+        .background(Theme.surfaceElevated, in: RoundedRectangle(cornerRadius: 14))
         .contentShape(Rectangle())
         .accessibilityElement(children: .combine)
     }
@@ -385,7 +396,7 @@ private struct DashboardSkeleton: View {
 
     private func placeholder(height: CGFloat) -> some View {
         RoundedRectangle(cornerRadius: Theme.Radius.card)
-            .fill(Color.secondary.opacity(0.15))
+            .fill(Theme.surface)
             .frame(height: height)
             .frame(maxWidth: .infinity)
     }

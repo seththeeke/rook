@@ -54,7 +54,7 @@ struct HistoryView: View {
             }
         }
         .listStyle(.plain)
-        .scrollContentBackground(.hidden)
+        .rookListStyle()
         .accessibilityIdentifier("history.list")
     }
 
@@ -81,7 +81,7 @@ struct WorkoutDetailView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text((workout.completedAt ?? workout.startedAt).formatted(date: .complete, time: .shortened))
                         .font(.subheadline)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Theme.textSecondary)
                     if let gym = workout.gymName {
                         Label(gym, systemImage: "mappin.and.ellipse").font(.subheadline)
                     }
@@ -96,12 +96,12 @@ struct WorkoutDetailView: View {
                         HStack {
                             Text(exercise.exerciseName)
                                 .font(.subheadline.weight(.semibold))
-                                .foregroundStyle(exercise.skipped ? .secondary : .primary)
+                                .foregroundStyle(exercise.skipped ? Theme.textTertiary : Theme.textPrimary)
                                 .strikethrough(exercise.skipped)
                             Spacer()
                             Text(WorkoutPresentation.detail(for: exercise, fallbackUnit: unit))
                                 .font(.subheadline)
-                                .foregroundStyle(.secondary)
+                                .foregroundStyle(Theme.textSecondary)
                         }
                         .padding(.vertical, 12)
                         .accessibilityElement(children: .combine)
@@ -128,11 +128,12 @@ struct WorkoutDetailView: View {
     private func metric(_ value: String, _ label: String) -> some View {
         VStack(spacing: 2) {
             Text(value).font(.rookNumber(22))
-            Text(label).font(.caption).foregroundStyle(.secondary)
+            Text(label).font(.caption).foregroundStyle(Theme.textSecondary)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 12)
         .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.Radius.card))
+        .overlay(RoundedRectangle(cornerRadius: Theme.Radius.card).strokeBorder(Theme.border))
         .accessibilityElement(children: .combine)
     }
 }
@@ -193,6 +194,7 @@ struct CalendarSheet: View {
                 }
                 .padding(Theme.Spacing.m)
             }
+            .background(Theme.background.ignoresSafeArea())
             .navigationTitle("Calendar")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -209,12 +211,12 @@ struct CalendarSheet: View {
             Text("\(day.dayNumber)")
                 .font(.subheadline.weight(day.isToday ? .bold : .regular))
                 .frame(maxWidth: .infinity, minHeight: 40)
-                .foregroundStyle(day.hasWorkout ? .white : (day.isFuture ? .secondary : .primary))
+                .foregroundStyle(day.hasWorkout ? .white : (day.isFuture ? Theme.textTertiary : Theme.textPrimary))
                 .background(
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(day.hasWorkout ? Theme.primary : (day.isToday ? Theme.primary.opacity(0.15) : .clear))
+                    Circle()
+                        .fill(day.hasWorkout ? Theme.primary : (day.isToday ? Theme.primary.opacity(0.12) : Theme.surface))
                 )
-                .overlay(RoundedRectangle(cornerRadius: 10).strokeBorder(selected ? Theme.accentOrange : .clear, lineWidth: 2))
+                .overlay(Circle().strokeBorder(selected ? Theme.primaryLight : (day.isToday ? Theme.primary : .clear), lineWidth: selected ? 2 : 1))
         }
         .buttonStyle(.plain)
         .disabled(day.isFuture)

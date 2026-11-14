@@ -120,7 +120,8 @@ struct ExecutionView: View {
                 Image(systemName: session.isPaused ? "play.fill" : "pause.fill")
                     .font(.headline)
                     .frame(width: 44, height: 44)
-                    .background(.white.opacity(0.12), in: Circle())
+                    .background(Theme.surfaceElevated, in: Circle())
+                    .overlay(Circle().strokeBorder(Theme.border))
             }
             .accessibilityLabel(session.isPaused ? "Resume workout" : "Pause workout")
             .accessibilityIdentifier("execution.pause")
@@ -139,7 +140,7 @@ struct ExecutionView: View {
     private var syncLabel: some View {
         switch controller.syncStatus {
         case .synced: EmptyView()
-        case .saving: Text("Saving…").font(.caption2).foregroundStyle(.white.opacity(0.6))
+        case .saving: Text("Saving…").font(.caption2).foregroundStyle(Theme.textSecondary)
         case .pending: Label("Not synced yet", systemImage: "icloud.slash").font(.caption2).foregroundStyle(Theme.warning)
         }
     }
@@ -154,17 +155,18 @@ struct ExecutionView: View {
                 .accessibilityLabel("Dismiss tip")
         }
         .padding(Theme.Spacing.m)
-        .background(.white.opacity(0.08), in: RoundedRectangle(cornerRadius: Theme.Radius.control))
+        .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.Radius.control))
+        .overlay(RoundedRectangle(cornerRadius: Theme.Radius.control).strokeBorder(Theme.border))
         .padding(.horizontal, Theme.Spacing.m)
     }
 
     private func progress(session: WorkoutSessionState) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             Text("Exercise \(session.currentIndex + 1) of \(session.exercises.count)")
-                .font(.subheadline)
-                .foregroundStyle(.white.opacity(0.6))
+                .font(.caption)
+                .foregroundStyle(Theme.textSecondary)
             ProgressView(value: Double(session.currentIndex + 1), total: Double(max(session.exercises.count, 1)))
-                .tint(Theme.primaryLight)
+                .tint(Theme.primary)
         }
         .padding(.horizontal, Theme.Spacing.m)
         .padding(.top, Theme.Spacing.s)
@@ -175,26 +177,28 @@ struct ExecutionView: View {
             if let last = exercise.lastUsedWeight, !exercise.modality.isTimed {
                 HStack(spacing: 6) {
                     Image(systemName: "clock.arrow.circlepath")
-                    Text("Last: ").foregroundStyle(.white.opacity(0.6))
+                    Text("Last: ").foregroundStyle(Theme.textSecondary)
                         + Text(RookFormat.weight(last, unit: exercise.lastUsedWeightUnit ?? controller.unit)).bold()
-                        + Text(lastDate(exercise)).foregroundStyle(.white.opacity(0.6))
+                        + Text(lastDate(exercise)).foregroundStyle(Theme.textSecondary)
                 }
                 .font(.subheadline)
                 .padding(.horizontal, 14)
                 .padding(.vertical, 8)
-                .background(.white.opacity(0.08), in: Capsule())
+                .background(Theme.surface, in: Capsule())
+                .overlay(Capsule().strokeBorder(Theme.border))
             }
             Image(systemName: exercise.modality.isTimed ? "timer" : "dumbbell.fill")
                 .font(.system(size: 34, weight: .semibold))
-                .frame(width: 80, height: 80)
-                .background(Theme.primary, in: RoundedRectangle(cornerRadius: 20))
+                .frame(width: 72, height: 72)
+                .background(Theme.accentGradient, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+                .shadow(color: Theme.primary.opacity(0.45), radius: 16, y: 6)
                 .accessibilityHidden(true)
             Text(exercise.exerciseName)
                 .font(.title.bold())
                 .multilineTextAlignment(.center)
                 .accessibilityIdentifier("execution.exerciseName")
             Text(target(exercise))
-                .foregroundStyle(.white.opacity(0.6))
+                .foregroundStyle(Theme.textSecondary)
             if exercise.skipped {
                 Label("Skipped", systemImage: "forward.fill")
                     .font(.footnote.weight(.semibold))
@@ -207,7 +211,7 @@ struct ExecutionView: View {
         let unit = exercise.weightUnit ?? controller.unit
         let step = unit == .kg ? 2.5 : 5
         return VStack(spacing: Theme.Spacing.m) {
-            Text("Weight (\(unit.label))").font(.subheadline).foregroundStyle(.white.opacity(0.6))
+            Text("Weight (\(unit.label))").font(.subheadline).foregroundStyle(Theme.textSecondary)
             HStack(spacing: Theme.Spacing.m) {
                 stepButton("minus", label: "Decrease weight") { adjustWeight(by: -step) }
                 TextField("0", text: $weightText)
@@ -231,7 +235,8 @@ struct ExecutionView: View {
         }
         .padding(Theme.Spacing.l)
         .frame(maxWidth: .infinity)
-        .background(.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 20))
+        .background(Theme.surface, in: RoundedRectangle(cornerRadius: 22))
+        .overlay(RoundedRectangle(cornerRadius: 22).strokeBorder(Theme.border))
         .toolbar {
             ToolbarItemGroup(placement: .keyboard) {
                 Spacer()
@@ -245,7 +250,8 @@ struct ExecutionView: View {
             Image(systemName: icon)
                 .font(.title2.weight(.bold))
                 .frame(width: 56, height: 56)
-                .background(.white.opacity(0.12), in: Circle())
+                .background(Theme.surfaceElevated, in: Circle())
+                .overlay(Circle().strokeBorder(Theme.border))
         }
         .accessibilityLabel(label)
         .sensoryFeedback(.increase, trigger: weightText)
@@ -258,7 +264,7 @@ struct ExecutionView: View {
             } label: {
                 Label("Previous", systemImage: "chevron.left")
             }
-            .buttonStyle(RookSecondaryButtonStyle(tint: .white))
+            .buttonStyle(.rookSecondary)
             .disabled(session.isFirst)
 
             if session.isLast {
@@ -370,10 +376,10 @@ private struct DurationCard: View {
             let target = session.currentDurationTarget
             VStack(spacing: Theme.Spacing.m) {
                 ZStack {
-                    Circle().stroke(.white.opacity(0.1), lineWidth: 12)
+                    Circle().stroke(Theme.surfaceElevated, lineWidth: 12)
                     Circle()
                         .trim(from: 0, to: CGFloat(target - remaining) / CGFloat(max(target, 1)))
-                        .stroke(Theme.accentGreen, style: StrokeStyle(lineWidth: 12, lineCap: .round))
+                        .stroke(Theme.accentGradient, style: StrokeStyle(lineWidth: 12, lineCap: .round))
                         .rotationEffect(.degrees(-90))
                         .animation(.linear(duration: 1), value: remaining)
                     Text(RookFormat.clock(seconds: remaining))
@@ -383,14 +389,14 @@ private struct DurationCard: View {
                 .frame(width: 200, height: 200)
 
                 if remaining == 0 {
-                    Text("Time's up!").font(.headline).foregroundStyle(Theme.accentGreen)
+                    Text("Time's up!").font(.headline).foregroundStyle(Theme.primaryLight)
                 }
                 HStack(spacing: Theme.Spacing.m) {
                     if remaining > 0 {
                         Button(session.isDurationRunning ? "Pause" : (session.durationElapsedSeconds(at: context.date) > 0 ? "Resume" : "Start")) {
                             Task { await controller.toggleDuration() }
                         }
-                        .buttonStyle(RookSecondaryButtonStyle(tint: .white))
+                        .buttonStyle(.rookSecondary)
                         .accessibilityIdentifier("execution.durationToggle")
                     }
                     Button("Done") { Task { await controller.completeDuration() } }
@@ -402,7 +408,8 @@ private struct DurationCard: View {
         }
         .padding(Theme.Spacing.l)
         .frame(maxWidth: .infinity)
-        .background(.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 20))
+        .background(Theme.surface, in: RoundedRectangle(cornerRadius: 22))
+        .overlay(RoundedRectangle(cornerRadius: 22).strokeBorder(Theme.border))
     }
 }
 
@@ -441,7 +448,8 @@ struct ActiveWorkoutBanner: View {
             }
             .foregroundStyle(.white)
             .padding(Theme.Spacing.m)
-            .background(Theme.accentGreen, in: RoundedRectangle(cornerRadius: Theme.Radius.card))
+            .background(Theme.accentGradient, in: RoundedRectangle(cornerRadius: Theme.Radius.card))
+            .shadow(color: Theme.primary.opacity(0.35), radius: 12, y: 4)
         }
         .buttonStyle(.plain)
         .accessibilityIdentifier("dashboard.resume")

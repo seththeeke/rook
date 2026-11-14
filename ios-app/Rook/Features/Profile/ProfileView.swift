@@ -12,12 +12,13 @@ struct ProfileView: View {
             VStack(spacing: Theme.Spacing.l) {
                 VStack(spacing: Theme.Spacing.s) {
                     AvatarView(initials: summary.initials, photoURL: profile.profilePhoto, size: 96)
+                        .overlay(Circle().strokeBorder(Theme.primary.opacity(0.6), lineWidth: 2))
                     Text(summary.displayName)
                         .font(.title.bold())
                         .accessibilityIdentifier("profile.name")
                     Text(summary.handle)
                         .font(.headline)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Theme.primaryLight)
                         .accessibilityIdentifier("profile.username")
                 }
                 .padding(.top, Theme.Spacing.l)
@@ -26,14 +27,14 @@ struct ProfileView: View {
                     HStack(spacing: Theme.Spacing.m) {
                         Image(systemName: "calendar")
                             .font(.title3)
-                            .foregroundStyle(Theme.primary)
+                            .foregroundStyle(Theme.primaryLight)
                             .frame(width: 44, height: 44)
-                            .background(Theme.primary.opacity(0.12), in: RoundedRectangle(cornerRadius: 12))
+                            .background(Theme.primary.opacity(0.16), in: RoundedRectangle(cornerRadius: 12))
                             .accessibilityHidden(true)
                         VStack(alignment: .leading, spacing: 2) {
                             Text("Member since")
                                 .font(.subheadline)
-                                .foregroundStyle(.secondary)
+                                .foregroundStyle(Theme.textSecondary)
                             Text(memberSince)
                                 .font(.headline)
                         }
@@ -88,10 +89,11 @@ struct AvatarView: View {
 
     private var initialsView: some View {
         ZStack {
-            Theme.primaryLight
+            Theme.surfaceElevated
             Text(initials)
-                .font(.system(size: size * 0.38, weight: .bold, design: .rounded))
-                .foregroundStyle(.white)
+                .font(.system(size: size * 0.38, weight: .semibold, design: .rounded))
+                .foregroundStyle(Theme.textPrimary)
         }
+        .overlay(Circle().strokeBorder(Theme.border))
     }
 }

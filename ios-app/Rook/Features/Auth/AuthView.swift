@@ -18,7 +18,7 @@ struct AuthView: View {
             VStack(spacing: Theme.Spacing.l) {
                 header
                 if let info = model.infoMessage {
-                    banner(info, systemImage: "info.circle.fill", tint: Theme.primary)
+                    banner(info, systemImage: "info.circle.fill", tint: Theme.primaryLight)
                 }
                 if let error = model.errorMessage {
                     banner(error, systemImage: "exclamationmark.circle.fill", tint: Theme.danger)
@@ -40,18 +40,14 @@ struct AuthView: View {
 
     private var header: some View {
         VStack(spacing: Theme.Spacing.s) {
-            Image("LaunchMark")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 72, height: 72)
-                .clipShape(RoundedRectangle(cornerRadius: 18))
+            BrandMark(size: 72)
                 .accessibilityHidden(true)
             Text(title)
                 .font(.largeTitle.bold())
                 .accessibilityIdentifier("auth.title")
             Text(subtitle)
                 .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Theme.textSecondary)
                 .multilineTextAlignment(.center)
         }
         .padding(.top, Theme.Spacing.l)
@@ -103,6 +99,7 @@ struct AuthView: View {
                 Spacer()
                 Button("Forgot password?") { model.go(to: .forgotPassword) }
                     .font(.subheadline.weight(.medium))
+                    .foregroundStyle(Theme.primaryLight)
             }
             RookButton(title: "Sign In", isLoading: model.isWorking) { Task { await model.signIn() } }
                 .buttonStyle(.rookPrimary)
@@ -186,8 +183,8 @@ struct AuthView: View {
 
     private func switchPrompt(_ prompt: String, action: String, perform: @escaping () -> Void) -> some View {
         HStack(spacing: 4) {
-            Text(prompt).foregroundStyle(.secondary)
-            Button(action, action: perform).fontWeight(.semibold)
+            Text(prompt).foregroundStyle(Theme.textSecondary)
+            Button(action, action: perform).fontWeight(.semibold).foregroundStyle(Theme.primaryLight)
         }
         .font(.subheadline)
         .padding(.top, Theme.Spacing.s)
@@ -200,6 +197,7 @@ struct AuthView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(Theme.Spacing.m)
             .background(tint.opacity(0.1), in: RoundedRectangle(cornerRadius: Theme.Radius.control))
+            .overlay(RoundedRectangle(cornerRadius: Theme.Radius.control).strokeBorder(tint.opacity(0.25)))
     }
 }
 
@@ -213,7 +211,7 @@ struct PasswordRequirementsView: View {
                 let met = requirement.isMet(by: password)
                 Label(requirement.label, systemImage: met ? "checkmark.circle.fill" : "circle")
                     .font(.footnote)
-                    .foregroundStyle(met ? Theme.accentGreen : .secondary)
+                    .foregroundStyle(met ? Theme.primaryLight : Theme.textSecondary)
                     .accessibilityLabel("\(requirement.label), \(met ? "met" : "not met")")
             }
         }

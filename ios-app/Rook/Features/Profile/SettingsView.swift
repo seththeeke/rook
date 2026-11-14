@@ -20,6 +20,7 @@ struct SettingsView: View {
                 Section {
                     Label(error, systemImage: "exclamationmark.circle.fill")
                         .foregroundStyle(Theme.danger)
+                        .rookRow()
                 }
             }
 
@@ -33,6 +34,7 @@ struct SettingsView: View {
                 }
                 .disabled(model.isSavingUnit)
                 .accessibilityIdentifier("settings.unit")
+                .rookRow()
             } header: {
                 Text("Workouts")
             } footer: {
@@ -47,6 +49,8 @@ struct SettingsView: View {
                     )) {
                         Label("Unlock with \(biometry.label)", systemImage: biometry == .touchID ? "touchid" : "faceid")
                     }
+                    .tint(Theme.primary)
+                    .rookRow()
                 } header: {
                     Text("Security")
                 } footer: {
@@ -56,17 +60,22 @@ struct SettingsView: View {
 
             Section {
                 Button("Sign Out") { confirmingSignOut = true }
+                    .foregroundStyle(Theme.textPrimary)
                     .accessibilityIdentifier("settings.signOut")
+                    .rookRow()
                 Button("Delete Account", role: .destructive) {
                     model.deleteAcknowledged = false
                     showingDelete = true
                 }
+                .rookRow()
             }
 
             Section {
                 LabeledContent("Version", value: model.appVersion)
+                    .rookRow()
             }
         }
+        .rookListStyle()
         .navigationTitle("Settings")
         .navigationBarTitleDisplayMode(.inline)
         .confirmationDialog("Sign out of Rook?", isPresented: $confirmingSignOut, titleVisibility: .visible) {
@@ -88,12 +97,13 @@ private struct DeleteAccountSheet: View {
             Text("Delete your account?")
                 .font(.title2.bold())
             Text("This permanently deletes your account, workouts, and progress. This can't be undone.")
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Theme.textSecondary)
             Toggle(isOn: $model.deleteAcknowledged) {
                 Text("I understand my account and data will be permanently deleted.")
                     .font(.subheadline)
             }
             .toggleStyle(.switch)
+            .tint(Theme.danger)
             if let error = model.errorMessage {
                 Text(error).font(.footnote).foregroundStyle(Theme.danger)
             }
@@ -108,6 +118,7 @@ private struct DeleteAccountSheet: View {
                 .disabled(model.isDeleting)
         }
         .padding(Theme.Spacing.l)
+        .background(Theme.surface.ignoresSafeArea())
         .interactiveDismissDisabled(model.isDeleting)
     }
 }

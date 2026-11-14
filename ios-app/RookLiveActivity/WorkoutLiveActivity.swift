@@ -21,7 +21,7 @@ struct WorkoutLiveActivity: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: WorkoutActivityAttributes.self) { context in
             LockScreenView(state: context.state)
-                .activityBackgroundTint(Color.black.opacity(0.85))
+                .activityBackgroundTint(Brand.gunmetal)
                 .activitySystemActionForegroundColor(.white)
         } dynamicIsland: { context in
             DynamicIsland {
@@ -66,8 +66,11 @@ struct WorkoutLiveActivity: Widget {
     }
 }
 
+/// Mirrors the app's Theme tokens (the extension can't import the app target).
 enum Brand {
-    static let accent = Color(red: 0x8B / 255, green: 0x5C / 255, blue: 0xF6 / 255)
+    static let accent = Color(red: 0x9F / 255, green: 0x86 / 255, blue: 0xFF / 255)
+    static let gunmetal = Color(red: 0x17 / 255, green: 0x17 / 255, blue: 0x1C / 255)
+    static let secondaryText = Color(red: 0x9A / 255, green: 0x9A / 255, blue: 0xA6 / 255)
 }
 
 // MARK: - Lock Screen
@@ -85,7 +88,7 @@ private struct LockScreenView: View {
                 Spacer()
                 Text(state.progressDescription)
                     .font(.caption)
-                    .foregroundStyle(.white.opacity(0.7))
+                    .foregroundStyle(Brand.secondaryText)
             }
             HStack(alignment: .firstTextBaseline) {
                 Text(state.exerciseName)
@@ -149,7 +152,7 @@ private struct WorkoutControls: View {
                     .labelStyle(.iconOnly)
                     .frame(width: 36, height: 36)
             }
-            .tint(state.isPaused ? .green : .orange)
+            .tint(Brand.accent.opacity(state.isPaused ? 1 : 0.35))
             if state.exercisePosition < state.exerciseCount {
                 Button(intent: NextExerciseIntent()) {
                     Label("Next exercise", systemImage: "forward.end.fill")

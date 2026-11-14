@@ -20,7 +20,7 @@ struct OnboardingView: View {
                         Text("What equipment do you have?")
                             .font(.largeTitle.bold())
                         Text("Rook uses this to suggest exercises you can actually do. You can change it later.")
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(Theme.textSecondary)
                     }
 
                     HStack(spacing: Theme.Spacing.s) {
@@ -53,10 +53,11 @@ struct OnboardingView: View {
                     .disabled(!model.canFinish)
                 Button("Skip, I have everything") { finish(skip: true) }
                     .font(.subheadline.weight(.medium))
+                    .foregroundStyle(Theme.textSecondary)
                     .disabled(model.isWorking)
             }
             .padding(Theme.Spacing.l)
-            .background(.bar)
+            .background(Theme.background.overlay(alignment: .top) { Rectangle().fill(Theme.border).frame(height: 1) })
         }
         .background(Theme.background.ignoresSafeArea())
         .accessibilityIdentifier("onboarding")
@@ -88,11 +89,11 @@ private struct EquipmentTile: View {
                     .font(.subheadline.weight(.semibold))
             }
             .frame(maxWidth: .infinity, minHeight: 92)
-            .foregroundStyle(isSelected ? .white : .primary)
-            .background(isSelected ? Theme.primary : Theme.surface, in: RoundedRectangle(cornerRadius: Theme.Radius.card))
+            .foregroundStyle(isSelected ? Theme.primaryLight : Theme.textSecondary)
+            .background(isSelected ? Theme.primary.opacity(0.16) : Theme.surface, in: RoundedRectangle(cornerRadius: Theme.Radius.card))
             .overlay(
                 RoundedRectangle(cornerRadius: Theme.Radius.card)
-                    .strokeBorder(isSelected ? .clear : Color.secondary.opacity(0.2))
+                    .strokeBorder(isSelected ? Theme.primary : Theme.border, lineWidth: isSelected ? 1.5 : 1)
             )
         }
         .buttonStyle(.plain)
@@ -123,8 +124,9 @@ struct ChipStyle: ButtonStyle {
             .font(.subheadline.weight(.medium))
             .padding(.horizontal, 14)
             .padding(.vertical, 8)
-            .foregroundStyle(isSelected ? .white : .primary)
-            .background(isSelected ? Theme.primary : Color.secondary.opacity(0.12), in: Capsule())
+            .foregroundStyle(isSelected ? .white : Theme.textSecondary)
+            .background(isSelected ? Theme.primary : Theme.surfaceElevated, in: Capsule())
+            .overlay(Capsule().strokeBorder(isSelected ? .clear : Theme.border))
             .opacity(configuration.isPressed ? 0.75 : 1)
             .accessibilityAddTraits(isSelected ? .isSelected : [])
     }

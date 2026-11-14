@@ -65,6 +65,11 @@ struct SignedInView: View {
                     await controller.begin(with: workout)
                     showingBuilder = false
                     showingExecution = true
+                },
+                onSaunaLogged: { _ in
+                    showingBuilder = false
+                    toasts.show("Sauna session logged", kind: .success)
+                    Task { await dashboard.load() }
                 }
             )
         }

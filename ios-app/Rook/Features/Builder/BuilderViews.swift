@@ -4,7 +4,7 @@ import RookModels
 import SwiftUI
 
 enum BuilderStep: Hashable {
-    case ai, manual, pastWorkout, review
+    case ai, manual, pastWorkout, sauna, review
 }
 
 /// Full-screen flow: New workout → AI / Manual / Past workout → Review → Start.
@@ -13,12 +13,20 @@ struct BuilderFlowView: View {
     @State private var path: [BuilderStep] = []
     let makeHistory: () -> HistoryModel
     let onStarted: (WorkoutInstance) async -> Void
+    /// A sauna session was logged (already completed; no workout screen).
+    let onSaunaLogged: (WorkoutInstance) -> Void
     @Environment(\.dismiss) private var dismiss
 
-    init(model: BuilderModel, makeHistory: @escaping () -> HistoryModel, onStarted: @escaping (WorkoutInstance) async -> Void) {
+    init(
+        model: BuilderModel,
+        makeHistory: @escaping () -> HistoryModel,
+        onStarted: @escaping (WorkoutInstance) async -> Void,
+        onSaunaLogged: @escaping (WorkoutInstance) -> Void
+    ) {
         _model = State(initialValue: model)
         self.makeHistory = makeHistory
         self.onStarted = onStarted
+        self.onSaunaLogged = onSaunaLogged
     }
 
     var body: some View {
@@ -40,6 +48,8 @@ struct BuilderFlowView: View {
                             model.loadPastWorkout(workout)
                             path.append(.review)
                         }
+                    case .sauna:
+                        SaunaLogView(model: model.makeSaunaLog(), onLogged: onSaunaLogged)
                     case .review:
                         ReviewWorkoutView(model: model, onEditManually: {
                             model.convertToManual()
@@ -102,6 +112,10 @@ private struct NewWorkoutView: View {
                     go(.pastWorkout)
                 }
                 .accessibilityIdentifier("builder.past")
+                OptionCard(icon: "flame.fill", title: "Sauna", subtitle: "Log a sauna session", tint: Theme.accentOrange) {
+                    go(.sauna)
+                }
+                .accessibilityIdentifier("builder.sauna")
 
                 QuickStartSection(model: model, quickStart: quickStart)
             }
@@ -213,6 +227,7 @@ private struct OptionCard: View {
     let title: String
     let subtitle: String
     var prominent = false
+    var tint: Color = Theme.primaryLight
     let action: () -> Void
 
     var body: some View {
@@ -220,7 +235,7 @@ private struct OptionCard: View {
             HStack(spacing: Theme.Spacing.m) {
                 Image(systemName: icon)
                     .font(.title2.weight(.semibold))
-                    .foregroundStyle(prominent ? .white : Theme.primaryLight)
+                    .foregroundStyle(prominent ? .white : tint)
                     .frame(width: 52, height: 52)
                     .background(prominent ? AnyShapeStyle(.white.opacity(0.18)) : AnyShapeStyle(Theme.surfaceElevated), in: RoundedRectangle(cornerRadius: 14))
                 VStack(alignment: .leading, spacing: 2) {

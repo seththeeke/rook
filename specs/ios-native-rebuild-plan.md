@@ -315,10 +315,10 @@ Each phase lists its scope, screens, the tests it must add, and its **exit crite
 
 1. **Header:** "Welcome back" + display name, avatar (initials; `profilePhoto` URL if present) → Profile.
 2. **Streak card:** current streak and best (`currentStreak`, `longestStreak`).
-3. **Stats row:** Total workouts · Workouts (last 30 days) · Volume and minutes (last 30 days), corrected per §6.6.
-   - **Steps today** tile (right of "Last 30 days"): today's count from the device pedometer (CoreMotion `CMPedometer`, `NSMotionUsageDescription`), live while the dashboard is in the foreground and reset at local midnight. Shows "—" when the device has no pedometer; when Motion & Fitness access is off it reads "Off · Enable steps" and opens the app's Settings page. Device-only data: nothing is sent to the backend.
+3. **Stats row:** Workouts (last 30 days, sauna sessions excluded) · Sauna sessions (last 30 days) · Steps today. The 30-day window is corrected per §6.6. The total-workouts tile was removed when sauna sessions were added.
+   - **Steps today** tile (rightmost): today's count from the device pedometer (CoreMotion `CMPedometer`, `NSMotionUsageDescription`), live while the dashboard is in the foreground and reset at local midnight. Shows "—" when the device has no pedometer; when Motion & Fitness access is off it reads "Off · Enable steps" and opens the app's Settings page. Device-only data: nothing is sent to the backend.
 4. **Personal records:** top 5 by `maxWeight` with each exercise's own unit and session count. Hidden when empty.
-5. **This week strip:** Mon–Sun, filled for days in `completedDates` (UTC day key, §6.7). Tap → **Calendar sheet** (month navigation, workout days marked, tap a day → that day's workouts → detail).
+5. **This week strip:** Mon–Sun, filled for days in `completedDates` (UTC day key, §6.7). Each day's icon shows what was done: a dumbbell for one workout, an orange flame for one sauna session, and a checkmark for more than one session (or a completed day whose workouts aren't loaded). Tap → **Calendar sheet** (month navigation, workout days marked, tap a day → that day's workouts → detail).
 6. **Recent workouts:** latest 5, each showing the first exercise names, count, minutes, relative date, and volume in the user's unit. "See all" → **History**. When empty: "No workouts yet", plus a "Start a workout" button that goes to the builder in Phase 3 and is hidden until then.
 7. **Active workout banner** (only when a stored session exists): "Workout in progress · 12:34 · Resume" → Execution. The banner itself is built in Phase 4. Phase 2 reserves the slot.
 8. **Floating "New workout" button:** added in Phase 3, when the builder exists.
@@ -463,3 +463,13 @@ Automatic signing is used throughout. Fastlane is unnecessary at this size. It c
 | The web app and the native app write the same records | They share the same API contract. The native app never writes fields the web app doesn't know about. |
 
 **Open questions:** none blocking Phase 0. Final Rook artwork, if the owner provides it, replaces the D8 icon and needs no code changes.
+
+
+## Sauna sessions
+
+Added 2026-11-14. Sauna is modelled inside the existing workout structure, with **no new backend types or endpoints**:
+
+- **Catalog:** `recovery-sauna` ("Sauna"), modality `duration`, muscle group `recovery`, equipment `sauna`, default 20 min (`packages/lambdas/exercise/scripts/full-exercise-database.json`).
+- **Logging:** Builder → **Sauna** (under "Repeat a past workout") → choose minutes → Complete. This calls `POST /workout-instances` with one Sauna exercise (`durationSeconds = minutes × 60`, `sets = 1`), then `PATCH … status=completed`. If completing fails, the new workout is cancelled. There's no execution screen and no Live Activity.
+- **Recognition:** a workout counts as a sauna session when every non-skipped exercise is Sauna (`Sauna.isSaunaWorkout`). Its minutes come from the exercise duration, because the server's `durationMinutes` is ~0 for a logged session.
+- **Side effects of using the existing structure:** sauna sessions count toward the server's streak, `totalWorkouts`, and `completedDates`, and they appear in the feed and in history like any workout. Quick start in the builder leaves them out. The AI builder sees Sauna in the catalog, so it could pick it.

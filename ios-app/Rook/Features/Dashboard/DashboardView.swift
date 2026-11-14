@@ -170,8 +170,11 @@ private struct StatsRow: View {
 
     var body: some View {
         HStack(spacing: Theme.Spacing.s) {
-            tile(icon: "dumbbell.fill", tint: Theme.primaryLight, value: "\(stats.totalWorkouts)", label: "Workouts")
-            tile(icon: "bolt.fill", tint: Theme.primaryLight, value: "\(stats.workoutsLast30Days)", label: "Last 30 days")
+            tile(icon: "dumbbell.fill", tint: Theme.primaryLight, value: "\(stats.workoutsLast30Days)", label: "Workouts · 30d")
+                .accessibilityLabel("\(stats.workoutsLast30Days) workouts in the last 30 days")
+            tile(icon: "flame.fill", tint: Theme.accentOrange, value: "\(stats.saunaSessionsLast30Days)", label: "Saunas · 30d")
+                .accessibilityLabel("\(stats.saunaSessionsLast30Days) sauna sessions in the last 30 days")
+                .accessibilityIdentifier("dashboard.sauna")
             stepsTile
         }
         .accessibilityIdentifier("dashboard.stats")
@@ -271,8 +274,8 @@ private struct WeekStrip: View {
                             .overlay(Circle().strokeBorder(day.isToday && !day.hasWorkout ? Theme.primary : Theme.border, lineWidth: day.isToday ? 1.5 : 1))
                             .frame(width: 34, height: 34)
                             .overlay {
-                                if day.hasWorkout {
-                                    Image(systemName: "checkmark").font(.caption.weight(.heavy)).foregroundStyle(.white)
+                                if let icon = icon(for: day.activity) {
+                                    Image(systemName: icon).font(.caption.weight(.heavy)).foregroundStyle(.white)
                                 }
                             }
                         Text(day.letter)
@@ -288,7 +291,17 @@ private struct WeekStrip: View {
         .rookCard()
     }
 
+    private func icon(for activity: DashboardModel.DayActivity) -> String? {
+        switch activity {
+        case .none: nil
+        case .workout: "dumbbell.fill"
+        case .sauna: "flame.fill"
+        case .multiple: "checkmark"
+        }
+    }
+
     private func fill(for day: DashboardModel.WeekDay) -> Color {
+        if day.activity == .sauna { return Theme.accentOrange }
         if day.hasWorkout { return Theme.primary }
         if day.isToday { return Theme.primary.opacity(0.12) }
         return Theme.surfaceElevated
@@ -296,7 +309,13 @@ private struct WeekStrip: View {
 
     private func accessibilityLabel(for day: DashboardModel.WeekDay) -> String {
         let name = day.date.formatted(.dateTime.weekday(.wide))
-        return "\(name)\(day.isToday ? ", today" : ""), \(day.hasWorkout ? "workout completed" : "no workout")"
+        let status = switch day.activity {
+        case .none: "no workout"
+        case .workout: "workout completed"
+        case .sauna: "sauna session"
+        case .multiple: "multiple sessions"
+        }
+        return "\(name)\(day.isToday ? ", today" : ""), \(status)"
     }
 }
 
@@ -352,17 +371,21 @@ struct WorkoutRow: View {
     let unit: WeightUnit
 
     var body: some View {
+        let isSauna = Sauna.isSaunaWorkout(workout)
+        let tint = isSauna ? Theme.accentOrange : Theme.primary
         HStack(spacing: Theme.Spacing.m) {
-            Image(systemName: "dumbbell.fill")
-                .foregroundStyle(Theme.primaryLight)
+            Image(systemName: isSauna ? "flame.fill" : "dumbbell.fill")
+                .foregroundStyle(isSauna ? Theme.accentOrange : Theme.primaryLight)
                 .frame(width: 40, height: 40)
-                .background(Theme.primary.opacity(0.16), in: RoundedRectangle(cornerRadius: 11))
+                .background(tint.opacity(0.16), in: RoundedRectangle(cornerRadius: 11))
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 2) {
                 Text(WorkoutPresentation.title(for: workout))
                     .font(.subheadline.weight(.semibold))
                     .lineLimit(1)
-                Text("\(workout.exercises.count) exercises · \(WorkoutPresentation.minutes(for: workout)) min")
+                Text(isSauna
+                     ? "\(WorkoutPresentation.minutes(for: workout)) min"
+                     : "\(workout.exercises.count) exercises · \(WorkoutPresentation.minutes(for: workout)) min")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -370,9 +393,11 @@ struct WorkoutRow: View {
             VStack(alignment: .trailing, spacing: 2) {
                 Text(RookFormat.relativeDay(workout.completedAt ?? workout.startedAt))
                     .font(.subheadline.weight(.medium))
-                Text("\(RookFormat.compactVolume(WorkoutPresentation.volume(for: workout))) \(unit.label)")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                if !isSauna {
+                    Text("\(RookFormat.compactVolume(WorkoutPresentation.volume(for: workout))) \(unit.label)")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
             }
         }
         .padding(10)

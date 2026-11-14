@@ -5,6 +5,7 @@ import SwiftUI
 struct RootView: View {
     let appModel: AppModel
     let dependencies: AppDependencies
+    let workout: WorkoutRuntime
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
@@ -17,11 +18,16 @@ struct RootView: View {
             }
         }
         .animation(.easeInOut(duration: 0.2), value: appModel.isLocked)
-        .task { await appModel.start() }
+        .task {
+            await workout.ensureRestored()
+            await appModel.start()
+        }
         .onChange(of: scenePhase) { _, phase in
             switch phase {
             case .background: appModel.didEnterBackground()
-            case .active: appModel.willEnterForeground()
+            case .active:
+                appModel.willEnterForeground()
+                Task { await workout.controller.sceneDidBecomeActive() }
             default: break
             }
         }
@@ -39,7 +45,7 @@ struct RootView: View {
         case .onboarding:
             OnboardingView(appModel: appModel, model: OnboardingModel(api: dependencies.api))
         case .ready(let profile):
-            SignedInView(appModel: appModel, dependencies: dependencies, profile: profile)
+            SignedInView(appModel: appModel, dependencies: dependencies, controller: workout.controller, profile: profile)
         case .failed(let message):
             ZStack {
                 Theme.background.ignoresSafeArea()

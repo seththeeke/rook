@@ -130,6 +130,9 @@ public final class BuilderModel {
         self.onSessionExpired = onSessionExpired
     }
 
+    /// A separate catalog search (e.g. for the swap sheet) so it doesn't disturb the manual builder's filters.
+    public func makeSearch() -> ExerciseSearchModel { ExerciseSearchModel(api: api) }
+
     // MARK: - Gyms
 
     public var selectedGym: Gym? { gyms.first { $0.gymId == selectedGymId } }

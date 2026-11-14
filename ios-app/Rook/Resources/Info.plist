@@ -26,6 +26,8 @@
 	<true/>
 	<key>NSFaceIDUsageDescription</key>
 	<string>Rook uses Face ID to unlock the app when you turn on biometric unlock.</string>
+	<key>NSSupportsLiveActivities</key>
+	<true/>
 	<key>RookAIStreamURL</key>
 	<string>$(ROOK_AI_STREAM_URL)</string>
 	<key>RookAPIBaseURL</key>

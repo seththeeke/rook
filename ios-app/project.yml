@@ -35,7 +35,7 @@ targets:
       - path: Rook
     dependencies:
       - package: RookKit
-        products: [RookModels, RookFormatting, RookNetworking, RookSession, RookAuth]
+        products: [RookModels, RookFormatting, RookNetworking, RookSession, RookAuth, RookFeatures]
       - package: Amplify
         products: [Amplify, AWSCognitoAuthPlugin]
     info:
@@ -46,6 +46,7 @@ targets:
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         ITSAppUsesNonExemptEncryption: false
         LSRequiresIPhoneOS: true
+        NSFaceIDUsageDescription: Rook uses Face ID to unlock the app when you turn on biometric unlock.
         UIApplicationSceneManifest:
           UIApplicationSupportsMultipleScenes: false
         UILaunchScreen:

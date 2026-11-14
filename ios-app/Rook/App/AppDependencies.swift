@@ -1,17 +1,20 @@
 import Foundation
 import RookAuth
+import RookFeatures
 import RookNetworking
 import RookSession
 
 /// The production object graph, created once at launch and passed down to features.
-/// Features depend on the protocols (`AuthService`, `AIWorkoutStreaming`, `SessionStoring`), so tests
-/// construct their own graphs from fakes.
+/// Features depend on protocols (`AuthService`, `RookAPI`, `AIWorkoutStreaming`, …), so tests build
+/// their own graphs from fakes.
 struct AppDependencies {
     let configuration: AppConfiguration
     let auth: AuthService
-    let api: APIClient
+    let api: RookAPI
     let aiStream: AIWorkoutStreaming
     let sessionStore: SessionStoring
+    let biometrics: BiometricAuthenticating
+    let preferences: AppPreferences
 
     @MainActor
     static func live(configuration: AppConfiguration) -> AppDependencies {
@@ -26,9 +29,19 @@ struct AppDependencies {
         return AppDependencies(
             configuration: configuration,
             auth: auth,
-            api: APIClient(baseURL: configuration.apiBaseURL, tokenProvider: auth),
+            api: LiveRookAPI(client: APIClient(baseURL: configuration.apiBaseURL, tokenProvider: auth)),
             aiStream: AIWorkoutStreamClient(url: configuration.aiStreamURL, tokenProvider: auth),
-            sessionStore: sessionStore
+            sessionStore: sessionStore,
+            biometrics: LocalBiometrics(),
+            preferences: UserDefaultsPreferences()
         )
+    }
+
+    /// "1.0 (12)" for Settings.
+    static var appVersion: String {
+        let info = Bundle.main.infoDictionary
+        let version = info?["CFBundleShortVersionString"] as? String ?? "?"
+        let build = info?["CFBundleVersion"] as? String ?? "?"
+        return "\(version) (\(build))"
     }
 }

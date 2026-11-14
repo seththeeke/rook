@@ -32,7 +32,7 @@ targets:
       - path: Rook
     dependencies:
       - package: RookKit
-        products: [RookModels, RookFormatting]
+        products: [RookModels, RookFormatting, RookNetworking]
     info:
       path: Rook/Resources/Info.plist
       properties:

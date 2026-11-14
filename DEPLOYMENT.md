@@ -46,7 +46,6 @@ The project is a **pnpm monorepo**:
 │   ├── backend-spec.md         # Backend & infrastructure
 │   ├── frontend-spec.md        # Web app
 │   └── monitoring-spec.md      # CloudWatch alarms & dashboard
-├── prototype-app/              # Standalone React prototype (mock backend) for UX iteration
 ├── pnpm-workspace.yaml
 └── tsconfig.base.json
 ```
@@ -97,10 +96,6 @@ pnpm -r build
 - **Run frontend:**  
   `pnpm --filter web run dev`  
   Copy `packages/web/.env.example` to `packages/web/.env.local` and set `VITE_COGNITO_USER_POOL_ID` and `VITE_COGNITO_CLIENT_ID` (same values as integration tests) so the Amplify login/signup/forgot-password flow works. Set `VITE_API_BASE_URL` when the API is deployed.
-
-- **Prototype only (no backend):**  
-  `cd prototype-app && pnpm install && pnpm dev`  
-  Uses mock data for UX iteration.
 
 - **Build & run iOS app (Capacitor):**  
   Repwise can run natively on iPhone via Capacitor. See [specs/capacitor-ios-plan.md](specs/capacitor-ios-plan.md) for full details. Quick flow: ensure `packages/web/.env.production` (or `.env.ios`) has the same `VITE_*` values as production; then `pnpm build:ios` (builds web + syncs to iOS), and `pnpm --filter web cap:open:ios` to open Xcode. Requires macOS and Xcode.

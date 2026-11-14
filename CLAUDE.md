@@ -14,7 +14,6 @@ Fitness app for building (manually or with AI), executing, and tracking workouts
 | `packages/integration-tests` | Vitest suite that runs against the **deployed** API (no unit tests exist in the repo) |
 | `specs/` | Design specs/plans. `specs/bug-tracker.md` is the running bug list; `specs/polishing/` holds polish ideas (`completed/`, `deferred/`) |
 | `ios-app/` | Native Swift/SwiftUI rebuild of the iOS app, rebranded **Rook**. Plan and phase status: `specs/ios-native-rebuild-plan.md`. Uses the same backend; backend code must not change for it |
-| `prototype-app/` | Standalone mock-data React prototype. Not in the pnpm workspace (uses npm) — legacy, rarely touched |
 | `scripts/` | `clear-user-data.sh`, `clear-test-user-data.sh` (DynamoDB resets for a single user) |
 
 ## Commands

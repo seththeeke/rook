@@ -149,4 +149,4 @@ data: {"message": "..."}
 
 - [Backend spec Phase 12 — AI Lambda (SSE)](backend-spec.md)
 - [Frontend spec 2c — SSE Client for AI Workout Generation](frontend-spec.md)
-- Prototype: [CreateWorkoutPage](prototype-app/src/pages/CreateWorkoutPage.tsx) — `AI_PROGRESS_STEPS`, `renderAIGenerating`, regenerate selection + `generateAIWorkout(regenerateIndices)`.
+- Prototype (since removed from the repo): `CreateWorkoutPage` — `AI_PROGRESS_STEPS`, `renderAIGenerating`, regenerate selection + `generateAIWorkout(regenerateIndices)`.

@@ -73,7 +73,7 @@ export function BiometricUnlockGate({ children, onUsePassword }: BiometricUnlock
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-gradient-to-b from-primary to-primary-dark">
         <Fingerprint className="w-16 h-16 text-white mb-6" aria-hidden />
-        <h1 className="text-xl font-semibold text-white text-center mb-2">Unlock Repwise</h1>
+        <h1 className="text-xl font-semibold text-white text-center mb-2">Unlock Rook</h1>
         <p className="text-sm text-white/80 text-center mb-6 max-w-xs">
           Use Face ID, Touch ID, or your device passcode to continue.
         </p>

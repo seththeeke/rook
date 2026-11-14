@@ -8,7 +8,7 @@ import {
   signInWithRedirect,
 } from 'aws-amplify/auth';
 import { Capacitor } from '@capacitor/core';
-import { Dumbbell, Loader2, Fingerprint, X } from 'lucide-react';
+import { Loader2, Fingerprint, X } from 'lucide-react';
 import { isAppleSignInEnabled } from '@/lib/amplify';
 import { KeychainPassword } from '@/lib/keychainPassword';
 
@@ -230,14 +230,12 @@ export default function LoginDialog({ open, onClose, onSuccess, variant = 'modal
 
   const headerContent = (
     <>
-      <div className="w-16 h-16 bg-violet-600 rounded-2xl flex items-center justify-center mb-4 shadow-lg">
-        <Dumbbell className="w-8 h-8 text-white" />
-      </div>
+      <img src="/rook-wordmark.png" alt="Rook" className="h-5 w-auto mb-5" />
       <h2 id="login-dialog-title" className="text-xl font-bold text-gray-900 dark:text-white">
         {title}
       </h2>
       <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-        Track your fitness journey
+        Train smarter. Get stronger.
       </p>
     </>
   );
@@ -605,19 +603,16 @@ export default function LoginDialog({ open, onClose, onSuccess, variant = 'modal
   if (isFullscreen) {
     return (
       <div
-        className="min-h-screen flex flex-col items-center justify-center p-6 bg-gradient-to-b from-primary to-primary-dark"
+        className="min-h-screen flex flex-col items-center justify-center p-6 bg-rook-canvas"
         role="dialog"
         aria-labelledby="login-dialog-title"
       >
         <div className="w-full max-w-sm flex flex-col items-center mb-6">
-          <div className="w-20 h-20 rounded-2xl flex items-center justify-center mb-4">
-            <Dumbbell className="w-12 h-12 text-white" />
-          </div>
-          <h1 className="text-2xl font-bold text-white">Repwise</h1>
-          <p className="text-sm text-white/80 mt-1">Track your fitness journey</p>
+          <img src="/rook-wordmark.png" alt="Rook" className="h-7 w-auto mb-3" />
+          <p className="text-sm text-rook-muted mt-1">Train smarter. Get stronger.</p>
         </div>
         <div className="w-full max-w-sm bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-          <div className="flex flex-col items-center pt-6 pb-2 px-6 bg-gradient-to-b from-violet-50 to-white dark:from-gray-800 dark:to-gray-800">
+          <div className="flex flex-col items-center pt-6 pb-2 px-6 bg-gray-800">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{title}</h2>
           </div>
           {formContent}
@@ -628,7 +623,7 @@ export default function LoginDialog({ open, onClose, onSuccess, variant = 'modal
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
       onClick={handleClose}
       role="dialog"
       aria-modal="true"
@@ -638,7 +633,7 @@ export default function LoginDialog({ open, onClose, onSuccess, variant = 'modal
         className="relative w-full max-w-sm bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="relative flex flex-col items-center pt-6 pb-4 px-6 bg-gradient-to-b from-violet-50 to-white dark:from-gray-800 dark:to-gray-800">
+        <div className="relative flex flex-col items-center pt-7 pb-4 px-6 bg-gray-800">
           <button
             type="button"
             onClick={handleClose}

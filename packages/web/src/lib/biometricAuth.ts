@@ -14,7 +14,7 @@ export async function isBiometryAvailableForUnlock(): Promise<boolean> {
 /** Prompt Face ID / Touch ID / device PIN. Throws on failure. */
 export async function authenticateForAppUnlock(): Promise<void> {
   await BiometricAuth.authenticate({
-    reason: 'Unlock Repwise',
+    reason: 'Unlock Rook',
     cancelTitle: 'Cancel',
     allowDeviceCredential: true,
     iosFallbackTitle: 'Use Passcode',

@@ -1,321 +1,328 @@
-import { Dumbbell, Wand2, Sparkles, ChevronDown } from 'lucide-react';
-import { StreakWidget } from '@/components/widgets/StreakWidget';
-import { StatsRow } from '@/components/widgets/StatsRow';
-import { GoalsWidget } from '@/components/widgets/GoalsWidget';
-import { WeekCalendarWidget } from '@/components/widgets/WeekCalendarWidget';
-import { RecentWorkoutsWidget } from '@/components/widgets/RecentWorkoutsWidget';
-import { PersonalRecordsWidget } from '@/components/widgets/PersonalRecordsWidget';
-import { Avatar } from '@/components/ui/Avatar';
-import { ProgressBar } from '@/components/ui/ProgressBar';
-import {
-  GoalType,
-  GoalTimeframe,
-  GoalStatus,
-  WorkoutStatus,
-  WorkoutSource,
-  PermissionType,
-  ExerciseModality,
-} from '@/types';
-import type { Goal, WorkoutInstance } from '@/types';
-import type { WeightUnit } from '@/types';
+import { Check, ChevronRight, Flame, Pause, Play, SkipForward, Sparkles, Trophy, Zap, Dumbbell, Timer } from 'lucide-react';
+import type { ReactNode } from 'react';
 
 interface LandingPageProps {
   onOpenLogin: () => void;
 }
 
-// Dummy data for product preview
-const DUMMY_DISPLAY_NAME = 'Alex';
-const DUMMY_STREAK = { current: 5, longest: 12 };
-const DUMMY_STATS = {
-  totalWorkouts: 48,
-  workoutsThisMonth: 8,
-  totalVolumeLast30Days: 42500,
-  durationLast30Days: 320,
-};
-const DUMMY_COMPLETED_DATES = ['2025-03-10', '2025-03-12', '2025-03-14', '2025-03-15'];
-const DUMMY_GOALS: Goal[] = [
-  {
-    goalId: 'g1',
-    userId: 'u1',
-    PK: 'USER#u1',
-    SK: 'GOAL#g1',
-    type: GoalType.TOTAL_WORKOUTS,
-    status: GoalStatus.ACTIVE,
-    title: '12 workouts this month',
-    timeframe: GoalTimeframe.MONTHLY,
-    targetValue: 12,
-    currentValue: 8,
-    unit: 'workouts',
-    startDate: '2025-03-01',
-    endDate: '2025-03-31',
-    createdAt: '2025-03-01T00:00:00Z',
-  },
-  {
-    goalId: 'g2',
-    userId: 'u1',
-    PK: 'USER#u1',
-    SK: 'GOAL#g2',
-    type: GoalType.TOTAL_VOLUME,
-    status: GoalStatus.ACTIVE,
-    title: '50K lbs volume (30 days)',
-    timeframe: GoalTimeframe.MONTHLY,
-    targetValue: 50000,
-    currentValue: 42500,
-    unit: 'lbs',
-    startDate: '2025-03-01',
-    endDate: '2025-03-31',
-    createdAt: '2025-03-01T00:00:00Z',
-  },
-];
-const DUMMY_WORKOUTS: WorkoutInstance[] = [
-  {
-    workoutInstanceId: 'w1',
-    userId: 'u1',
-    PK: 'USER#u1',
-    SK: 'WORKOUT#w1',
-    status: WorkoutStatus.COMPLETED,
-    source: WorkoutSource.AI_GENERATED,
-    permissionType: PermissionType.FOLLOWERS_ONLY,
-    startedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-    completedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-    durationMinutes: 42,
-    totalVolume: 8250,
-    exercises: [
-      { exerciseId: 'e1', exerciseName: 'Bench Press', modality: ExerciseModality.SETS_REPS, sets: 4, reps: 8, skipped: false, orderIndex: 0 },
-      { exerciseId: 'e2', exerciseName: 'Incline Dumbbell Press', modality: ExerciseModality.SETS_REPS, sets: 3, reps: 10, skipped: false, orderIndex: 1 },
-      { exerciseId: 'e3', exerciseName: 'Cable Fly', modality: ExerciseModality.SETS_REPS, sets: 3, reps: 12, skipped: false, orderIndex: 2 },
-    ],
-  },
-  {
-    workoutInstanceId: 'w2',
-    userId: 'u1',
-    PK: 'USER#u1',
-    SK: 'WORKOUT#w2',
-    status: WorkoutStatus.COMPLETED,
-    source: WorkoutSource.MANUAL,
-    permissionType: PermissionType.FOLLOWERS_ONLY,
-    startedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-    completedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-    durationMinutes: 38,
-    totalVolume: 6200,
-    exercises: [
-      { exerciseId: 'e4', exerciseName: 'Barbell Row', modality: ExerciseModality.SETS_REPS, sets: 4, reps: 8, skipped: false, orderIndex: 0 },
-      { exerciseId: 'e5', exerciseName: 'Pull-Ups', modality: ExerciseModality.SETS_REPS, sets: 3, reps: 8, skipped: false, orderIndex: 1 },
-    ],
-  },
-];
-const DUMMY_PR_RECORDS: { exerciseName: string; maxWeight: number; maxWeightUnit: WeightUnit; totalSessions: number }[] = [
-  { exerciseName: 'Bench Press', maxWeight: 185, maxWeightUnit: 'LBS', totalSessions: 24 },
-  { exerciseName: 'Squat', maxWeight: 225, maxWeightUnit: 'LBS', totalSessions: 18 },
-  { exerciseName: 'Deadlift', maxWeight: 275, maxWeightUnit: 'LBS', totalSessions: 12 },
-];
-
+/**
+ * Public marketing page for Rook (shown to signed-out visitors on the web).
+ * Styled to match the iOS app: gunmetal canvas, white text, purple accent, ROOK wordmark.
+ * The phone previews are static illustrations of the app's real screens.
+ */
 export default function LandingPage({ onOpenLogin }: LandingPageProps) {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Sticky header */}
-      <header className="sticky top-0 z-50 px-4 py-4 flex items-center justify-between max-w-6xl mx-auto w-full bg-gray-50/95 dark:bg-gray-900/95 backdrop-blur border-b border-gray-200/50 dark:border-gray-800/50">
-        <div className="flex items-center gap-2">
-          <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg">
-            <Dumbbell className="w-5 h-5 text-white" />
-          </div>
-          <span className="text-xl font-bold text-gray-900 dark:text-white">Repwise</span>
+    <div className="min-h-screen bg-rook-canvas text-white antialiased">
+      {/* Soft accent glow */}
+      <div
+        aria-hidden
+        className="pointer-events-none fixed -top-40 right-[-10rem] h-[32rem] w-[32rem] rounded-full bg-primary/20 blur-[120px]"
+      />
+
+      <header className="sticky top-0 z-50 border-b border-white/5 bg-rook-canvas/80 backdrop-blur">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4">
+          <img src="/rook-wordmark.png" alt="Rook" className="h-6 w-auto" />
+          <button
+            type="button"
+            onClick={onOpenLogin}
+            className="rounded-xl border border-white/10 bg-rook-elevated px-5 py-2.5 text-sm font-semibold transition hover:bg-white/10"
+          >
+            Log in
+          </button>
         </div>
-        <button
-          type="button"
-          onClick={onOpenLogin}
-          className="px-5 py-2.5 bg-primary hover:bg-primary-dark text-white font-semibold rounded-xl shadow-lg shadow-primary/30 transition-all"
-        >
-          Log in
-        </button>
       </header>
 
-      <main className="max-w-6xl mx-auto">
+      <main className="relative mx-auto max-w-6xl px-5">
         {/* Hero */}
-        <section className="px-4 pt-16 pb-20 text-center">
-          <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-white mb-4 tracking-tight">
-            Track your fitness journey
-          </h1>
-          <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-400 mb-10 max-w-2xl mx-auto">
-            Log workouts, set goals, and see your progress over time—with AI-generated plans and a clean execution experience.
+        <section className="grid items-center gap-12 pb-24 pt-16 md:grid-cols-2 md:pt-24">
+          <div className="text-center md:text-left">
+            <p className="mb-4 text-xs font-semibold uppercase tracking-[0.35em] text-primary-light">
+              Train smarter. Get stronger.
+            </p>
+            <h1 className="mb-5 text-4xl font-bold tracking-tight sm:text-5xl">
+              Build it, start it, <span className="text-primary-light">log every rep.</span>
+            </h1>
+            <p className="mb-9 text-lg text-rook-muted">
+              Rook builds your workout with AI or from your favorites, runs it with a timer on your Lock Screen and
+              Dynamic Island, and tracks your streaks and PRs automatically.
+            </p>
+            <div className="flex flex-col items-center gap-3 sm:flex-row md:justify-start">
+              <PrimaryButton onClick={onOpenLogin}>Get started</PrimaryButton>
+            </div>
+          </div>
+          <Phone>
+            <DashboardPreview />
+          </Phone>
+        </section>
+
+        {/* Features */}
+        <section className="grid gap-5 pb-24 md:grid-cols-3">
+          <Feature icon={<Sparkles className="h-5 w-5" />} title="AI workouts">
+            Describe what you want, like “upper body, 45 minutes”, and get a balanced plan from your gym’s equipment.
+          </Feature>
+          <Feature icon={<Play className="h-5 w-5" />} title="One-tap quick start">
+            Repeat a recent workout instantly. Same exercises, sets and reps, no setup.
+          </Feature>
+          <Feature icon={<Timer className="h-5 w-5" />} title="Live Activity">
+            Your session timer and current exercise on the Lock Screen and Dynamic Island, with pause and next.
+          </Feature>
+        </section>
+
+        {/* Execution */}
+        <section className="grid items-center gap-12 pb-24 md:grid-cols-2">
+          <div className="order-2 md:order-1">
+            <Phone>
+              <ExecutionPreview />
+            </Phone>
+          </div>
+          <div className="order-1 text-center md:order-2 md:text-left">
+            <SectionEyebrow>Track every rep</SectionEyebrow>
+            <h2 className="mb-4 text-3xl font-bold tracking-tight">Log in seconds, mid-set.</h2>
+            <p className="text-rook-muted">
+              Your last weight is already filled in. Adjust with quick buttons (−5, +5, +10, +25, +50), tap Next, and
+              Rook saves as you go, even if you close the app.
+            </p>
+          </div>
+        </section>
+
+        {/* Live Activity */}
+        <section className="pb-24 text-center">
+          <SectionEyebrow>Always in view</SectionEyebrow>
+          <h2 className="mb-4 text-3xl font-bold tracking-tight">Your workout, on your Lock Screen.</h2>
+          <p className="mx-auto mb-10 max-w-xl text-rook-muted">
+            Keep your phone locked between sets. The timer keeps running, and you can pause or move on without
+            opening the app.
           </p>
-          <button
-            type="button"
-            onClick={onOpenLogin}
-            className="px-8 py-4 bg-primary hover:bg-primary-dark text-white font-semibold rounded-xl shadow-lg shadow-primary/30 transition-all text-lg"
-          >
-            Get started — Log in
-          </button>
+          <LiveActivityPreview />
         </section>
 
-        {/* Dashboard preview */}
-        <section className="px-4 pb-24">
-          <div className="text-center mb-8">
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2">
-              Your dashboard
-            </h2>
-            <p className="text-gray-600 dark:text-gray-400">
-              Streaks, stats, goals, and recent workouts in one place
-            </p>
-          </div>
-          <div className="max-w-md mx-auto rounded-3xl overflow-hidden shadow-2xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
-            <div className="bg-gradient-to-b from-primary to-primary-dark px-4 pt-8 pb-6">
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <p className="text-violet-200 text-sm">Welcome back</p>
-                  <h1 className="text-2xl font-bold text-white">{DUMMY_DISPLAY_NAME}</h1>
-                </div>
-                <Avatar displayName={DUMMY_DISPLAY_NAME} size="md" className="ring-2 ring-white/20" />
-              </div>
-              <StreakWidget currentStreak={DUMMY_STREAK.current} longestStreak={DUMMY_STREAK.longest} />
-            </div>
-            <div className="px-4 py-6 -mt-4 space-y-5 bg-gray-50 dark:bg-gray-900">
-              <StatsRow
-                totalWorkouts={DUMMY_STATS.totalWorkouts}
-                workoutsThisMonth={DUMMY_STATS.workoutsThisMonth}
-                totalVolumeLast30Days={DUMMY_STATS.totalVolumeLast30Days}
-                durationLast30Days={DUMMY_STATS.durationLast30Days}
-              />
-              <PersonalRecordsWidget records={DUMMY_PR_RECORDS} />
-              <GoalsWidget goals={DUMMY_GOALS} onSeeAll={() => {}} onAddGoal={() => {}} />
-              <div className="pointer-events-none">
-                <WeekCalendarWidget completedDates={DUMMY_COMPLETED_DATES} />
-              </div>
-              <RecentWorkoutsWidget
-                workouts={DUMMY_WORKOUTS}
-                onSeeAll={() => {}}
-                onWorkoutPress={() => {}}
-              />
-            </div>
-          </div>
+        {/* CTA */}
+        <section className="pb-20 pt-4 text-center">
+          <h2 className="mb-4 text-3xl font-bold tracking-tight">Ready to train smarter?</h2>
+          <p className="mx-auto mb-8 max-w-md text-rook-muted">Sign in to pick up where you left off.</p>
+          <PrimaryButton onClick={onOpenLogin}>Get started</PrimaryButton>
         </section>
-
-        {/* Goals progress highlight */}
-        <section className="px-4 pb-24">
-          <div className="text-center mb-8">
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2">
-              Goals that keep you on track
-            </h2>
-            <p className="text-gray-600 dark:text-gray-400 max-w-xl mx-auto">
-              Set monthly targets for workouts and volume—see progress at a glance
-            </p>
-          </div>
-          <div className="max-w-sm mx-auto bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-xl border border-gray-200 dark:border-gray-700">
-            <div className="space-y-4">
-              {DUMMY_GOALS.slice(0, 2).map((goal) => {
-                const progress = Math.min(100, Math.round((goal.currentValue / goal.targetValue) * 100));
-                return (
-                  <div key={goal.goalId} className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{goal.title}</p>
-                      <span className="text-xs font-medium text-primary">{progress}%</span>
-                    </div>
-                    <ProgressBar value={goal.currentValue} max={goal.targetValue} showLabel={false} />
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                      {goal.currentValue.toLocaleString()} / {goal.targetValue.toLocaleString()} {goal.unit ?? ''}
-                    </p>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-
-        {/* AI workout preview */}
-        <section className="px-4 pb-24">
-          <div className="text-center mb-8">
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2">
-              AI-powered workouts in one click
-            </h2>
-            <p className="text-gray-600 dark:text-gray-400 max-w-xl mx-auto">
-              Describe what you want—upper body, 45 minutes, home equipment—and get a tailored plan
-            </p>
-          </div>
-          <div className="max-w-md mx-auto rounded-2xl overflow-hidden shadow-2xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-primary to-primary-dark rounded-xl flex items-center justify-center">
-                <Sparkles className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-gray-900 dark:text-white">What would you like to train?</h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Describe your goals or time available</p>
-              </div>
-            </div>
-            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-600 p-4 min-h-[100px] text-gray-500 dark:text-gray-400 text-sm">
-              e.g., 45 minute upper body push workout focusing on chest and shoulders...
-            </div>
-            <button
-              type="button"
-              className="w-full mt-4 py-4 bg-primary hover:bg-primary-dark text-white font-semibold rounded-xl flex items-center justify-center gap-2 shadow-lg"
-            >
-              <Wand2 className="w-5 h-5" />
-              Generate Workout
-            </button>
-          </div>
-        </section>
-
-        {/* Execution view preview */}
-        <section className="px-4 pb-24">
-          <div className="text-center mb-8">
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2">
-              Track every rep
-            </h2>
-            <p className="text-gray-600 dark:text-gray-400 max-w-xl mx-auto">
-              Clean execution view with timer, weight entry, and quick-add buttons
-            </p>
-          </div>
-          <div className="max-w-sm mx-auto rounded-2xl overflow-hidden shadow-2xl border border-gray-200 dark:border-gray-700 bg-gray-900">
-            <div className="flex items-center justify-between p-4 border-b border-gray-700">
-              <div className="w-12 h-12 rounded-full bg-gray-800" />
-              <div className="flex items-center gap-2 bg-gray-800 px-4 py-2 rounded-full">
-                <span className="font-mono text-lg text-primary">12:34</span>
-                <div className="w-4 h-4 rounded bg-gray-600" />
-              </div>
-              <div className="w-12 h-12 rounded-full bg-gray-800" />
-            </div>
-            <div className="p-6">
-              <p className="text-center text-gray-400 text-sm mb-2">Bench Press · Set 2</p>
-              <div className="bg-gray-800 rounded-2xl p-6">
-                <label className="block text-sm text-gray-400 mb-2 text-center">Weight (lbs)</label>
-                <div className="text-center text-5xl font-bold text-white">135</div>
-              </div>
-              <div className="flex gap-2 mt-4">
-                {[5, 10, 25, 45].map((w) => (
-                  <button
-                    key={w}
-                    type="button"
-                    className="flex-1 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg text-sm font-medium text-white"
-                  >
-                    +{w}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Final CTA */}
-        <section className="px-4 pt-12 pb-20 text-center">
-          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-4">
-            Ready to build the habit?
-          </h2>
-          <p className="text-gray-600 dark:text-gray-400 mb-8 max-w-md mx-auto">
-            Join Repwise and get your dashboard, goals, and AI workouts in one app.
-          </p>
-          <button
-            type="button"
-            onClick={onOpenLogin}
-            className="inline-flex items-center gap-2 px-8 py-4 bg-primary hover:bg-primary-dark text-white font-semibold rounded-xl shadow-lg shadow-primary/30 transition-all"
-          >
-            Get started
-            <ChevronDown className="w-5 h-5 rotate-[-90deg]" />
-          </button>
-        </section>
-
-        <footer className="px-4 py-8 text-center text-sm text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-gray-800">
-          Repwise
-        </footer>
       </main>
+
+      <footer className="border-t border-white/5 py-8">
+        <div className="mx-auto flex max-w-6xl flex-col items-center gap-3 px-5">
+          <img src="/rook-wordmark.png" alt="Rook" className="h-4 w-auto opacity-70" />
+          <p className="text-xs text-rook-faint">© {new Date().getFullYear()} Rook. All rights reserved.</p>
+        </div>
+      </footer>
+    </div>
+  );
+}
+
+// ---------- Building blocks ----------
+
+function PrimaryButton({ onClick, children }: { onClick: () => void; children: ReactNode }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-br from-[#8B6CFF] to-[#6A4BE8] px-7 py-3.5 font-semibold shadow-lg shadow-primary/40 transition hover:brightness-110"
+    >
+      {children}
+      <ChevronRight className="h-5 w-5" />
+    </button>
+  );
+}
+
+function SectionEyebrow({ children }: { children: ReactNode }) {
+  return <p className="mb-3 text-xs font-semibold uppercase tracking-[0.3em] text-primary-light">{children}</p>;
+}
+
+function Feature({ icon, title, children }: { icon: ReactNode; title: string; children: ReactNode }) {
+  return (
+    <div className="rounded-2xl border border-white/[0.07] bg-rook-surface p-6">
+      <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-primary/15 text-primary-light">
+        {icon}
+      </div>
+      <h3 className="mb-2 text-lg font-semibold">{title}</h3>
+      <p className="text-sm leading-relaxed text-rook-muted">{children}</p>
+    </div>
+  );
+}
+
+function Card({ children, className = '' }: { children: ReactNode; className?: string }) {
+  return <div className={`rounded-2xl border border-white/[0.07] bg-rook-surface p-4 ${className}`}>{children}</div>;
+}
+
+/** An iPhone-shaped frame for the static screen previews. */
+function Phone({ children }: { children: ReactNode }) {
+  return (
+    <div className="mx-auto w-full max-w-[320px] rounded-[2.75rem] border border-white/10 bg-black p-2.5 shadow-2xl shadow-primary/20">
+      <div className="relative overflow-hidden rounded-[2.25rem] bg-rook-canvas">
+        <div className="absolute left-1/2 top-2.5 z-10 h-6 w-24 -translate-x-1/2 rounded-full bg-black" />
+        <div className="px-4 pb-6 pt-12">{children}</div>
+      </div>
+    </div>
+  );
+}
+
+// ---------- Screen previews (illustrations) ----------
+
+function DashboardPreview() {
+  const days = [
+    { d: 'M', done: true },
+    { d: 'T', done: false },
+    { d: 'W', done: true },
+    { d: 'T', done: false },
+    { d: 'F', done: true },
+    { d: 'S', done: false, today: true },
+    { d: 'S', done: false },
+  ];
+  return (
+    <div className="space-y-3 text-left">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-xs text-rook-muted">Welcome back,</p>
+          <p className="text-xl font-bold">Alex</p>
+        </div>
+        <div className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-rook-elevated text-sm font-semibold">
+          A
+        </div>
+      </div>
+      <Card className="flex items-center gap-3">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-500/15">
+          <Flame className="h-5 w-5 text-orange-400" />
+        </div>
+        <div className="flex-1">
+          <p className="text-[10px] text-rook-muted">Current Streak</p>
+          <p className="text-lg font-bold">12 days</p>
+        </div>
+        <div className="text-right">
+          <p className="text-[10px] text-rook-muted">Best</p>
+          <p className="text-sm font-semibold text-primary-light">21 days</p>
+        </div>
+      </Card>
+      <div className="grid grid-cols-2 gap-2">
+        <Card className="!p-3">
+          <Dumbbell className="mb-1.5 h-4 w-4 text-primary-light" />
+          <p className="text-lg font-bold">48</p>
+          <p className="text-[10px] text-rook-muted">Workouts</p>
+        </Card>
+        <Card className="!p-3">
+          <Zap className="mb-1.5 h-4 w-4 text-primary-light" />
+          <p className="text-lg font-bold">13</p>
+          <p className="text-[10px] text-rook-muted">Last 30 days</p>
+        </Card>
+      </div>
+      <Card>
+        <p className="mb-3 text-sm font-semibold">This Week</p>
+        <div className="flex justify-between">
+          {days.map((day, i) => (
+            <div key={i} className="flex flex-col items-center gap-1.5">
+              <div
+                className={`flex h-7 w-7 items-center justify-center rounded-full border ${
+                  day.done
+                    ? 'border-transparent bg-primary'
+                    : day.today
+                      ? 'border-primary bg-primary/10'
+                      : 'border-white/[0.07] bg-rook-elevated'
+                }`}
+              >
+                {day.done && <Check className="h-3.5 w-3.5" strokeWidth={3} />}
+              </div>
+              <span className={`text-[9px] ${day.today ? 'font-bold text-primary-light' : 'text-rook-muted'}`}>
+                {day.d}
+              </span>
+            </div>
+          ))}
+        </div>
+      </Card>
+      <Card className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Trophy className="h-4 w-4 text-amber-400" />
+          <div>
+            <p className="text-[10px] text-rook-muted">Personal Record</p>
+            <p className="text-sm font-semibold">Bench Press</p>
+          </div>
+        </div>
+        <p className="text-sm font-bold">225 lbs</p>
+      </Card>
+    </div>
+  );
+}
+
+function ExecutionPreview() {
+  return (
+    <div className="text-center">
+      <div className="mb-3 flex items-center justify-between">
+        <div className="h-8 w-8" />
+        <p className="font-mono text-2xl font-bold tabular-nums">24:18</p>
+        <div className="flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-rook-elevated">
+          <Pause className="h-3.5 w-3.5" />
+        </div>
+      </div>
+      <p className="mb-1.5 text-left text-[10px] text-rook-muted">Exercise 2 of 6</p>
+      <div className="mb-6 h-1 overflow-hidden rounded-full bg-rook-elevated">
+        <div className="h-full w-1/3 rounded-full bg-primary" />
+      </div>
+      <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#8B6CFF] to-[#6A4BE8] shadow-lg shadow-primary/40">
+        <Dumbbell className="h-7 w-7" />
+      </div>
+      <p className="text-lg font-bold">Barbell Bench Press</p>
+      <p className="mb-4 text-xs text-rook-muted">4 sets × 6 reps</p>
+      <Card className="mb-4">
+        <p className="mb-1 text-[10px] text-rook-muted">Weight (lbs)</p>
+        <p className="mb-3 text-4xl font-bold tabular-nums">185</p>
+        <div className="grid grid-cols-5 gap-1">
+          {['−5', '+5', '+10', '+25', '+50'].map((label) => (
+            <div
+              key={label}
+              className={`rounded-lg border border-white/[0.07] bg-rook-elevated py-1.5 text-[11px] font-semibold ${
+                label.startsWith('−') ? 'text-rook-muted' : ''
+              }`}
+            >
+              {label}
+            </div>
+          ))}
+        </div>
+      </Card>
+      <div className="flex gap-2">
+        <div className="flex-1 rounded-xl border border-white/[0.07] bg-rook-elevated py-2.5 text-sm font-semibold">
+          Previous
+        </div>
+        <div className="flex-1 rounded-xl bg-gradient-to-br from-[#8B6CFF] to-[#6A4BE8] py-2.5 text-sm font-semibold">
+          Next
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function LiveActivityPreview() {
+  return (
+    <div className="mx-auto max-w-md space-y-4">
+      {/* Dynamic Island (compact) */}
+      <div className="mx-auto flex w-64 items-center justify-between rounded-full bg-black px-4 py-2.5 shadow-xl">
+        <Dumbbell className="h-4 w-4 text-primary-light" />
+        <span className="font-mono text-sm font-semibold tabular-nums">24:18</span>
+      </div>
+      {/* Lock Screen */}
+      <div className="rounded-3xl border border-white/10 bg-rook-surface/90 p-4 text-left shadow-2xl backdrop-blur">
+        <div className="mb-2 flex items-center justify-between text-xs">
+          <span className="font-semibold text-primary-light">Garage Gym</span>
+          <span className="text-rook-muted">Exercise 2 of 6</span>
+        </div>
+        <div className="mb-2 flex items-baseline justify-between">
+          <span className="font-semibold">Barbell Bench Press</span>
+          <span className="font-mono text-2xl font-bold tabular-nums">24:18</span>
+        </div>
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-white/80">4 sets × 6 reps · 185 lbs</span>
+          <div className="flex gap-2">
+            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/35">
+              <Pause className="h-3.5 w-3.5" />
+            </span>
+            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary">
+              <SkipForward className="h-3.5 w-3.5" />
+            </span>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

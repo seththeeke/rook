@@ -3477,5 +3477,25 @@
     "difficulty": "intermediate",
     "instructions": "Bear hug or shoulder a sandbag. Walk with a braced core and controlled breathing. The unstable load adds a unique challenge vs dumbbells.",
     "isActive": true
+  },
+  {
+    "PK": "EXERCISE#recovery-sauna",
+    "SK": "METADATA",
+    "exerciseId": "recovery-sauna",
+    "name": "Sauna",
+    "muscleGroups": [
+      "recovery"
+    ],
+    "muscleGroup": "recovery",
+    "equipment": [
+      "sauna"
+    ],
+    "equipmentPrimary": "sauna",
+    "modality": "duration",
+    "defaultSets": 1,
+    "defaultDurationSeconds": 1200,
+    "difficulty": "beginner",
+    "instructions": "Sit or lie in a heated sauna for the session. Hydrate before and after, and leave if you feel dizzy or unwell.",
+    "isActive": true
   }
 ]

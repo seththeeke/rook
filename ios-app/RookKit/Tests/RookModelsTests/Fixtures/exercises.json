@@ -1,0 +1,34 @@
+[
+  {
+    "exerciseId": "barbell-bench-press",
+    "name": "Barbell Bench Press",
+    "muscleGroups": ["chest", "triceps"],
+    "muscleGroup": "chest",
+    "equipment": ["barbell", "bench"],
+    "equipmentPrimary": "barbell",
+    "modality": "sets_reps",
+    "defaultSets": 4,
+    "defaultReps": 6,
+    "difficulty": "intermediate",
+    "instructions": "Lower the bar to your chest and press.",
+    "isActive": true
+  },
+  {
+    "exerciseId": "plank",
+    "name": "Plank",
+    "muscleGroups": ["core"],
+    "muscleGroup": "core",
+    "equipment": ["bodyweight"],
+    "equipmentPrimary": "bodyweight",
+    "modality": "duration",
+    "defaultDurationSeconds": 45,
+    "difficulty": "beginner",
+    "instructions": "Hold a straight line.",
+    "isActive": true
+  },
+  {
+    "exerciseId": "mystery-move",
+    "name": "Mystery Move",
+    "modality": "some_future_modality"
+  }
+]

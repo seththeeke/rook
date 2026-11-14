@@ -1,0 +1,12 @@
+{
+  "userId": "99999999-0000-0000-0000-000000000000",
+  "email": "new@example.com",
+  "username": "new",
+  "displayName": "new",
+  "isPrivate": false,
+  "weightUnit": "LBS",
+  "followersCount": 0,
+  "followingCount": 0,
+  "streakCount": 0,
+  "createdAt": "2026-03-15T09:30:00.000Z"
+}

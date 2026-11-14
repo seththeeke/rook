@@ -1,0 +1,7 @@
+{
+  "gyms": [
+    { "gymId": "gym-1", "name": "My Gym", "equipmentTypes": ["dumbbells", "free_weights", "cables"] },
+    { "gymId": "gym-2", "name": "Home", "equipmentTypes": ["dumbbells"] }
+  ],
+  "defaultGymId": "gym-2"
+}

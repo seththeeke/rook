@@ -1,0 +1,32 @@
+{
+  "workoutInstanceId": "wk-123",
+  "userId": "11111111-2222-3333-4444-555555555555",
+  "status": "in_progress",
+  "source": "ai_generated",
+  "permissionType": "FOLLOWERS_ONLY",
+  "startedAt": "2026-03-14T18:02:11.123Z",
+  "gymId": "gym-1",
+  "gymName": "My Gym",
+  "exercises": [
+    {
+      "exerciseId": "plank",
+      "exerciseName": "Plank",
+      "modality": "duration",
+      "durationSeconds": 45,
+      "skipped": false,
+      "orderIndex": 1
+    },
+    {
+      "exerciseId": "barbell-bench-press",
+      "exerciseName": "Barbell Bench Press",
+      "modality": "sets_reps",
+      "sets": 4,
+      "reps": 6,
+      "skipped": false,
+      "orderIndex": 0,
+      "lastUsedWeight": 185,
+      "lastUsedWeightUnit": "LBS",
+      "lastPerformedDate": "2026-03-10"
+    }
+  ]
+}

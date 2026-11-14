@@ -1,0 +1,17 @@
+// Shared build settings for every target and configuration.
+// Values here are NOT secrets: they are the same public client identifiers the web app ships.
+// Note: "//" begins a comment in xcconfig files, so URLs use "$()" to break the double slash.
+
+DEVELOPMENT_TEAM = 2C568CVX27
+MARKETING_VERSION = 0.1.0
+CURRENT_PROJECT_VERSION = 1
+
+// Backend endpoints (production — the only environment that exists).
+ROOK_API_BASE_URL = https:/$()/api.repwisefit.com
+ROOK_AI_STREAM_URL = https:/$()/3la4tvu7tfraazoayc4tugejii0pxkqu.lambda-url.us-east-1.on.aws/
+ROOK_COGNITO_USER_POOL_ID = us-east-1_9jr8u8h37
+ROOK_COGNITO_CLIENT_ID = 3aatm24d4c0r2qtt57jnfoutod
+ROOK_COGNITO_REGION = us-east-1
+
+// Optional, git-ignored per-developer overrides (copy Local.xcconfig.example).
+#include? "Local.xcconfig"

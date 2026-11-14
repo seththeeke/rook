@@ -1,0 +1,4 @@
+[
+  { "exerciseId": "squat", "exerciseName": "Back Squat", "totalSessions": 14, "maxWeight": 275, "maxWeightUnit": "LBS", "lastPerformedDate": "2026-03-13", "lastUsedWeight": 225.5 },
+  { "exerciseId": "deadlift", "exerciseName": "Deadlift", "totalSessions": 3, "maxWeight": 140, "maxWeightUnit": "KG" }
+]

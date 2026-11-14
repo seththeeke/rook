@@ -1,0 +1,109 @@
+name: Rook
+
+options:
+  bundleIdPrefix: com.rookfitness
+  deploymentTarget:
+    iOS: "17.0"
+  developmentLanguage: en
+  createIntermediateGroups: true
+  groupSortPosition: top
+  generateEmptyDirectories: false
+
+configFiles:
+  Debug: Config/Base.xcconfig
+  Release: Config/Base.xcconfig
+
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    SWIFT_STRICT_CONCURRENCY: complete
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+    DEAD_CODE_STRIPPING: YES
+
+packages:
+  RookKit:
+    path: RookKit
+
+targets:
+  Rook:
+    type: application
+    platform: iOS
+    sources:
+      - path: Rook
+    dependencies:
+      - package: RookKit
+        products: [RookModels]
+    info:
+      path: Rook/Resources/Info.plist
+      properties:
+        CFBundleDisplayName: Rook
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        ITSAppUsesNonExemptEncryption: false
+        LSRequiresIPhoneOS: true
+        UIApplicationSceneManifest:
+          UIApplicationSupportsMultipleScenes: false
+        UILaunchScreen:
+          UIColorName: LaunchBackground
+          UIImageName: LaunchMark
+          UIImageRespectsSafeAreaInsets: true
+        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
+        UIRequiredDeviceCapabilities: [arm64]
+        RookAPIBaseURL: $(ROOK_API_BASE_URL)
+        RookAIStreamURL: $(ROOK_AI_STREAM_URL)
+        RookCognitoUserPoolID: $(ROOK_COGNITO_USER_POOL_ID)
+        RookCognitoClientID: $(ROOK_COGNITO_CLIENT_ID)
+        RookCognitoRegion: $(ROOK_COGNITO_REGION)
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.rookfitness.app
+        PRODUCT_NAME: Rook
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        TARGETED_DEVICE_FAMILY: "1"
+        ENABLE_PREVIEWS: YES
+        CODE_SIGN_STYLE: Automatic
+
+  RookTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: RookTests
+    dependencies:
+      - target: Rook
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.rookfitness.app.tests
+        GENERATE_INFOPLIST_FILE: YES
+        CODE_SIGN_STYLE: Automatic
+
+  RookUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: RookUITests
+    dependencies:
+      - target: Rook
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.rookfitness.app.uitests
+        GENERATE_INFOPLIST_FILE: YES
+        CODE_SIGN_STYLE: Automatic
+        TEST_TARGET_NAME: Rook
+
+schemes:
+  Rook:
+    build:
+      targets:
+        Rook: all
+    run:
+      config: Debug
+    test:
+      config: Debug
+      gatherCoverageData: true
+      coverageTargets: [Rook]
+      targets:
+        - RookTests
+        - RookUITests
+    archive:
+      config: Release

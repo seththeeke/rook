@@ -1,0 +1,16 @@
+{
+  "userId": "11111111-2222-3333-4444-555555555555",
+  "email": "athlete@example.com",
+  "username": "athlete",
+  "displayName": "Alex Athlete",
+  "isPrivate": false,
+  "weightUnit": "KG",
+  "defaultPermissionType": "FOLLOWERS_ONLY",
+  "defaultGymId": "gym-1",
+  "onboardingCompletedAt": "2026-03-01T15:04:05.678Z",
+  "followersCount": 2,
+  "followingCount": 3,
+  "streakCount": 4,
+  "lastWorkoutDate": "2026-03-14",
+  "createdAt": "2026-02-28T10:00:00Z"
+}

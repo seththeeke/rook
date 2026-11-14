@@ -43,9 +43,11 @@ struct AuthView: View {
             Wordmark(width: 160)
                 .padding(.bottom, Theme.Spacing.m)
                 .accessibilityHidden(true)
-            Text(title)
-                .font(.largeTitle.bold())
-                .accessibilityIdentifier("auth.title")
+            if let title {
+                Text(title)
+                    .font(.largeTitle.bold())
+                    .accessibilityIdentifier("auth.title")
+            }
             Text(subtitle)
                 .font(.subheadline)
                 .foregroundStyle(Theme.textSecondary)
@@ -54,9 +56,10 @@ struct AuthView: View {
         .padding(.top, Theme.Spacing.l)
     }
 
-    private var title: String {
+    /// Screen heading; sign-in has none (the wordmark leads that screen).
+    private var title: String? {
         switch model.screen {
-        case .signIn: "Welcome to Rook"
+        case .signIn: nil
         case .signUp: "Create your account"
         case .confirmSignUp: "Check your email"
         case .forgotPassword: "Reset password"

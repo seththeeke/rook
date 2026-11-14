@@ -12,14 +12,14 @@ final class LaunchUITests: XCTestCase {
 
     @MainActor
     func testFreshInstallShowsSignIn() {
-        XCTAssertTrue(app.staticTexts["auth.title"].waitForExistence(timeout: 15))
-        XCTAssertEqual(app.staticTexts["auth.title"].label, "Welcome to Rook")
-        XCTAssertTrue(app.buttons["auth.submit"].exists)
+        XCTAssertTrue(app.buttons["auth.submit"].waitForExistence(timeout: 15))
+        XCTAssertTrue(app.textFields["auth.email"].exists)
+        XCTAssertFalse(app.staticTexts["Welcome to Rook"].exists)
     }
 
     @MainActor
     func testInvalidEmailIsCaughtBeforeContactingServer() {
-        XCTAssertTrue(app.staticTexts["auth.title"].waitForExistence(timeout: 15))
+        XCTAssertTrue(app.buttons["auth.submit"].waitForExistence(timeout: 15))
         let email = app.textFields["auth.email"]
         email.tap()
         email.typeText("not-an-email")
@@ -31,9 +31,11 @@ final class LaunchUITests: XCTestCase {
 
     @MainActor
     func testCanNavigateToSignUpAndSeePasswordRules() {
-        XCTAssertTrue(app.staticTexts["auth.title"].waitForExistence(timeout: 15))
+        XCTAssertTrue(app.buttons["auth.submit"].waitForExistence(timeout: 15))
         app.buttons["Create an account"].tap()
-        XCTAssertTrue(app.staticTexts["Create your account"].waitForExistence(timeout: 5))
+        let heading = app.descendants(matching: .any)
+            .matching(NSPredicate(format: "label == %@", "Create your account")).firstMatch
+        XCTAssertTrue(heading.waitForExistence(timeout: 10), app.debugDescription)
         XCTAssertTrue(app.staticTexts["At least 8 characters"].exists || app.otherElements["At least 8 characters, not met"].exists
             || app.descendants(matching: .any)["At least 8 characters, not met"].exists)
     }

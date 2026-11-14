@@ -1,16 +1,16 @@
-import { Check, ChevronRight, Flame, Pause, Play, SkipForward, Sparkles, Trophy, Zap, Dumbbell, Timer } from 'lucide-react';
+import { Check, Flame, Mail, Pause, Play, SkipForward, Sparkles, Trophy, Zap, Dumbbell, Timer } from 'lucide-react';
 import type { ReactNode } from 'react';
 
-interface LandingPageProps {
-  onOpenLogin: () => void;
-}
+/** Where "Contact us to try it" sends people (opens their mail app). */
+const CONTACT_HREF = 'mailto:seththeeke@gmail.com?subject=' + encodeURIComponent('Trying Rook');
 
 /**
- * Public marketing page for Rook (shown to signed-out visitors on the web).
+ * Public marketing page for Rook (shown to signed-out visitors on the web). Marketing only: there is
+ * no sign-in entry point; interested visitors contact us to try the app.
  * Styled to match the iOS app: gunmetal canvas, white text, purple accent, ROOK wordmark.
  * The phone previews are static illustrations of the app's real screens.
  */
-export default function LandingPage({ onOpenLogin }: LandingPageProps) {
+export default function LandingPage() {
   return (
     <div className="min-h-screen bg-rook-canvas text-white antialiased">
       {/* Soft accent glow */}
@@ -22,13 +22,12 @@ export default function LandingPage({ onOpenLogin }: LandingPageProps) {
       <header className="sticky top-0 z-50 border-b border-white/5 bg-rook-canvas/80 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4">
           <img src="/rook-wordmark.png" alt="Rook" className="h-6 w-auto" />
-          <button
-            type="button"
-            onClick={onOpenLogin}
+          <a
+            href={CONTACT_HREF}
             className="rounded-xl border border-white/10 bg-rook-elevated px-5 py-2.5 text-sm font-semibold transition hover:bg-white/10"
           >
-            Log in
-          </button>
+            Contact us
+          </a>
         </div>
       </header>
 
@@ -47,7 +46,7 @@ export default function LandingPage({ onOpenLogin }: LandingPageProps) {
               Dynamic Island, and tracks your streaks and PRs automatically.
             </p>
             <div className="flex flex-col items-center gap-3 sm:flex-row md:justify-start">
-              <PrimaryButton onClick={onOpenLogin}>Get started</PrimaryButton>
+              <ContactButton />
             </div>
           </div>
           <Phone>
@@ -99,8 +98,10 @@ export default function LandingPage({ onOpenLogin }: LandingPageProps) {
         {/* CTA */}
         <section className="pb-20 pt-4 text-center">
           <h2 className="mb-4 text-3xl font-bold tracking-tight">Ready to train smarter?</h2>
-          <p className="mx-auto mb-8 max-w-md text-rook-muted">Sign in to pick up where you left off.</p>
-          <PrimaryButton onClick={onOpenLogin}>Get started</PrimaryButton>
+          <p className="mx-auto mb-8 max-w-md text-rook-muted">
+            Rook is in early access. Reach out and we’ll get you set up.
+          </p>
+          <ContactButton />
         </section>
       </main>
 
@@ -116,16 +117,15 @@ export default function LandingPage({ onOpenLogin }: LandingPageProps) {
 
 // ---------- Building blocks ----------
 
-function PrimaryButton({ onClick, children }: { onClick: () => void; children: ReactNode }) {
+function ContactButton() {
   return (
-    <button
-      type="button"
-      onClick={onClick}
+    <a
+      href={CONTACT_HREF}
       className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-br from-[#8B6CFF] to-[#6A4BE8] px-7 py-3.5 font-semibold shadow-lg shadow-primary/40 transition hover:brightness-110"
     >
-      {children}
-      <ChevronRight className="h-5 w-5" />
-    </button>
+      <Mail className="h-5 w-5" />
+      Contact us to try it
+    </a>
   );
 }
 

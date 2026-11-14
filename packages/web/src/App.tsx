@@ -87,7 +87,6 @@ function ConfigRequired() {
 function App() {
   const [user, setUser] = useState<{ username: string } | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
-  const [loginOpen, setLoginOpen] = useState(false);
   const { profile, setProfile, clear: clearAuthStore } = useAuthStore();
 
   const loadUser = useCallback(async () => {
@@ -183,16 +182,10 @@ function App() {
         </AppShell>
       );
     }
+    // The public website is marketing only; there is no web sign-in entry point.
     return (
       <AppShell>
-      <>
-        <LandingPage onOpenLogin={() => setLoginOpen(true)} />
-        <LoginDialog
-          open={loginOpen}
-          onClose={() => setLoginOpen(false)}
-          onSuccess={loadUser}
-        />
-      </>
+        <LandingPage />
       </AppShell>
     );
   }

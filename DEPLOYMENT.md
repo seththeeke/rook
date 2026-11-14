@@ -1,6 +1,6 @@
-# Repwise — Deployment & Development Guide
+# Rook — Deployment & Development Guide
 
-This document covers how to build, deploy, and run Repwise. For a product overview, see [README.md](README.md).
+This document covers how to build, deploy, and run Rook (web, iOS, and backend). For a product overview, see [README.md](README.md).
 
 ---
 

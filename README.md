@@ -1,31 +1,35 @@
-# Repwise
+# Rook
 
-**[Try Repwise](https://d4cw9s7n6lheh.cloudfront.net)** · Repwise is a fitness app for creating and tracking workouts. Build workouts manually or with AI, run them on mobile, hit personal records, and stay accountable with goals and a social feed.
+**Train smarter. Get stronger.** · **[Open Rook on the web](https://repwisefit.com)**
+
+Rook is a fitness app for building and running workouts. Build a workout with AI or by hand (or restart a recent one in a tap), log every set mid-workout, and watch your streaks and personal records update automatically.
 
 ---
 
 ## What you can do
 
-- **Create workouts** — Use the exercise catalog to build routines by hand, or describe what you want and let AI generate a workout for you.
-- **Execute & log** — Start a session, log weight and reps (or time), and finish with a simple mobile-friendly flow.
-- **Track progress** — See streaks, total workouts, volume over time, and per-exercise PRs. Metrics and trends update automatically.
-- **Set goals** — Goals like “3 workouts/week,” “hit 100 total sessions,” or “bench 225 lbs” are tracked and evaluated as you complete workouts.
-- **Social feed** — Follow others and see their completions and PRs. Control your own visibility (public, followers only, or private).
+- **Build workouts**: describe what you want ("upper body, 45 min") and let AI pick exercises for your gym's equipment, choose from the exercise catalog yourself, or repeat a past workout.
+- **Quick start**: restart a recent workout with one tap, with the same exercises, sets and reps and no setup.
+- **Log as you go**: your last weight is pre-filled. Adjust it with quick buttons (−5, +5, +10, +25, +50), handle timed exercises with a countdown, and progress saves even if you close the app.
+- **Live Activity**: on iPhone, the session timer and current exercise stay on the Lock Screen and Dynamic Island, with Pause and Next buttons.
+- **Track progress**: streaks, workout counts, per-exercise PRs, and your workout history update automatically after every session.
 
 ---
 
-## Highlights
+## Apps
 
-- **AI workout generation** — Tell the app what you want (e.g. “upper body, 45 min, no equipment”) and get a structured workout.
-- **Exercise catalog** — Searchable by muscle group, equipment, and type (sets/reps, duration, burnout).
-- **Mobile-first execution** — Optimized for logging sets on the go.
-- **Profile & following** — Follow requests, follower/following lists, and configurable workout visibility.
+| | |
+|---|---|
+| **iOS** (`ios-app/`) | Native SwiftUI app with the Live Activity / Dynamic Island. See [ios-app/README.md](ios-app/README.md) and the [rebuild plan](specs/ios-native-rebuild-plan.md). |
+| **Web** (`packages/web/`) | React app served at [repwisefit.com](https://repwisefit.com); also includes goals and the social feed. |
+
+Both use the same serverless backend.
 
 ---
 
 ## Tech
 
-Repwise is built with React, TypeScript, AWS (Lambda, DynamoDB, Cognito), and Claude/Bedrock for AI. See **[DEPLOYMENT.md](DEPLOYMENT.md)** for setup, deployment, and development details.
+React, SwiftUI, TypeScript, Swift, AWS (Lambda, API Gateway, DynamoDB, Cognito, CloudFront), and Amazon Bedrock for AI workout generation. See **[DEPLOYMENT.md](DEPLOYMENT.md)** for setup, deployment, and development details.
 
 ---
 

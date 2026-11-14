@@ -161,7 +161,7 @@ public struct WorkoutExercise: Codable, Equatable, Hashable, Sendable {
 }
 
 /// A workout instance (`toResponse` in `lambdas/workout`).
-public struct WorkoutInstance: Codable, Equatable, Identifiable, Sendable {
+public struct WorkoutInstance: Codable, Equatable, Hashable, Identifiable, Sendable {
     public var workoutInstanceId: String
     public var userId: String?
     public var status: WorkoutStatus

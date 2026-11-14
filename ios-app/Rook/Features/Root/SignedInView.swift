@@ -6,20 +6,43 @@ import SwiftUI
 enum AppRoute: Hashable {
     case profile
     case settings
+    case history
+    case workoutDetail(WorkoutInstance)
 }
 
-/// The signed-in app shell and its navigation stack.
+/// The signed-in app shell: dashboard at the root of a navigation stack.
 struct SignedInView: View {
     let appModel: AppModel
     let dependencies: AppDependencies
     let profile: UserProfile
     @State private var path: [AppRoute] = []
+    @State private var dashboard: DashboardModel
+
+    init(appModel: AppModel, dependencies: AppDependencies, profile: UserProfile) {
+        self.appModel = appModel
+        self.dependencies = dependencies
+        self.profile = profile
+        _dashboard = State(initialValue: DashboardModel(api: dependencies.api, unit: profile.preferredUnit) {
+            await appModel.sessionExpired()
+        })
+    }
 
     var body: some View {
         NavigationStack(path: $path) {
-            ProfileView(profile: profile)
-                .navigationDestination(for: AppRoute.self, destination: destination)
+            DashboardView(
+                model: dashboard,
+                profile: profile,
+                makeCalendar: {
+                    CalendarModel(
+                        api: dependencies.api,
+                        completedDates: dashboard.global.completedDates,
+                        knownWorkouts: dashboard.completedWorkouts
+                    )
+                }
+            )
+            .navigationDestination(for: AppRoute.self, destination: destination)
         }
+        .onChange(of: profile.preferredUnit) { _, unit in dashboard.unit = unit }
     }
 
     @ViewBuilder
@@ -41,6 +64,13 @@ struct SignedInView: View {
                 ),
                 onSignOut: { await appModel.signOut() }
             )
+        case .history:
+            HistoryView(
+                model: HistoryModel(api: dependencies.api) { await appModel.sessionExpired() },
+                unit: profile.preferredUnit
+            )
+        case .workoutDetail(let workout):
+            WorkoutDetailView(workout: workout, unit: profile.preferredUnit)
         }
     }
 }

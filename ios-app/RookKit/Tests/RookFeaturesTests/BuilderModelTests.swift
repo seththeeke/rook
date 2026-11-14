@@ -368,3 +368,73 @@ struct ExerciseSearchModelTests {
         #expect(model.results.map(\.exerciseId) == ["bench"])
     }
 }
+
+@MainActor
+@Suite("Builder quick start")
+struct BuilderQuickStartTests {
+    let api = FakeAPI()
+
+    func makeModel() -> BuilderModel {
+        BuilderModel(api: api, aiStream: FakeAIStream(), unit: .lbs, search: ExerciseSearchModel(api: api, sleep: { _ in })) {}
+    }
+
+    private func workout(_ id: String, _ exerciseIds: [String], daysAgo: Double) -> WorkoutInstance {
+        .completed(id, completedAt: Date(timeIntervalSince1970: 1_773_500_000 - daysAgo * 86_400), exercises: exerciseIds.enumerated().map { i, ex in
+            WorkoutExercise(exerciseId: ex, exerciseName: ex.capitalized, modality: .setsReps, sets: 4, reps: 6, weight: 100, weightUnit: .lbs, orderIndex: i)
+        })
+    }
+
+    @Test func listsRecentDistinctWorkouts() async {
+        api.workoutPages = [nil: WorkoutListPage(items: [
+            workout("push-2", ["bench", "press"], daysAgo: 1),
+            workout("legs", ["squat"], daysAgo: 2),
+            workout("push-1", ["bench", "press"], daysAgo: 4), // same routine as push-2
+            workout("reordered", ["press", "bench"], daysAgo: 5), // different order: distinct
+            WorkoutInstance(workoutInstanceId: "empty", status: .completed, startedAt: Date(), completedAt: Date(timeIntervalSince1970: 1_773_000_000), exercises: []),
+        ], nextToken: nil)]
+        let model = makeModel()
+        await model.loadRecentWorkouts(limit: 5)
+        #expect(model.recentWorkouts.map(\.id) == ["push-2", "legs", "reordered"])
+        await model.loadRecentWorkouts() // loads once
+        #expect(api.count(.workouts) == 1)
+    }
+
+    @Test func respectsLimit() async {
+        api.workoutPages = [nil: WorkoutListPage(items: (0..<8).map { workout("w\($0)", ["ex\($0)"], daysAgo: Double($0)) }, nextToken: nil)]
+        let model = makeModel()
+        await model.loadRecentWorkouts(limit: 3)
+        #expect(model.recentWorkouts.map(\.id) == ["w0", "w1", "w2"])
+    }
+
+    @Test func loadFailureHidesListQuietly() async {
+        api.fail(.workouts, with: APIError.server(status: 500))
+        let model = makeModel()
+        await model.loadRecentWorkouts()
+        #expect(model.hasLoadedRecent)
+        #expect(model.recentWorkouts.isEmpty)
+        #expect(model.startError == nil)
+    }
+
+    @Test func quickStartCreatesWorkoutFromPastDefinition() async {
+        api.gyms = GymsListResponse(gyms: [Gym(gymId: "g", name: "Home", equipmentTypes: [])], defaultGymId: "g")
+        let model = makeModel()
+        await model.loadGyms()
+        let past = workout("push", ["bench", "press"], daysAgo: 1)
+        let started = await model.quickStart(past)
+        #expect(started?.workoutInstanceId == "w-new")
+        #expect(model.quickStartingId == nil)
+        let request = api.createdWorkouts.get()[0]
+        #expect(request.exercises.map(\.exerciseId) == ["bench", "press"])
+        #expect(request.exercises.allSatisfy { $0.sets == 4 && $0.reps == 6 && $0.weight == nil && !$0.skipped })
+        #expect(request.source == .manual)
+        #expect(request.gymId == "g")
+    }
+
+    @Test func quickStartFailureReportsError() async {
+        api.fail(.create, with: APIError.network(.notConnectedToInternet))
+        let model = makeModel()
+        #expect(await model.quickStart(workout("push", ["bench"], daysAgo: 1)) == nil)
+        #expect(model.startError?.contains("Couldn't start") == true)
+        #expect(model.quickStartingId == nil)
+    }
+}

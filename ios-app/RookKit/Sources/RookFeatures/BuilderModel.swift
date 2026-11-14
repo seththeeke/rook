@@ -97,6 +97,12 @@ public final class BuilderModel {
     public private(set) var isRegenerating = false
     public private(set) var regenerateError: String?
 
+    // Quick start (recent workouts on the New Workout screen)
+    public private(set) var recentWorkouts: [WorkoutInstance] = []
+    public private(set) var hasLoadedRecent = false
+    /// The recent workout currently being quick-started (drives its row's spinner).
+    public private(set) var quickStartingId: String?
+
     // Starting
     public private(set) var isStarting = false
     public private(set) var startError: String?
@@ -147,6 +153,38 @@ public final class BuilderModel {
             if isSessionExpired(error) { await onSessionExpired(); return }
             gymsError = userMessage(for: error) // non-blocking: building works without a gym
         }
+    }
+
+    // MARK: - Quick start
+
+    /// Loads the most recent distinct completed workouts. Workouts with the same exercises in the same
+    /// order are shown once (the newest), so a routine you repeat doesn't fill the list.
+    public func loadRecentWorkouts(limit: Int = 5) async {
+        guard !hasLoadedRecent else { return }
+        do {
+            var pager = CompletedWorkoutPager()
+            try await pager.load(api: api, minimumCount: limit * 3, maxPages: 2)
+            var seen = Set<[String]>()
+            recentWorkouts = pager.workouts
+                .filter { !$0.exercises.isEmpty && seen.insert($0.orderedExercises.map(\.exerciseId)).inserted }
+                .prefix(limit)
+                .map { $0 }
+            hasLoadedRecent = true
+        } catch {
+            if isSessionExpired(error) { await onSessionExpired(); return }
+            // Non-blocking: the other ways to build a workout still work, so the list simply stays hidden.
+            hasLoadedRecent = true
+        }
+    }
+
+    /// Starts a past workout immediately, skipping review: same exercises, sets, reps and durations,
+    /// with fresh (unlogged) progress. Returns the created workout, or nil after setting `startError`.
+    public func quickStart(_ workout: WorkoutInstance) async -> WorkoutInstance? {
+        guard quickStartingId == nil, !isStarting else { return nil }
+        quickStartingId = workout.id
+        defer { quickStartingId = nil }
+        loadPastWorkout(workout)
+        return await startWorkout()
     }
 
     // MARK: - Manual editing

@@ -1,4 +1,5 @@
 import RookFeatures
+import RookFormatting
 import RookModels
 import SwiftUI
 
@@ -22,7 +23,7 @@ struct BuilderFlowView: View {
 
     var body: some View {
         NavigationStack(path: $path) {
-            NewWorkoutView(model: model) { path.append($0) }
+            NewWorkoutView(model: model, go: { path.append($0) }, quickStart: quickStart)
                 .toolbar {
                     ToolbarItem(placement: .cancellationAction) {
                         Button("Close") { dismiss() }.accessibilityIdentifier("builder.close")
@@ -47,8 +48,20 @@ struct BuilderFlowView: View {
                     }
                 }
         }
-        .task { await model.loadGyms() }
+        .task {
+            async let gyms: Void = model.loadGyms()
+            async let recent: Void = model.loadRecentWorkouts()
+            _ = await (gyms, recent)
+        }
         .interactiveDismissDisabled(model.isStarting || model.isGenerating)
+    }
+
+    private func quickStart(_ workout: WorkoutInstance) {
+        Task {
+            if let started = await model.quickStart(workout) {
+                await onStarted(started)
+            }
+        }
     }
 
     private func start() {
@@ -65,6 +78,7 @@ struct BuilderFlowView: View {
 private struct NewWorkoutView: View {
     let model: BuilderModel
     let go: (BuilderStep) -> Void
+    let quickStart: (WorkoutInstance) -> Void
 
     var body: some View {
         ScrollView {
@@ -88,12 +102,109 @@ private struct NewWorkoutView: View {
                     go(.pastWorkout)
                 }
                 .accessibilityIdentifier("builder.past")
+
+                QuickStartSection(model: model, quickStart: quickStart)
             }
             .padding(Theme.Spacing.m)
         }
         .background(Theme.background.ignoresSafeArea())
         .navigationTitle("New Workout")
         .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+/// Recent workouts that start immediately with one tap (no review step).
+private struct QuickStartSection: View {
+    let model: BuilderModel
+    let quickStart: (WorkoutInstance) -> Void
+
+    var body: some View {
+        if !model.hasLoadedRecent {
+            ProgressView()
+                .tint(Theme.primaryLight)
+                .frame(maxWidth: .infinity)
+                .padding(.top, Theme.Spacing.l)
+        } else if !model.recentWorkouts.isEmpty {
+            VStack(alignment: .leading, spacing: Theme.Spacing.s) {
+                HStack(alignment: .firstTextBaseline) {
+                    Text("Quick start").font(.title3.bold())
+                    Spacer()
+                    Text("Tap to begin").font(.caption).foregroundStyle(Theme.textSecondary)
+                }
+                .padding(.top, Theme.Spacing.l)
+
+                if let error = model.startError, model.quickStartingId == nil {
+                    Label(error, systemImage: "exclamationmark.circle.fill")
+                        .font(.footnote)
+                        .foregroundStyle(Theme.danger)
+                }
+
+                VStack(spacing: Theme.Spacing.s) {
+                    ForEach(model.recentWorkouts) { workout in
+                        QuickStartRow(
+                            workout: workout,
+                            isStarting: model.quickStartingId == workout.id,
+                            isDisabled: model.quickStartingId != nil || model.isStarting
+                        ) { quickStart(workout) }
+                    }
+                }
+            }
+            .accessibilityElement(children: .contain)
+            .accessibilityIdentifier("builder.quickStart")
+        }
+    }
+}
+
+private struct QuickStartRow: View {
+    let workout: WorkoutInstance
+    let isStarting: Bool
+    let isDisabled: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: Theme.Spacing.m) {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(WorkoutPresentation.title(for: workout))
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(Theme.textPrimary)
+                        .lineLimit(1)
+                    Text(subtitle)
+                        .font(.caption)
+                        .foregroundStyle(Theme.textSecondary)
+                        .lineLimit(1)
+                }
+                Spacer(minLength: Theme.Spacing.s)
+                ZStack {
+                    Circle().fill(Theme.accentGradient)
+                    if isStarting {
+                        ProgressView().tint(.white).controlSize(.small)
+                    } else {
+                        Image(systemName: "play.fill").font(.footnote.weight(.bold)).foregroundStyle(.white)
+                    }
+                }
+                .frame(width: 38, height: 38)
+                .shadow(color: Theme.primary.opacity(0.35), radius: 8, y: 3)
+            }
+            .padding(.horizontal, Theme.Spacing.m)
+            .padding(.vertical, 12)
+            .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.Radius.card))
+            .overlay(RoundedRectangle(cornerRadius: Theme.Radius.card).strokeBorder(Theme.border))
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .disabled(isDisabled)
+        .opacity(isDisabled && !isStarting ? 0.5 : 1)
+        .accessibilityLabel("Start \(WorkoutPresentation.title(for: workout)), \(subtitle)")
+        .accessibilityHint("Starts this workout right away")
+    }
+
+    private var subtitle: String {
+        let count = workout.exercises.count
+        let exercises = count == 1 ? "1 exercise" : "\(count) exercises"
+        var parts = [exercises, RookFormat.relativeDay(workout.completedAt ?? workout.startedAt)]
+        if let gym = workout.gymName { parts.append(gym) }
+        return parts.joined(separator: " · ")
     }
 }
 

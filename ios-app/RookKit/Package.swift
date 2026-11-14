@@ -13,6 +13,7 @@ let package = Package(
         .library(name: "RookAuth", targets: ["RookAuth"]),
         .library(name: "RookFeatures", targets: ["RookFeatures"]),
         .library(name: "RookLiveActivityKit", targets: ["RookLiveActivityKit"]),
+        .library(name: "RookWidgetData", targets: ["RookWidgetData"]),
     ],
     targets: [
         .target(name: "RookModels"),
@@ -36,14 +37,18 @@ let package = Package(
 
         .target(
             name: "RookFeatures",
-            dependencies: ["RookModels", "RookNetworking", "RookAuth", "RookSession", "RookFormatting", "RookLiveActivityKit"]
+            dependencies: ["RookModels", "RookNetworking", "RookAuth", "RookSession", "RookFormatting", "RookLiveActivityKit", "RookWidgetData"]
         ),
         .testTarget(
             name: "RookFeaturesTests",
-            dependencies: ["RookFeatures", "RookModels", "RookNetworking", "RookAuth", "RookSession", "RookFormatting", "RookLiveActivityKit"]
+            dependencies: ["RookFeatures", "RookModels", "RookNetworking", "RookAuth", "RookSession", "RookFormatting", "RookLiveActivityKit", "RookWidgetData"]
         ),
 
         .target(name: "RookLiveActivityKit", dependencies: ["RookModels", "RookSession"]),
         .testTarget(name: "RookLiveActivityKitTests", dependencies: ["RookLiveActivityKit", "RookModels", "RookSession"]),
+
+        // Shared by the app and the widget extension: the dashboard snapshot the home-screen widgets show.
+        .target(name: "RookWidgetData", dependencies: ["RookFormatting"]),
+        .testTarget(name: "RookWidgetDataTests", dependencies: ["RookWidgetData", "RookFormatting"]),
     ]
 )

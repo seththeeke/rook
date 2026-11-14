@@ -3,6 +3,7 @@ import Observation
 import RookFormatting
 import RookModels
 import RookNetworking
+import RookWidgetData
 
 /// The dashboard's data and derived figures.
 ///
@@ -25,16 +26,8 @@ public final class DashboardModel {
         public var saunaSessionsLast30Days: Int
     }
 
-    /// What a day in the week strip shows.
-    public enum DayActivity: Equatable, Sendable {
-        case none
-        /// One workout (not sauna).
-        case workout
-        /// One sauna session.
-        case sauna
-        /// More than one session that day, or a completed day whose workouts aren't loaded.
-        case multiple
-    }
+    /// What a day in the week strip shows (shared with the home-screen widgets).
+    public typealias DayActivity = RookWidgetData.DayActivity
 
     public struct PersonalRecord: Equatable, Identifiable, Sendable {
         public var id: String
@@ -183,6 +176,25 @@ public final class DashboardModel {
     }
 
     public var recentWorkouts: [WorkoutInstance] { Array(completedWorkouts.prefix(5)) }
+
+    /// The figures the home-screen widgets show; nil until the dashboard has loaded.
+    public func widgetSnapshot(steps: Int?) -> DashboardSnapshot? {
+        guard state == .loaded else { return nil }
+        let stats = stats
+        let now = clock.now()
+        var days: [String: DayActivity] = [:]
+        for day in currentWeek where day.activity != .none {
+            days[day.key.description] = day.activity
+        }
+        return DashboardSnapshot(
+            updatedAt: now,
+            workoutsLast30Days: stats.workoutsLast30Days,
+            saunaSessionsLast30Days: stats.saunaSessionsLast30Days,
+            days: days,
+            steps: steps,
+            stepsDay: steps == nil ? nil : DayKey(localDay: now, calendar: calendar).description
+        )
+    }
 
     static func activity(_ sessions: [Bool], completedOnServer: Bool) -> DayActivity {
         switch sessions.count {

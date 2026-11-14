@@ -33,6 +33,12 @@ public final class StepsModel {
 
     public private(set) var state: State = .loading
 
+    /// Today's count when known.
+    public var count: Int? {
+        if case .count(let steps) = state { return steps }
+        return nil
+    }
+
     private let counter: StepCounting
     private let clock: Clock
     private let calendar: Calendar

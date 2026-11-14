@@ -4,6 +4,7 @@ import RookFormatting
 import RookModels
 import RookNetworking
 @testable import RookFeatures
+import RookWidgetData
 
 /// Saturday 2026-03-14 12:00 in New York.
 let dashNow = ISO8601.parse("2026-03-14T16:00:00Z")!
@@ -284,5 +285,50 @@ struct HistoryModelTests {
         let model = HistoryModel(api: api) { expired.set(true) }
         await model.loadFirstPage()
         #expect(expired.get())
+    }
+}
+
+@MainActor
+@Suite("Widget sync")
+struct WidgetSyncTests {
+    @Test func dashboardSnapshotMirrorsTheDashboard() async throws {
+        let api = FakeAPI()
+        api.workoutPages = [nil: WorkoutListPage(items: [
+            .completed("lift", completedAt: ISO8601.parse("2026-03-13T18:00:00Z")!),
+            .completed("sauna", completedAt: ISO8601.parse("2026-03-12T18:00:00Z")!, exercises: [Sauna.exercise(minutes: 20)]),
+        ], nextToken: nil)]
+        let model = DashboardModel(api: api, unit: .lbs, clock: Clock { dashNow }, calendar: nyCalendar) {}
+        #expect(model.widgetSnapshot(steps: 10) == nil) // not loaded yet
+        await model.load()
+        let snapshot = try #require(model.widgetSnapshot(steps: 4_200))
+        #expect(snapshot.workoutsLast30Days == 1)
+        #expect(snapshot.saunaSessionsLast30Days == 1)
+        #expect(snapshot.days == ["2026-03-13": .workout, "2026-03-12": .sauna])
+        #expect(snapshot.steps == 4_200)
+        #expect(snapshot.stepsDay == "2026-03-14")
+        #expect(model.widgetSnapshot(steps: nil)?.stepsDay == nil)
+    }
+
+    @Test func reloadsOnlyWhenFiguresChange() {
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent("sync-\(UUID().uuidString).json")
+        let store = DashboardSnapshotStore(url: url)
+        var reloads = 0
+        let sync = WidgetSync(store: store) { reloads += 1 }
+        var snapshot = DashboardSnapshot(updatedAt: dashNow, workoutsLast30Days: 3, saunaSessionsLast30Days: 1, days: [:], steps: 100, stepsDay: "2026-03-14")
+
+        sync.update(nil)
+        #expect(reloads == 0)
+        sync.update(snapshot)
+        #expect(reloads == 1)
+        snapshot.steps = 250
+        sync.update(snapshot)
+        #expect(reloads == 1) // steps alone: saved, no reload
+        #expect(store.load()?.steps == 250)
+        snapshot.workoutsLast30Days = 4
+        sync.update(snapshot)
+        #expect(reloads == 2)
+        sync.clear()
+        #expect(reloads == 3)
+        #expect(store.load() == nil)
     }
 }

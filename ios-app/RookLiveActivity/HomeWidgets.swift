@@ -65,7 +65,7 @@ enum PedometerReader {
 
 // MARK: - Widgets
 
-/// 1. Large: workouts, saunas and steps, plus the week.
+/// 1. Medium: workouts, saunas and steps above the week.
 struct OverviewWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: "RookOverviewWidget", provider: DashboardProvider()) { entry in
@@ -73,7 +73,7 @@ struct OverviewWidget: Widget {
         }
         .configurationDisplayName("Overview")
         .description("Workouts and sauna sessions in the last 30 days, today's steps, and your week.")
-        .supportedFamilies([.systemLarge])
+        .supportedFamilies([.systemMedium])
     }
 }
 
@@ -101,7 +101,7 @@ struct WeekWidget: Widget {
     }
 }
 
-/// 4. Medium: the three numbers in one row.
+/// 4. Small: the three numbers stacked.
 struct StatsWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: "RookStatsWidget", provider: DashboardProvider()) { entry in
@@ -109,7 +109,7 @@ struct StatsWidget: Widget {
         }
         .configurationDisplayName("Stats")
         .description("Workouts and sauna sessions in the last 30 days, and today's steps.")
-        .supportedFamilies([.systemMedium])
+        .supportedFamilies([.systemSmall])
     }
 }
 
@@ -169,36 +169,6 @@ private enum Metric {
 
     func accessibilityLabel(in summary: WidgetSummary) -> String {
         "\(label.replacingOccurrences(of: " · 30d", with: ", last 30 days")): \(value(in: summary))"
-    }
-}
-
-/// Icon, big number, caption.
-private struct MetricView: View {
-    let metric: Metric
-    let summary: WidgetSummary
-    var valueSize: CGFloat = 26
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Image(systemName: metric.icon)
-                .font(.footnote.weight(.semibold))
-                .foregroundStyle(metric.tint)
-            Text(metric.value(in: summary))
-                .font(.system(size: valueSize, weight: .bold, design: .rounded))
-                .monospacedDigit()
-                .foregroundStyle(.white)
-                .lineLimit(1)
-                .minimumScaleFactor(0.5)
-                .contentTransition(.numericText())
-            Text(metric.label)
-                .font(.caption2.weight(.medium))
-                .foregroundStyle(WidgetColors.secondaryText)
-                .lineLimit(1)
-                .minimumScaleFactor(0.8)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(metric.accessibilityLabel(in: summary))
     }
 }
 
@@ -272,41 +242,22 @@ private struct SignInPrompt: View {
     }
 }
 
-private struct WidgetTitle: View {
-    let text: String
-    var body: some View {
-        Text(text)
-            .font(.subheadline.weight(.semibold))
-            .foregroundStyle(.white)
-    }
-}
-
 struct OverviewWidgetView: View {
     let summary: WidgetSummary
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            HStack {
-                WidgetTitle(text: "Rook")
-                Spacer()
-                Text("Last 30 days")
-                    .font(.caption2)
-                    .foregroundStyle(WidgetColors.secondaryText)
-            }
-            if summary.hasData {
-                HStack(spacing: 8) {
+        if summary.hasData {
+            VStack(spacing: 0) {
+                HStack(spacing: 6) {
                     ForEach([Metric.workouts, .saunas, .steps], id: \.self) { metric in
-                        MetricView(metric: metric, summary: summary, valueSize: 30)
-                            .padding(12)
-                            .background(WidgetColors.surface.opacity(0.6), in: RoundedRectangle(cornerRadius: 14))
+                        MetricRow(metric: metric, summary: summary)
                     }
                 }
-                Spacer(minLength: 0)
-                WidgetTitle(text: "This Week")
-                WeekStripView(days: summary.week, circle: 34)
-            } else {
-                SignInPrompt()
+                Spacer(minLength: 8)
+                WeekStripView(days: summary.week, circle: 28)
             }
+        } else {
+            SignInPrompt()
         }
     }
 }
@@ -341,12 +292,40 @@ struct WeekWidgetView: View {
     let summary: WidgetSummary
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            WidgetTitle(text: "This Week")
-            Spacer(minLength: 0)
-            WeekStripView(days: summary.week, circle: 36)
+        WeekStripView(days: summary.week, circle: 36)
+            .frame(maxHeight: .infinity)
+    }
+}
+
+/// One compact row: icon, number, and a short label beneath it.
+private struct MetricRow: View {
+    let metric: Metric
+    let summary: WidgetSummary
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(systemName: metric.icon)
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(metric.tint)
+                .frame(width: 16)
+            VStack(alignment: .leading, spacing: 0) {
+                Text(metric.value(in: summary))
+                    .font(.system(size: 19, weight: .bold, design: .rounded))
+                    .monospacedDigit()
+                    .foregroundStyle(.white)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.6)
+                    .contentTransition(.numericText())
+                Text(metric.label)
+                    .font(.system(size: 10, weight: .medium))
+                    .foregroundStyle(WidgetColors.secondaryText)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+            }
             Spacer(minLength: 0)
         }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(metric.accessibilityLabel(in: summary))
     }
 }
 
@@ -355,19 +334,20 @@ struct StatsWidgetView: View {
 
     var body: some View {
         if summary.hasData {
-            HStack(spacing: 12) {
-                ForEach([Metric.workouts, .saunas, .steps], id: \.self) { metric in
-                    MetricView(metric: metric, summary: summary, valueSize: 30)
-                }
+            VStack(alignment: .leading, spacing: 0) {
+                MetricRow(metric: .workouts, summary: summary)
+                Spacer(minLength: 4)
+                MetricRow(metric: .saunas, summary: summary)
+                Spacer(minLength: 4)
+                MetricRow(metric: .steps, summary: summary)
             }
-            .frame(maxHeight: .infinity)
         } else {
             SignInPrompt()
         }
     }
 }
 
-#Preview("Overview", as: .systemLarge) {
+#Preview("Overview", as: .systemMedium) {
     OverviewWidget()
 } timeline: {
     DashboardEntry(date: .now, summary: .sample())
@@ -385,7 +365,7 @@ struct StatsWidgetView: View {
     DashboardEntry(date: .now, summary: .sample())
 }
 
-#Preview("Stats", as: .systemMedium) {
+#Preview("Stats", as: .systemSmall) {
     StatsWidget()
 } timeline: {
     DashboardEntry(date: .now, summary: .sample())

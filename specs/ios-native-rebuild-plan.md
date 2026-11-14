@@ -480,10 +480,10 @@ Added 2026-11-14. Four widgets live in the existing widget extension (`RookLiveA
 
 | Widget | Family | Shows |
 |---|---|---|
-| Overview | Large | Workouts · 30d, Saunas · 30d, Steps today, and This Week |
+| Overview | Medium | Workouts · 30d, Saunas · 30d and Steps today in one compact row above the week strip (no titles) |
 | Steps | Small | Steps today |
-| This Week | Medium | The week strip (dumbbell / flame / checkmark) |
-| Stats | Medium | Workouts · 30d, Saunas · 30d, Steps today |
+| This Week | Medium | The week strip (dumbbell / flame / checkmark), no title |
+| Stats | Small | Workouts · 30d, Saunas · 30d, Steps today, stacked |
 
 - **Data flow:** the extension has no session and never calls the API. After each dashboard change the app writes a `DashboardSnapshot` (30-day counts, this week's day activities, and the last step count) as JSON to the App Group `group.com.rookfitness.app` (`RookWidgetData`). `WidgetSync` reloads the timelines only when the figures change, not on every step. Signing out deletes the snapshot.
 - **Steps:** the widget reads today's count from CoreMotion itself when Motion & Fitness access is already granted, and otherwise falls back to the app's last count for today. Timelines refresh every 15 minutes and just after midnight, when the week and steps roll over.

@@ -73,6 +73,9 @@ public enum WorkoutPresentation {
     /// "3 × 8 @ 135 lbs", "60 s", "Skipped".
     public static func detail(for exercise: WorkoutExercise, fallbackUnit: WeightUnit) -> String {
         if exercise.skipped { return "Skipped" }
+        if Sauna.isSauna(exercise), let seconds = exercise.durationSeconds, seconds >= 60 {
+            return "\(Int((Double(seconds) / 60).rounded())) min"
+        }
         if exercise.modality.isTimed {
             return "\(exercise.durationSeconds ?? WorkoutExercise.defaultDurationSeconds) s"
         }
@@ -84,6 +87,7 @@ public enum WorkoutPresentation {
 
     /// Minutes the workout took (server figure, else derived from timestamps).
     public static func minutes(for workout: WorkoutInstance) -> Int {
+        if Sauna.isSaunaWorkout(workout) { return Sauna.minutes(in: workout) }
         if let minutes = workout.durationMinutes { return minutes }
         guard let completed = workout.completedAt else { return 0 }
         return max(0, Int(completed.timeIntervalSince(workout.startedAt) / 60))

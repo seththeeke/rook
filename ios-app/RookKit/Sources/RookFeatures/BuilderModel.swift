@@ -156,6 +156,11 @@ public final class BuilderModel {
     /// A separate catalog search (e.g. for the swap sheet) so it doesn't disturb the manual builder's filters.
     public func makeSearch() -> ExerciseSearchModel { ExerciseSearchModel(api: api) }
 
+    /// The Sauna screen's model, logging at the gym currently selected here.
+    public func makeSaunaLog() -> SaunaLogModel {
+        SaunaLogModel(api: api, gym: selectedGym, onSessionExpired: onSessionExpired)
+    }
+
     // MARK: - Gyms
 
     public var selectedGym: Gym? { gyms.first { $0.gymId == selectedGymId } }
@@ -183,7 +188,9 @@ public final class BuilderModel {
             try await pager.load(api: api, minimumCount: limit * 3, maxPages: 2)
             var seen = Set<[String]>()
             recentWorkouts = pager.workouts
-                .filter { !$0.exercises.isEmpty && seen.insert($0.orderedExercises.map(\.exerciseId)).inserted }
+                // Sauna sessions are logged from their own screen, not run as a workout.
+                .filter { !$0.exercises.isEmpty && !Sauna.isSaunaWorkout($0) }
+                .filter { seen.insert($0.orderedExercises.map(\.exerciseId)).inserted }
                 .prefix(limit)
                 .map { $0 }
             hasLoadedRecent = true

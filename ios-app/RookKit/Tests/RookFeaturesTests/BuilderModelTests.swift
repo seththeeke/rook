@@ -405,6 +405,14 @@ struct BuilderQuickStartTests {
         #expect(api.count(.workouts) == 1)
     }
 
+    @Test func quickStartLeavesOutSaunaSessions() async {
+        let sauna = WorkoutInstance.completed("sauna", completedAt: Date(timeIntervalSince1970: 1_773_500_000), exercises: [Sauna.exercise(minutes: 20)])
+        api.workoutPages = [nil: WorkoutListPage(items: [sauna, workout("push", ["bench"], daysAgo: 1)], nextToken: nil)]
+        let model = makeModel()
+        await model.loadRecentWorkouts()
+        #expect(model.recentWorkouts.map(\.id) == ["push"])
+    }
+
     @Test func respectsLimit() async {
         api.workoutPages = [nil: WorkoutListPage(items: (0..<8).map { workout("w\($0)", ["ex\($0)"], daysAgo: Double($0)) }, nextToken: nil)]
         let model = makeModel()

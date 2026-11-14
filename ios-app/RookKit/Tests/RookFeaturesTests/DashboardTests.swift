@@ -107,7 +107,7 @@ struct DashboardModelTests {
         await model.load()
         #expect(model.state == .loaded)
         #expect(!model.hasAnyWorkouts)
-        #expect(model.stats == .init(totalWorkouts: 0, workoutsLast30Days: 0))
+        #expect(model.stats == .init(workoutsLast30Days: 0, saunaSessionsLast30Days: 0))
         #expect(model.personalRecords.isEmpty)
         #expect(model.recentWorkouts.isEmpty)
         #expect(model.currentWeek.count == 7)
@@ -122,7 +122,7 @@ struct DashboardModelTests {
         ], nextToken: nil)]
         let model = makeModel()
         await model.load()
-        #expect(model.stats == .init(totalWorkouts: 40, workoutsLast30Days: 2))
+        #expect(model.stats == .init(workoutsLast30Days: 2, saunaSessionsLast30Days: 0))
         #expect(model.recentWorkouts.map(\.id) == ["a", "b", "c"])
     }
 
@@ -147,7 +147,37 @@ struct DashboardModelTests {
         let week = model.currentWeek
         #expect(week.map(\.key.description) == ["2026-03-09", "2026-03-10", "2026-03-11", "2026-03-12", "2026-03-13", "2026-03-14", "2026-03-15"])
         #expect(week.filter(\.hasWorkout).map(\.letter) == ["M", "S"])
+        // Completed per the server, but those workouts weren't loaded: a generic checkmark.
+        #expect(week.filter(\.hasWorkout).map(\.activity) == [.multiple, .multiple])
         #expect(week.first { $0.isToday }?.key.description == "2026-03-14")
+    }
+
+    @Test func saunaSessionsAreCountedSeparately() async {
+        api.workoutPages = [nil: WorkoutListPage(items: [
+            .completed("lift", completedAt: daysAgo(1)),
+            .completed("sauna-1", completedAt: daysAgo(2), exercises: [Sauna.exercise(minutes: 20)]),
+            .completed("sauna-2", completedAt: daysAgo(20), exercises: [Sauna.exercise(minutes: 15)]),
+            .completed("sauna-old", completedAt: daysAgo(40), exercises: [Sauna.exercise(minutes: 15)]),
+        ], nextToken: nil)]
+        let model = makeModel()
+        await model.load()
+        #expect(model.stats == .init(workoutsLast30Days: 1, saunaSessionsLast30Days: 2))
+    }
+
+    @Test func weekStripShowsWhatKindOfSession() async {
+        // dashNow is Saturday 2026-03-14 (UTC); the week runs Mon 9 – Sun 15.
+        let at = { (day: Int, hour: Int) in ISO8601.parse(String(format: "2026-03-%02dT%02d:00:00Z", day, hour))! }
+        api.workoutPages = [nil: WorkoutListPage(items: [
+            .completed("sat-lift", completedAt: at(14, 15)),
+            .completed("sat-sauna", completedAt: at(14, 14), exercises: [Sauna.exercise(minutes: 20)]),
+            .completed("thu-sauna", completedAt: at(12, 18), exercises: [Sauna.exercise(minutes: 20)]),
+            .completed("tue-lift", completedAt: at(10, 18)),
+            .completed("mon-lift-1", completedAt: at(9, 18)),
+            .completed("mon-lift-2", completedAt: at(9, 12)),
+        ], nextToken: nil)]
+        let model = makeModel()
+        await model.load()
+        #expect(model.currentWeek.map(\.activity) == [.multiple, .workout, .none, .sauna, .none, .multiple, .none])
     }
 
     @Test func failureThenRetry() async {

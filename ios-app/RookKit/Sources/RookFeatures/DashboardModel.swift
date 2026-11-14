@@ -19,8 +19,21 @@ public final class DashboardModel {
     }
 
     public struct Stats: Equatable, Sendable {
-        public var totalWorkouts: Int
+        /// Completed workouts in the last 30 days, not counting sauna sessions.
         public var workoutsLast30Days: Int
+        /// Completed sauna-only workouts in the last 30 days.
+        public var saunaSessionsLast30Days: Int
+    }
+
+    /// What a day in the week strip shows.
+    public enum DayActivity: Equatable, Sendable {
+        case none
+        /// One workout (not sauna).
+        case workout
+        /// One sauna session.
+        case sauna
+        /// More than one session that day, or a completed day whose workouts aren't loaded.
+        case multiple
     }
 
     public struct PersonalRecord: Equatable, Identifiable, Sendable {
@@ -37,7 +50,8 @@ public final class DashboardModel {
         public var key: DayKey
         public var letter: String
         public var isToday: Bool
-        public var hasWorkout: Bool
+        public var activity: DayActivity
+        public var hasWorkout: Bool { activity != .none }
     }
 
     public private(set) var state: LoadState = .loading
@@ -131,10 +145,9 @@ public final class DashboardModel {
 
     public var stats: Stats {
         let cutoff = thirtyDaysAgo
-        return Stats(
-            totalWorkouts: max(global.totalWorkouts, completedWorkouts.count),
-            workoutsLast30Days: completedWorkouts.filter { ($0.completedAt ?? .distantPast) >= cutoff }.count
-        )
+        let recent = completedWorkouts.filter { ($0.completedAt ?? .distantPast) >= cutoff }
+        let saunas = recent.filter(Sauna.isSaunaWorkout).count
+        return Stats(workoutsLast30Days: recent.count - saunas, saunaSessionsLast30Days: saunas)
     }
 
     /// Top five lifts by max weight. Mixed units are compared fairly by converting to pounds.
@@ -152,17 +165,32 @@ public final class DashboardModel {
     }
 
     public var currentWeek: [WeekDay] {
-        let completed = DayKey.set(from: global.completedDates)
-            .union(completedWorkouts.compactMap { $0.completedAt.map(DayKey.init(utcDayOf:)) })
+        var sessions: [DayKey: [Bool]] = [:] // day → isSauna for each loaded workout
+        for workout in completedWorkouts {
+            guard let completedAt = workout.completedAt else { continue }
+            sessions[DayKey(utcDayOf: completedAt), default: []].append(Sauna.isSaunaWorkout(workout))
+        }
+        let completedDays = DayKey.set(from: global.completedDates)
         let today = DayKey(localDay: clock.now(), calendar: calendar)
         let letters = ["M", "T", "W", "T", "F", "S", "S"]
         return CalendarMath.mondayWeek(containing: clock.now(), calendar: calendar).enumerated().map { index, date in
             let key = DayKey(localDay: date, calendar: calendar)
-            return WeekDay(date: date, key: key, letter: letters[index], isToday: key == today, hasWorkout: completed.contains(key))
+            return WeekDay(
+                date: date, key: key, letter: letters[index], isToday: key == today,
+                activity: Self.activity(sessions[key] ?? [], completedOnServer: completedDays.contains(key))
+            )
         }
     }
 
     public var recentWorkouts: [WorkoutInstance] { Array(completedWorkouts.prefix(5)) }
+
+    static func activity(_ sessions: [Bool], completedOnServer: Bool) -> DayActivity {
+        switch sessions.count {
+        case 0: completedOnServer ? .multiple : .none
+        case 1: sessions[0] ? .sauna : .workout
+        default: .multiple
+        }
+    }
 
     static func pounds(_ weight: Double, _ unit: WeightUnit?) -> Double {
         unit == .kg ? weight * 2.20462 : weight

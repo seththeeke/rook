@@ -3,71 +3,88 @@ import Observation
 import RookModels
 import RookNetworking
 
-/// Catalog search with debounced queries and muscle-group filtering (manual builder and swap sheet).
+/// Catalog search for the manual builder and swap sheet.
+///
+/// The server's `search` parameter only matches the whole phrase against the name, so "machine hack
+/// squat" would find nothing. Instead the catalog (small: ~160 items) is fetched per muscle group and
+/// filtered here: every typed word must appear in the name, equipment, or muscles.
 @MainActor
 @Observable
 public final class ExerciseSearchModel {
-    public static let muscleGroups = ["chest", "back", "shoulders", "biceps", "triceps", "quadriceps", "hamstrings", "glutes", "core"]
+    /// Muscle groups exactly as stored in the catalog (`muscleGroup`), with display labels.
+    public static let muscleGroups: [(value: String, label: String)] = [
+        ("chest", "Chest"), ("back", "Back"), ("shoulders", "Shoulders"), ("biceps", "Biceps"),
+        ("triceps", "Triceps"), ("quads", "Quads"), ("hamstrings", "Hamstrings"), ("glutes", "Glutes"),
+        ("calves", "Calves"), ("core", "Core"), ("forearms", "Forearms"), ("full body", "Full Body"),
+        ("cardio", "Cardio"),
+    ]
 
     public var query = "" {
-        didSet { if query != oldValue { scheduleSearch(debounced: true) } }
+        didSet { if query != oldValue { applyFilter() } }
     }
     public var muscleGroup: String? {
-        didSet { if muscleGroup != oldValue { scheduleSearch(debounced: false) } }
+        didSet { if muscleGroup != oldValue { scheduleFetch() } }
     }
     public private(set) var results: [ExerciseCatalogItem] = []
     public private(set) var isLoading = false
     public private(set) var errorMessage: String?
 
     private let api: RookAPI
-    private let sleep: Sleeper
-    private var searchTask: Task<Void, Never>?
+    private var catalog: [ExerciseCatalogItem] = []
+    private var fetchTask: Task<Void, Never>?
 
     public init(api: RookAPI, sleep: @escaping Sleeper = systemSleeper) {
         self.api = api
-        self.sleep = sleep
     }
 
-    /// Initial load (no filters).
+    /// Initial load (no muscle filter).
     public func loadIfNeeded() async {
-        guard results.isEmpty, !isLoading else { return }
-        await search()
+        guard catalog.isEmpty, !isLoading else { return }
+        await fetch()
     }
 
-    /// Waits for any in-flight search (tests and retry buttons).
-    public func waitForSearch() async { await searchTask?.value }
+    /// Waits for any in-flight fetch (tests and retry buttons).
+    public func waitForSearch() async { await fetchTask?.value }
 
-    public func retry() { scheduleSearch(debounced: false) }
+    public func retry() { scheduleFetch() }
 
-    private func scheduleSearch(debounced: Bool) {
-        searchTask?.cancel()
-        searchTask = Task { [weak self, sleep] in
-            if debounced {
-                do { try await sleep(.milliseconds(300)) } catch { return }
-            }
-            guard !Task.isCancelled else { return }
-            await self?.search()
-        }
+    /// True when every word of `query` appears in the item's name, equipment, or muscles.
+    public static func matches(_ item: ExerciseCatalogItem, query: String) -> Bool {
+        let words = query.lowercased().split(whereSeparator: { $0.isWhitespace || $0 == "-" })
+        guard !words.isEmpty else { return true }
+        let haystack = ([item.name, item.equipmentPrimary ?? "", item.muscleGroup ?? ""]
+            + (item.equipment ?? []) + (item.muscleGroups ?? []))
+            .joined(separator: " ")
+            .lowercased()
+            .replacingOccurrences(of: "-", with: " ")
+        return words.allSatisfy { haystack.contains($0) }
     }
 
-    private func search() async {
-        let query = query.trimmingCharacters(in: .whitespacesAndNewlines)
+    private func scheduleFetch() {
+        fetchTask?.cancel()
+        fetchTask = Task { [weak self] in await self?.fetch() }
+    }
+
+    private func fetch() async {
         let group = muscleGroup
         isLoading = true
         errorMessage = nil
         defer { isLoading = false }
         do {
-            let items = try await api.fetchExercises(muscleGroup: group, search: query.isEmpty ? nil : query)
+            let items = try await api.fetchExercises(muscleGroup: group, search: nil)
             guard !Task.isCancelled else { return }
-            // Match the web app: also filter locally by name or muscle so results feel instant and exact.
-            results = query.isEmpty ? items : items.filter { item in
-                item.name.localizedCaseInsensitiveContains(query)
-                    || (item.muscleGroups ?? []).contains { $0.localizedCaseInsensitiveContains(query) }
-            }
+            catalog = items.filter { $0.isActive != false }
+                .sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+            applyFilter()
         } catch {
             guard !Task.isCancelled else { return }
             errorMessage = userMessage(for: error)
         }
+    }
+
+    private func applyFilter() {
+        let q = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        results = q.isEmpty ? catalog : catalog.filter { Self.matches($0, query: q) }
     }
 }
 

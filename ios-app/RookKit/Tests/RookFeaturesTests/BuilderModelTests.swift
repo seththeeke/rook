@@ -55,7 +55,7 @@ struct BuilderModelTests {
         let counter = Locked(0)
         return BuilderModel(
             api: api, aiStream: ai, unit: unit,
-            search: ExerciseSearchModel(api: api, sleep: { _ in }),
+            search: ExerciseSearchModel(api: api),
             makeSessionId: { "session-\(counter.mutate { $0 += 1; return $0 })" }
         ) { [expired] in expired.mutate { $0 += 1 } }
     }
@@ -321,27 +321,49 @@ struct BuilderModelTests {
 @MainActor
 @Suite("Exercise search")
 struct ExerciseSearchModelTests {
-    @Test func filtersByMuscleAndQuery() async {
+    let hackSquat = ExerciseCatalogItem(
+        exerciseId: "quads-hack-squat", name: "Hack Squat", muscleGroups: ["quads", "glutes"], muscleGroup: "quads",
+        equipment: ["hack squat machine"], equipmentPrimary: "machine", modality: .setsReps
+    )
+    let retired = ExerciseCatalogItem(exerciseId: "old", name: "Old Squat", muscleGroup: "quads", modality: .setsReps, isActive: false)
+
+    @Test func catalogMuscleGroupsMatchStoredValues() {
+        let values = ExerciseSearchModel.muscleGroups.map(\.value)
+        #expect(values.contains("quads"))
+        #expect(!values.contains("quadriceps"))
+        #expect(values.contains("full body"))
+    }
+
+    @Test(arguments: ["machine hack squat", "Hack", "squat machine", "QUADS hack", "hack-squat", ""])
+    func findsHackSquat(query: String) {
+        #expect(ExerciseSearchModel.matches(hackSquat, query: query))
+    }
+
+    @Test(arguments: ["barbell hack squat", "bench", "smith"])
+    func rejectsNonMatches(query: String) {
+        #expect(!ExerciseSearchModel.matches(hackSquat, query: query))
+    }
+
+    @Test func filtersLocallyAndByMuscleGroup() async {
         let api = FakeAPI()
-        api.exercises = [bench, row, plank]
-        let model = ExerciseSearchModel(api: api, sleep: { _ in })
+        api.exercises = [bench, row, plank, hackSquat, retired]
+        let model = ExerciseSearchModel(api: api)
         await model.loadIfNeeded()
-        #expect(model.results.count == 3)
+        #expect(model.results.map(\.exerciseId) == ["row", "bench", "quads-hack-squat", "plank"]) // sorted, inactive hidden
+        model.query = "machine hack squat"
+        #expect(model.results.map(\.exerciseId) == ["quads-hack-squat"])
+        model.query = ""
         model.muscleGroup = "back"
         await model.waitForSearch()
         #expect(model.results.map(\.exerciseId) == ["row"])
-        model.muscleGroup = nil
-        model.query = "  plank "
-        await model.waitForSearch()
-        #expect(model.results.map(\.exerciseId) == ["plank"])
-        let last = api.exerciseQueries.get().last!
-        #expect(last.0 == nil && last.1 == "plank")
+        // Typing never sends the phrase to the server (its search is whole-phrase only).
+        #expect(api.exerciseQueries.get().allSatisfy { $0.1 == nil })
     }
 
     @Test func errorsAndRetry() async {
         let api = FakeAPI()
         api.fail(.exercises, with: APIError.network(.notConnectedToInternet))
-        let model = ExerciseSearchModel(api: api, sleep: { _ in })
+        let model = ExerciseSearchModel(api: api)
         await model.loadIfNeeded()
         #expect(model.errorMessage != nil)
         api.succeed(.exercises)
@@ -351,22 +373,6 @@ struct ExerciseSearchModelTests {
         #expect(model.errorMessage == nil)
         #expect(model.results.count == 1)
     }
-
-    @Test func rapidTypingOnlySearchesLatestQuery() async {
-        let api = FakeAPI()
-        api.exercises = [bench, row]
-        let gate = Locked(0)
-        let model = ExerciseSearchModel(api: api, sleep: { _ in
-            gate.mutate { $0 += 1 }
-            try await Task.sleep(for: .milliseconds(20))
-        })
-        model.query = "b"
-        model.query = "be"
-        model.query = "ben"
-        await model.waitForSearch()
-        #expect(api.exerciseQueries.get().map(\.1) == ["ben"])
-        #expect(model.results.map(\.exerciseId) == ["bench"])
-    }
 }
 
 @MainActor
@@ -375,7 +381,7 @@ struct BuilderQuickStartTests {
     let api = FakeAPI()
 
     func makeModel() -> BuilderModel {
-        BuilderModel(api: api, aiStream: FakeAIStream(), unit: .lbs, search: ExerciseSearchModel(api: api, sleep: { _ in })) {}
+        BuilderModel(api: api, aiStream: FakeAIStream(), unit: .lbs, search: ExerciseSearchModel(api: api)) {}
     }
 
     private func workout(_ id: String, _ exerciseIds: [String], daysAgo: Double) -> WorkoutInstance {

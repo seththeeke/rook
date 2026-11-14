@@ -373,9 +373,9 @@ private struct SelectExercisesView: View {
                     HStack(spacing: Theme.Spacing.s) {
                         Button("All") { search.muscleGroup = nil }
                             .buttonStyle(ChipStyle(isSelected: search.muscleGroup == nil))
-                        ForEach(ExerciseSearchModel.muscleGroups, id: \.self) { group in
-                            Button(group.capitalized) { search.muscleGroup = group }
-                                .buttonStyle(ChipStyle(isSelected: search.muscleGroup == group))
+                        ForEach(ExerciseSearchModel.muscleGroups, id: \.value) { group in
+                            Button(group.label) { search.muscleGroup = group.value }
+                                .buttonStyle(ChipStyle(isSelected: search.muscleGroup == group.value))
                         }
                     }
                     .padding(.vertical, 4)

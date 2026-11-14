@@ -26,7 +26,8 @@ generate:
 test: lint test-kit test-app
 
 test-kit:
-	cd RookKit && swift test
+	cd RookKit && swift test --enable-code-coverage
+	python3 scripts/check-coverage.py "$$(cd RookKit && swift test --show-codecov-path)"
 
 test-app: generate
 	rm -rf $(RESULT_BUNDLE)

@@ -3,6 +3,27 @@
 **Status:** Decisions confirmed (2026-11-13), ready for Phase 0 · **Owner:** seththeeke · **Created:** 2026-11-13
 **Target directory:** `ios-app/` · **Bundle ID:** `com.rookfitness.app` · **Installs alongside** the existing Capacitor app (`com.repwisefit.app`), which stays untouched
 
+## Progress
+
+| Phase | Status | Notes |
+|---|---|---|
+| 0: Foundation | **Done** (2026-11-13) | 106 RookKit tests and 15 app/UI tests passing. Coverage gate enforced for RookKit (every module ≥ 90%). See "Phase 0 deviations" below. |
+| 1: Auth / onboarding / profile / settings | Not started | |
+| 2: Dashboard + history | Not started | |
+| 3: Workout building | Not started | |
+| 4a / 4b: Execution + Live Activity | Not started | |
+| 5: Release readiness | Not started | |
+
+**Phase 0 deviations from the plan**
+
+- **Widget extension target and `RookLiveActivityKit` are deferred to Phase 4.** There's nothing to put in them until the Live Activity is ported, and an empty widget bundle doesn't compile.
+- **Amplify Swift is pinned to 2.61.0.** Releases 2.62.0 and later use a language feature that the Swift 6.1 compiler in Xcode 16.3 rejects. Revisit after upgrading Xcode.
+- **Command-line builds pass `-skipPackagePluginValidation -skipMacroValidation`** because Amplify's `smithy-swift` dependency ships an SPM plugin. In Xcode, trust the plugin once when prompted.
+- **Fixtures** were built from the Lambda response mappers (`toResponse`, `toMeProfile`, etc.) rather than captured from the live API. If a decoding problem shows up against real data, capture and add that payload as a fixture.
+- **Coverage gate:** RookKit is gated per module by `scripts/check-coverage.py` (`make test-kit`). The app-target view-model threshold (70%) starts being enforced in Phase 1, once view models exist. Right now the app target is mostly views and the live Amplify adapter.
+- **No SwiftLint/SwiftFormat yet.** `make lint` currently runs only the brand check.
+- `make archive` / `make export` are added in Phase 5.
+
 ## 1. Goal
 
 Rebuild the iPhone app as a native **Swift / SwiftUI** app called **Rook** (rebranded from Repwise). It talks to the **existing, unchanged** Repwise backend. The first release is a deliberately smaller app built around the flows used daily:

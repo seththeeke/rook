@@ -66,3 +66,6 @@ packages/capacitor-workout-live-activity/.swiftpm/xcode/xcuserdata/
 # Deployment outputs
 cdk-outputs.json
 deploy-outputs.json
+
+# Claude Code (per-user local settings)
+.claude/settings.local.json

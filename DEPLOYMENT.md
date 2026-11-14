@@ -9,17 +9,17 @@ This document covers how to build, deploy, and run Repwise. For a product overvi
 | Layer | Technology |
 |-------|------------|
 | **Backend** | Node.js 20.x, TypeScript, AWS Lambda, API Gateway (HTTP API), DynamoDB, Cognito |
-| **AI** | Anthropic Claude (or AWS Bedrock), SSE for streaming workout generation |
-| **Frontend** | React 18, TypeScript, Vite, Tailwind CSS, React Router, Zustand, TanStack Query, AWS Amplify (Cognito) |
-| **Infrastructure** | AWS CDK (TypeScript), GitHub Actions CI/CD |
-| **Monitoring** | CloudWatch (alarms, dashboard, log groups) — free-tier first |
+| **AI** | AWS Bedrock (Converse API; Nova and Claude models, chosen in the admin builder config), SSE via a Lambda Function URL |
+| **Frontend** | React 18, TypeScript, Vite, Tailwind CSS, React Router, Zustand, TanStack Query, AWS Amplify (Cognito); native iOS via Capacitor |
+| **Infrastructure** | AWS CDK (TypeScript), single stack `RepwiseStack`; deployed manually (no CI/CD yet) |
+| **Monitoring** | CloudWatch Logs only today; alarms/dashboard are specced in `specs/monitoring-spec.md` but not built |
 | **Package manager** | pnpm |
 
 ---
 
 ## Repository structure
 
-The project is a **pnpm monorepo**. Target layout (as specified):
+The project is a **pnpm monorepo**:
 
 ```
 /
@@ -28,17 +28,21 @@ The project is a **pnpm monorepo**. Target layout (as specified):
 │   ├── lambdas/
 │   │   ├── shared/             # Shared types, DDB client, utilities (source of truth for models)
 │   │   ├── user/               # User + follow endpoints
+│   │   ├── gyms/               # User gyms (equipment sets)
 │   │   ├── feed/               # Feed endpoint
 │   │   ├── exercise/           # Exercise catalog endpoints
 │   │   ├── workout/            # Workout instance CRUD + AI invoke
 │   │   ├── metrics/            # Metrics read endpoints
 │   │   ├── goals/              # Goals CRUD endpoints
+│   │   ├── goals-ai/           # AI goal suggestions
 │   │   ├── metrics-processor/  # DynamoDB Streams → update metrics & goals (no API route)
-│   │   ├── ai/                 # AI workout generation (SSE, invoked by workout Lambda)
+│   │   ├── ai/                 # AI workout generation (SSE via Function URL) + admin builder config
+│   │   ├── cleanup-user-data/  # Account deletion (DELETE /users/me)
 │   │   └── cognito-post-confirm/
-│   └── web/                    # React frontend (dashboard, workout builder, execution, goals, feed, profile)
+│   ├── capacitor-workout-live-activity/  # Local Capacitor plugin for Live Activity / Dynamic Island
+│   ├── web/                    # React frontend + Capacitor iOS project (web/ios)
 │   └── integration-tests/     # Vitest integration tests (run against deployed API)
-├── specs/                      # Implementation specs (follow in order)
+├── specs/                      # Implementation specs, plans, polishing ideas, bug tracker
 │   ├── backend-spec.md         # Backend & infrastructure
 │   ├── frontend-spec.md        # Web app
 │   └── monitoring-spec.md      # CloudWatch alarms & dashboard
@@ -62,7 +66,7 @@ Implementation is specified in the `specs/` directory. Use them in this order:
 2. **Frontend** — [specs/frontend-spec.md](specs/frontend-spec.md)  
    Scaffold, API client, auth (Cognito/Amplify), stores, design system, dashboard, workout builder, workout execution, catalog, metrics & exercise detail, goals, feed, profile & settings, routing, desktop layout.
 
-3. **Monitoring** — [specs/monitoring-spec.md](specs/monitoring-spec.md)  
+3. **Monitoring** _(not yet implemented)_ — [specs/monitoring-spec.md](specs/monitoring-spec.md)  
    CloudWatch dashboard, alarms, log groups, optional SNS email alerts. Designed for free-tier-first and minimal custom metrics.
 
 4. **Integration tests** — [specs/integration-test-spec.md](specs/integration-test-spec.md)  
@@ -79,20 +83,16 @@ Implementation is specified in the `specs/` directory. Use them in this order:
 
 ---
 
-## Quick start (after implementation)
-
-Once the monorepo is built from the specs:
+## Quick start
 
 ```bash
 pnpm install
 pnpm -r build
 ```
 
-- **Deploy backend:**  
-  From repo root: `pnpm --filter cdk run cdk deploy --require-approval never`  
-  Or from `packages/cdk`: `pnpm run cdk deploy --require-approval never`  
-  Use one of these (so the project's CDK CLI version is used); avoid running a global `cdk` to prevent schema version mismatch.  
-  (Anthropic API key in SSM if using Claude; exercise catalog seed as in backend-spec.)
+- **Deploy (backend + website):**  
+  Create `packages/web/.env.production` from `.env.production.example` (the website is built from it), run `pnpm -r build`, then from `packages/cdk`: `pnpm run deploy -- --require-approval never`.  
+  Always use the project's CDK CLI through pnpm. A global `cdk` can cause schema version mismatches. Bedrock model access must be enabled in the account for the AI builder. Seed the exercise catalog once per new environment (see `packages/lambdas/exercise/scripts/`). See [packages/cdk/README.md](packages/cdk/README.md) for domains, OAuth, and Sign in with Apple.
 
 - **Run frontend:**  
   `pnpm --filter web run dev`  
@@ -148,7 +148,7 @@ The stack does not create test users. After deploying:
 | Workouts | Instance-only, no "templates" | Simpler model; source (manual/AI) is stored on each instance |
 | Metrics | Pre-built via DynamoDB Streams | Fast reads, no ad-hoc aggregation at request time |
 | Goals | Stored in metrics table; evaluated in metrics-processor | Single write path, no cron; goals and metrics stay in sync |
-| AI | SSE from Lambda (invoked by workout Lambda) | Better UX and avoids API Gateway timeout limits |
+| AI | SSE from a Lambda Function URL (response streaming) | Better UX and avoids API Gateway timeout limits |
 | Feed | Fan-out at write time | Fast feed reads; follower counts are small |
 | Types | Shared package in `lambdas/shared` | One source of truth for API and frontend |
 

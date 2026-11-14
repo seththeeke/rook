@@ -83,9 +83,13 @@ final class AmplifyAuthService: AuthService, @unchecked Sendable {
             )
             return try Self.outcome(for: result.nextStep)
         } catch let error as AuthError {
+            Self.log.error("signIn failed: \(error.errorDescription, privacy: .public) [\(String(describing: error.underlyingError), privacy: .private)]")
             let failure = Self.map(error)
             if failure == .userNotConfirmed { return .needsConfirmation }
             throw failure
+        } catch {
+            Self.log.error("signIn failed (non-auth error): \(String(describing: type(of: error)), privacy: .public)")
+            throw error
         }
     }
 

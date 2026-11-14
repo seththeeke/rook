@@ -3,11 +3,15 @@ SCHEME := Rook
 PROJECT := Rook.xcodeproj
 SIMULATOR ?= iPhone 16 Pro
 DESTINATION := platform=iOS Simulator,name=$(SIMULATOR)
+# UI tests expect a signed-out install, so they run on their own simulator that is erased each run.
+TEST_SIMULATOR := Rook Tests
+TEST_DEVICE_TYPE := com.apple.CoreSimulator.SimDeviceType.iPhone-16-Pro
 BUILD_DIR := build
 RESULT_BUNDLE := $(BUILD_DIR)/RookTests.xcresult
 # Amplify's dependency smithy-swift ships an SPM build plugin; Xcode asks to trust it once in the UI,
-# and command-line builds need these flags instead.
-XCODE_FLAGS := -skipPackagePluginValidation -skipMacroValidation CODE_SIGNING_ALLOWED=NO
+# and command-line builds need these flags instead. Simulator builds are signed locally (see project.yml)
+# so Keychain entitlements are present; never pass CODE_SIGNING_ALLOWED=NO or sign-in breaks.
+XCODE_FLAGS := -skipPackagePluginValidation -skipMacroValidation
 
 .PHONY: help generate test test-kit test-app uitest build lint clean open
 
@@ -31,8 +35,11 @@ test-kit:
 
 test-app: generate
 	rm -rf $(RESULT_BUNDLE)
+	@xcrun simctl list devices | grep -q "$(TEST_SIMULATOR) (" || xcrun simctl create "$(TEST_SIMULATOR)" $(TEST_DEVICE_TYPE) >/dev/null
+	@xcrun simctl shutdown "$(TEST_SIMULATOR)" >/dev/null 2>&1 || true
+	@xcrun simctl erase "$(TEST_SIMULATOR)"
 	xcodebuild test -project $(PROJECT) -scheme $(SCHEME) \
-		-destination '$(DESTINATION)' -resultBundlePath $(RESULT_BUNDLE) \
+		-destination 'platform=iOS Simulator,name=$(TEST_SIMULATOR)' -resultBundlePath $(RESULT_BUNDLE) \
 		$(XCODE_FLAGS) -quiet
 	@xcrun xccov view --report --only-targets $(RESULT_BUNDLE) || true
 

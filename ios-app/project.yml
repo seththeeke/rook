@@ -66,6 +66,10 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.rookfitness.app
         PRODUCT_NAME: Rook
+        CODE_SIGN_ENTITLEMENTS: Rook/Resources/Rook.entitlements
+        # Simulator builds are signed locally ("Sign to Run Locally") so entitlements, and with them
+        # Keychain access, are always present, even without an Apple Developer account in Xcode.
+        "CODE_SIGN_IDENTITY[sdk=iphonesimulator*]": "-"
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
         TARGETED_DEVICE_FAMILY: "1"

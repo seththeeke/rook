@@ -33,9 +33,11 @@ targets:
     platform: iOS
     sources:
       - path: Rook
+      - path: Shared
     dependencies:
+      - target: RookLiveActivity
       - package: RookKit
-        products: [RookModels, RookFormatting, RookNetworking, RookSession, RookAuth, RookFeatures]
+        products: [RookModels, RookFormatting, RookNetworking, RookSession, RookAuth, RookFeatures, RookLiveActivityKit]
       - package: Amplify
         products: [Amplify, AWSCognitoAuthPlugin]
     info:
@@ -47,6 +49,7 @@ targets:
         ITSAppUsesNonExemptEncryption: false
         LSRequiresIPhoneOS: true
         NSFaceIDUsageDescription: Rook uses Face ID to unlock the app when you turn on biometric unlock.
+        NSSupportsLiveActivities: true
         UIApplicationSceneManifest:
           UIApplicationSupportsMultipleScenes: false
         UILaunchScreen:
@@ -69,6 +72,33 @@ targets:
         TARGETED_DEVICE_FAMILY: "1"
         ENABLE_PREVIEWS: YES
         CODE_SIGN_STYLE: Automatic
+
+  RookLiveActivity:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: RookLiveActivity
+      - path: Shared
+    dependencies:
+      - package: RookKit
+        products: [RookLiveActivityKit]
+      - sdk: WidgetKit.framework
+      - sdk: SwiftUI.framework
+    info:
+      path: RookLiveActivity/Info.plist
+      properties:
+        CFBundleDisplayName: Rook
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.rookfitness.app.LiveActivity
+        PRODUCT_NAME: RookLiveActivity
+        TARGETED_DEVICE_FAMILY: "1"
+        CODE_SIGN_STYLE: Automatic
+        SKIP_INSTALL: YES
 
   RookTests:
     type: bundle.unit-test

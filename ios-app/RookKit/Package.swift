@@ -12,6 +12,7 @@ let package = Package(
         .library(name: "RookSession", targets: ["RookSession"]),
         .library(name: "RookAuth", targets: ["RookAuth"]),
         .library(name: "RookFeatures", targets: ["RookFeatures"]),
+        .library(name: "RookLiveActivityKit", targets: ["RookLiveActivityKit"]),
     ],
     targets: [
         .target(name: "RookModels"),
@@ -35,11 +36,14 @@ let package = Package(
 
         .target(
             name: "RookFeatures",
-            dependencies: ["RookModels", "RookNetworking", "RookAuth", "RookSession", "RookFormatting"]
+            dependencies: ["RookModels", "RookNetworking", "RookAuth", "RookSession", "RookFormatting", "RookLiveActivityKit"]
         ),
         .testTarget(
             name: "RookFeaturesTests",
-            dependencies: ["RookFeatures", "RookModels", "RookNetworking", "RookAuth", "RookSession", "RookFormatting"]
+            dependencies: ["RookFeatures", "RookModels", "RookNetworking", "RookAuth", "RookSession", "RookFormatting", "RookLiveActivityKit"]
         ),
+
+        .target(name: "RookLiveActivityKit", dependencies: ["RookModels", "RookSession"]),
+        .testTarget(name: "RookLiveActivityKitTests", dependencies: ["RookLiveActivityKit", "RookModels", "RookSession"]),
     ]
 )

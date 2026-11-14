@@ -1,5 +1,6 @@
 import RookFeatures
 import RookModels
+import RookWidgetData
 import SwiftUI
 
 /// Navigation destinations inside the signed-in app.
@@ -51,6 +52,12 @@ struct SignedInView: View {
             // Resume straight into a workout restored from a previous launch.
             if controller.isActive { showingExecution = true }
         }
+        // Keep the home-screen widgets in step with the dashboard (and the latest step count).
+        .onChange(of: widgetState, initial: true) { _, state in
+            var snapshot = state
+            snapshot?.updatedAt = Date()
+            dependencies.widgetSync.update(snapshot)
+        }
         .onChange(of: profile.preferredUnit) { _, unit in
             dashboard.unit = unit
             controller.unit = unit
@@ -80,6 +87,13 @@ struct SignedInView: View {
                 Task { await dashboard.load() }
             }
         }
+    }
+
+    /// The widget snapshot without its timestamp, so it only changes when the figures do.
+    private var widgetState: DashboardSnapshot? {
+        var snapshot = dashboard.widgetSnapshot(steps: steps.count)
+        snapshot?.updatedAt = .distantPast
+        return snapshot
     }
 
     private var banner: AnyView? {

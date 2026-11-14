@@ -473,3 +473,18 @@ Added 2026-11-14. Sauna is modelled inside the existing workout structure, with 
 - **Logging:** Builder → **Sauna** (under "Repeat a past workout") → choose minutes → Complete. This calls `POST /workout-instances` with one Sauna exercise (`durationSeconds = minutes × 60`, `sets = 1`), then `PATCH … status=completed`. If completing fails, the new workout is cancelled. There's no execution screen and no Live Activity.
 - **Recognition:** a workout counts as a sauna session when every non-skipped exercise is Sauna (`Sauna.isSaunaWorkout`). Its minutes come from the exercise duration, because the server's `durationMinutes` is ~0 for a logged session.
 - **Side effects of using the existing structure:** sauna sessions count toward the server's streak, `totalWorkouts`, and `completedDates`, and they appear in the feed and in history like any workout. Quick start in the builder leaves them out. The AI builder sees Sauna in the catalog, so it could pick it.
+
+## Home-screen widgets
+
+Added 2026-11-14. Four widgets live in the existing widget extension (`RookLiveActivity`, alongside the Live Activity):
+
+| Widget | Family | Shows |
+|---|---|---|
+| Overview | Large | Workouts · 30d, Saunas · 30d, Steps today, and This Week |
+| Steps | Small | Steps today |
+| This Week | Medium | The week strip (dumbbell / flame / checkmark) |
+| Stats | Medium | Workouts · 30d, Saunas · 30d, Steps today |
+
+- **Data flow:** the extension has no session and never calls the API. After each dashboard change the app writes a `DashboardSnapshot` (30-day counts, this week's day activities, and the last step count) as JSON to the App Group `group.com.rookfitness.app` (`RookWidgetData`). `WidgetSync` reloads the timelines only when the figures change, not on every step. Signing out deletes the snapshot.
+- **Steps:** the widget reads today's count from CoreMotion itself when Motion & Fitness access is already granted, and otherwise falls back to the app's last count for today. Timelines refresh every 15 minutes and just after midnight, when the week and steps roll over.
+- **Staleness:** the 30-day counts and the week only update when the app loads the dashboard. A session logged on the web shows up in the widget the next time the app is opened.

@@ -25,7 +25,10 @@ struct RookApp: App {
             unit: .lbs
         ) { await appModel.sessionExpired() }
         // Signing out discards any local workout and ends its Live Activity.
-        appModel.onSignedOut = { await controller.discardLocally() }
+        appModel.onSignedOut = {
+            await controller.discardLocally()
+            dependencies.widgetSync.clear()
+        }
 
         _dependencies = State(initialValue: dependencies)
         _appModel = State(initialValue: appModel)

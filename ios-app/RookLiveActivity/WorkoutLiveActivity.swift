@@ -8,6 +8,10 @@ import WidgetKit
 struct RookLiveActivityBundle: WidgetBundle {
     var body: some Widget {
         WorkoutLiveActivity()
+        OverviewWidget()
+        StepsWidget()
+        WeekWidget()
+        StatsWidget()
     }
 }
 

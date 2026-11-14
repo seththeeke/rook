@@ -37,7 +37,7 @@ targets:
     dependencies:
       - target: RookLiveActivity
       - package: RookKit
-        products: [RookModels, RookFormatting, RookNetworking, RookSession, RookAuth, RookFeatures, RookLiveActivityKit]
+        products: [RookModels, RookFormatting, RookNetworking, RookSession, RookAuth, RookFeatures, RookLiveActivityKit, RookWidgetData]
       - package: Amplify
         products: [Amplify, AWSCognitoAuthPlugin]
     info:
@@ -85,7 +85,7 @@ targets:
       - path: Shared
     dependencies:
       - package: RookKit
-        products: [RookLiveActivityKit]
+        products: [RookLiveActivityKit, RookWidgetData]
       - sdk: WidgetKit.framework
       - sdk: SwiftUI.framework
     info:
@@ -94,12 +94,15 @@ targets:
         CFBundleDisplayName: Rook
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        NSMotionUsageDescription: Rook shows your step count for today in its widgets.
         NSExtension:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.rookfitness.app.LiveActivity
         PRODUCT_NAME: RookLiveActivity
+        CODE_SIGN_ENTITLEMENTS: RookLiveActivity/RookLiveActivity.entitlements
+        "CODE_SIGN_IDENTITY[sdk=iphonesimulator*]": "-"
         TARGETED_DEVICE_FAMILY: "1"
         CODE_SIGN_STYLE: Automatic
         SKIP_INSTALL: YES

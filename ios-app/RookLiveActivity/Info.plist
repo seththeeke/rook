@@ -25,5 +25,7 @@
 		<key>NSExtensionPointIdentifier</key>
 		<string>com.apple.widgetkit-extension</string>
 	</dict>
+	<key>NSMotionUsageDescription</key>
+	<string>Rook shows your step count for today in its widgets.</string>
 </dict>
 </plist>

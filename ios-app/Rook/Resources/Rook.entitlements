@@ -5,6 +5,11 @@
 	<!-- Amplify stores the Cognito session in the Keychain. Without an explicit access group, builds that
 	     aren't signed with the team (e.g. simulator builds) have no application-identifier and every
 	     Keychain call fails with errSecMissingEntitlement (-34018), which breaks sign-in. -->
+	<!-- Shared container for the dashboard snapshot the home-screen widgets read. -->
+	<key>com.apple.security.application-groups</key>
+	<array>
+		<string>group.com.rookfitness.app</string>
+	</array>
 	<key>keychain-access-groups</key>
 	<array>
 		<string>$(AppIdentifierPrefix)com.rookfitness.app</string>

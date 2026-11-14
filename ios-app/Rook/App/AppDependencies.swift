@@ -3,6 +3,8 @@ import RookAuth
 import RookFeatures
 import RookNetworking
 import RookSession
+import RookWidgetData
+import WidgetKit
 
 /// The production object graph, created once at launch and passed down to features.
 /// Features depend on protocols (`AuthService`, `RookAPI`, `AIWorkoutStreaming`, …), so tests build
@@ -16,6 +18,7 @@ struct AppDependencies {
     let biometrics: BiometricAuthenticating
     let preferences: AppPreferences
     let stepCounter: StepCounting
+    let widgetSync: WidgetSync
 
     @MainActor
     static func live(configuration: AppConfiguration) -> AppDependencies {
@@ -35,7 +38,8 @@ struct AppDependencies {
             sessionStore: sessionStore,
             biometrics: LocalBiometrics(),
             preferences: UserDefaultsPreferences(),
-            stepCounter: MotionStepCounter()
+            stepCounter: MotionStepCounter(),
+            widgetSync: WidgetSync(store: .shared) { WidgetCenter.shared.reloadAllTimelines() }
         )
     }
 

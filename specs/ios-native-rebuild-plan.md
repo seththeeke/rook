@@ -7,12 +7,22 @@
 
 | Phase | Status | Notes |
 |---|---|---|
-| 0: Foundation | **Done** (2026-11-13) | 106 RookKit tests and 15 app/UI tests passing. Coverage gate enforced for RookKit (every module ≥ 90%). See "Phase 0 deviations" below. |
-| 1: Auth / onboarding / profile / settings | Not started | |
-| 2: Dashboard + history | Not started | |
-| 3: Workout building | Not started | |
-| 4a / 4b: Execution + Live Activity | Not started | |
-| 5: Release readiness | Not started | |
+| 0: Foundation | **Done** (2026-11-13) | See "Phase 0 deviations" below. |
+| 1: Auth / onboarding / profile / settings | **Built**, awaiting device test | Sign in/up/confirm/reset, biometric lock, equipment onboarding, profile, settings (units, Face ID, sign out, delete account). |
+| 2: Dashboard + history | **Built**, awaiting device test | Streak, corrected 30-day stats, PRs, week strip + calendar, recent workouts, history, detail. |
+| 3: Workout building | **Built**, awaiting device test | AI (stream, progress, cancel, regenerate), manual, past workout, review, start. |
+| 4a / 4b: Execution + Live Activity | **Built**, awaiting device test | Execution screen, session controller, widget extension, interactive Pause/Next. |
+| 5: Release readiness | Not started | Accessibility pass, TestFlight upload. |
+
+**Verification so far:** 208 RookKit tests (every module ≥ 93% line coverage, gated) and 17 app/UI tests pass on the iOS 18.4 simulator, and the signed-out UI was checked visually. **Not yet verified:** live Cognito sign-in, real API responses, and everything in the Phase 4a manual device checklist (Dynamic Island, lock-screen ticking, background intents). These need a real account and an iPhone.
+
+**Phases 1–4 deviations from the plan**
+
+- **View models live in the `RookFeatures` package module**, not the app target, so they're covered by fast `swift test` runs and by the RookKit coverage gate. The app target is now SwiftUI views and thin platform adapters (Amplify, ActivityKit, LocalAuthentication), so its line coverage is low by design. Those adapters are verified on device.
+- **The Dashboard is the signed-in root from the start**, rather than Profile in Phase 1 and then Dashboard in Phase 2, because the phases shipped together.
+- **Cancelling a workout that fails on the server** offers "Discard Workout" (local only) instead of silently clearing it.
+- **A workout that's already completed or cancelled on the server** (e.g. finished on the web) is treated as finished when you complete or cancel it in Rook.
+- **The Dynamic Island "Next" button** is hidden on the last exercise, because completing needs the confirmation in the app.
 
 **Phase 0 deviations from the plan**
 

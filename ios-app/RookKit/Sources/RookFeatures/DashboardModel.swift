@@ -21,8 +21,6 @@ public final class DashboardModel {
     public struct Stats: Equatable, Sendable {
         public var totalWorkouts: Int
         public var workoutsLast30Days: Int
-        public var volumeLast30Days: Double
-        public var minutesLast30Days: Int
     }
 
     public struct PersonalRecord: Equatable, Identifiable, Sendable {
@@ -111,12 +109,9 @@ public final class DashboardModel {
 
     public var stats: Stats {
         let cutoff = thirtyDaysAgo
-        let recent = completedWorkouts.filter { ($0.completedAt ?? .distantPast) >= cutoff }
         return Stats(
             totalWorkouts: max(global.totalWorkouts, completedWorkouts.count),
-            workoutsLast30Days: recent.count,
-            volumeLast30Days: recent.reduce(0) { $0 + WorkoutPresentation.volume(for: $1) },
-            minutesLast30Days: recent.reduce(0) { $0 + WorkoutPresentation.minutes(for: $1) }
+            workoutsLast30Days: completedWorkouts.filter { ($0.completedAt ?? .distantPast) >= cutoff }.count
         )
     }
 

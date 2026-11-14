@@ -86,7 +86,7 @@ struct PresentationTests {
         w.durationMinutes = nil
         w.totalVolume = nil
         #expect(WorkoutPresentation.minutes(for: w) == 50)
-        #expect(WorkoutPresentation.volume(for: w) == 2400) // 3 × 8 × 100
+        #expect(WorkoutPresentation.volume(for: w) == 0) // never computed on the phone
     }
 }
 
@@ -107,13 +107,13 @@ struct DashboardModelTests {
         await model.load()
         #expect(model.state == .loaded)
         #expect(!model.hasAnyWorkouts)
-        #expect(model.stats == .init(totalWorkouts: 0, workoutsLast30Days: 0, volumeLast30Days: 0, minutesLast30Days: 0))
+        #expect(model.stats == .init(totalWorkouts: 0, workoutsLast30Days: 0))
         #expect(model.personalRecords.isEmpty)
         #expect(model.recentWorkouts.isEmpty)
         #expect(model.currentWeek.count == 7)
     }
 
-    @Test func thirtyDayFiguresOnlyCountTheLast30Days() async {
+    @Test func thirtyDayCountOnlyIncludesTheLast30Days() async {
         api.global = GlobalMetrics(totalWorkouts: 40, currentStreak: 2, longestStreak: 9, workoutsLast30: 99)
         api.workoutPages = [nil: WorkoutListPage(items: [
             .completed("a", completedAt: daysAgo(1), minutes: 30, volume: 1000),
@@ -122,7 +122,7 @@ struct DashboardModelTests {
         ], nextToken: nil)]
         let model = makeModel()
         await model.load()
-        #expect(model.stats == .init(totalWorkouts: 40, workoutsLast30Days: 2, volumeLast30Days: 3000, minutesLast30Days: 70))
+        #expect(model.stats == .init(totalWorkouts: 40, workoutsLast30Days: 2))
         #expect(model.recentWorkouts.map(\.id) == ["a", "b", "c"])
     }
 

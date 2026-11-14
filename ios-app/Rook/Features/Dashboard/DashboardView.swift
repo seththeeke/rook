@@ -166,11 +166,6 @@ private struct StatsRow: View {
         HStack(spacing: Theme.Spacing.s) {
             tile(icon: "dumbbell.fill", tint: Theme.primaryLight, value: "\(stats.totalWorkouts)", label: "Workouts")
             tile(icon: "bolt.fill", tint: Theme.primaryLight, value: "\(stats.workoutsLast30Days)", label: "Last 30 days")
-            tile(
-                icon: "chart.bar.fill", tint: Theme.primaryLight,
-                value: RookFormat.compactVolume(stats.volumeLast30Days),
-                label: "\(unit.label) · \(stats.minutesLast30Days) min"
-            )
         }
         .accessibilityIdentifier("dashboard.stats")
     }

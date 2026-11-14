@@ -64,9 +64,10 @@ public enum WorkoutPresentation {
         return shown.joined(separator: ", ") + (extra > 0 ? " +\(extra)" : "")
     }
 
-    /// Total volume of non-skipped sets/reps work (prefers the server's figure).
+    /// Total volume as calculated and stored by the server at completion (0 if absent).
+    /// The app never computes volume itself.
     public static func volume(for workout: WorkoutInstance) -> Double {
-        workout.totalVolume ?? workout.exercises.reduce(0) { $0 + $1.volume }
+        workout.totalVolume ?? 0
     }
 
     /// "3 × 8 @ 135 lbs", "60 s", "Skipped".

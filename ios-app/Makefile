@@ -21,7 +21,7 @@ help:
 
 generate:
 	@command -v xcodegen >/dev/null || { echo "Install XcodeGen: brew install xcodegen"; exit 1; }
-	xcodegen generate --quiet
+	xcodegen generate --use-cache --quiet  # only rewrites the project when project.yml changes
 
 test: lint test-kit test-app
 

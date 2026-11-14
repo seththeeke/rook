@@ -5,6 +5,9 @@ SIMULATOR ?= iPhone 16 Pro
 DESTINATION := platform=iOS Simulator,name=$(SIMULATOR)
 BUILD_DIR := build
 RESULT_BUNDLE := $(BUILD_DIR)/RookTests.xcresult
+# Amplify's dependency smithy-swift ships an SPM build plugin; Xcode asks to trust it once in the UI,
+# and command-line builds need these flags instead.
+XCODE_FLAGS := -skipPackagePluginValidation -skipMacroValidation CODE_SIGNING_ALLOWED=NO
 
 .PHONY: help generate test test-kit test-app uitest build lint clean open
 
@@ -29,12 +32,12 @@ test-app: generate
 	rm -rf $(RESULT_BUNDLE)
 	xcodebuild test -project $(PROJECT) -scheme $(SCHEME) \
 		-destination '$(DESTINATION)' -resultBundlePath $(RESULT_BUNDLE) \
-		CODE_SIGNING_ALLOWED=NO -quiet
+		$(XCODE_FLAGS) -quiet
 	@xcrun xccov view --report --only-targets $(RESULT_BUNDLE) || true
 
 build: generate
 	xcodebuild build -project $(PROJECT) -scheme $(SCHEME) -destination '$(DESTINATION)' \
-		CODE_SIGNING_ALLOWED=NO -quiet
+		$(XCODE_FLAGS) -quiet
 
 # Fails if the old brand appears anywhere except backend endpoint values in Config/.
 lint:

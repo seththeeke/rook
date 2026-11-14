@@ -23,6 +23,9 @@ settings:
 packages:
   RookKit:
     path: RookKit
+  Amplify:
+    url: https://github.com/aws-amplify/amplify-swift
+    exactVersion: 2.61.0  # 2.62+ needs a newer Swift compiler than Xcode 16.3 ships
 
 targets:
   Rook:
@@ -32,7 +35,9 @@ targets:
       - path: Rook
     dependencies:
       - package: RookKit
-        products: [RookModels, RookFormatting, RookNetworking, RookSession]
+        products: [RookModels, RookFormatting, RookNetworking, RookSession, RookAuth]
+      - package: Amplify
+        products: [Amplify, AWSCognitoAuthPlugin]
     info:
       path: Rook/Resources/Info.plist
       properties:

@@ -54,6 +54,7 @@ targets:
           UIApplicationSupportsMultipleScenes: false
         UILaunchScreen:
           UIColorName: LaunchBackground
+          UIImageName: Wordmark
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
         UIRequiredDeviceCapabilities: [arm64]
         RookAPIBaseURL: $(ROOK_API_BASE_URL)

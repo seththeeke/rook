@@ -40,7 +40,8 @@ struct AuthView: View {
 
     private var header: some View {
         VStack(spacing: Theme.Spacing.s) {
-            BrandMark(size: 72)
+            Wordmark(width: 160)
+                .padding(.bottom, Theme.Spacing.m)
                 .accessibilityHidden(true)
             Text(title)
                 .font(.largeTitle.bold())

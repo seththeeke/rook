@@ -66,34 +66,28 @@ struct BrandSplashView: View {
     var body: some View {
         ZStack {
             Theme.background.ignoresSafeArea()
-            VStack(spacing: Theme.Spacing.l) {
-                BrandMark(size: 120)
-                    .accessibilityLabel("Rook")
-                Text("ROOK")
-                    .font(.system(size: 22, weight: .semibold))
-                    .tracking(10)
-                    .foregroundStyle(Theme.textPrimary)
-                    .accessibilityHidden(true)
-                ProgressView().tint(Theme.primaryLight).opacity(showsProgress ? 1 : 0)
-            }
+            // Same image, size and centered position as the launch screen, so app start looks continuous.
+            Wordmark(width: 220)
+            ProgressView()
+                .tint(Theme.primaryLight)
+                .offset(y: 70)
+                .opacity(showsProgress ? 1 : 0)
         }
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("root.brand")
     }
 }
 
-/// The R monogram on a rounded gunmetal tile.
-struct BrandMark: View {
-    var size: CGFloat = 72
+/// The ROOK wordmark. Its transparent background sits on `Theme.background`, which matches the logo.
+struct Wordmark: View {
+    var width: CGFloat = 220
 
     var body: some View {
-        Image("LaunchMark")
+        Image("Wordmark")
             .resizable()
             .scaledToFit()
-            .frame(width: size, height: size)
-            .clipShape(RoundedRectangle(cornerRadius: size * 0.24, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: size * 0.24, style: .continuous).strokeBorder(Theme.border))
-            .shadow(color: Theme.primary.opacity(0.35), radius: size * 0.2, y: size * 0.06)
+            .frame(width: width)
+            .accessibilityLabel("Rook")
     }
 }
 

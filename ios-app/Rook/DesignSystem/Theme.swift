@@ -25,12 +25,13 @@ enum Theme {
 
     // MARK: Surfaces
 
-    /// App canvas.
-    static let background = Color(hex: 0x0B0B0E)
+    /// App canvas. Identical to the logo's background (and `LaunchBackground`) so the wordmark and
+    /// app icon blend in seamlessly.
+    static let background = Color(hex: 0x111118)
     /// Cards and grouped rows (gunmetal).
-    static let surface = Color(hex: 0x17171C)
+    static let surface = Color(hex: 0x1B1B23)
     /// Raised controls inside cards (steppers, chips, round buttons).
-    static let surfaceElevated = Color(hex: 0x222229)
+    static let surfaceElevated = Color(hex: 0x26262F)
     /// Hairline border around cards and fields.
     static let border = Color.white.opacity(0.07)
     /// Workout execution screen background (same canvas, kept as its own token).
@@ -44,7 +45,7 @@ enum Theme {
 
     /// Subtle top-of-screen glow behind headers (replaces the old solid purple header).
     static let headerGradient = LinearGradient(
-        colors: [Color(hex: 0x1C1A26), background], startPoint: .top, endPoint: .bottom
+        colors: [Color(hex: 0x1A1824), background], startPoint: .top, endPoint: .bottom
     )
 
     enum Radius {

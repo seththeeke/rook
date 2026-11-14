@@ -35,7 +35,7 @@ public struct Endpoint<Response: Decodable & Sendable>: Sendable {
     }
 }
 
-/// Every backend route Rook uses (see spec §3.3). Paths mirror `packages/cdk/lib/repwise-stack.ts`.
+/// Every backend route Rook uses (see spec §3.3). Paths mirror the routes declared in the CDK stack (`packages/cdk/lib`).
 public enum Endpoints {
     // MARK: Users
     public static let getMe = Endpoint<UserProfile>(method: .get, path: "/users/me")

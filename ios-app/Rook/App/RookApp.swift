@@ -2,11 +2,18 @@ import SwiftUI
 
 @main
 struct RookApp: App {
-    private let configuration = AppConfiguration.fromMainBundle()
+    @State private var dependencies = AppDependencies.live(configuration: .fromMainBundle())
+    @State private var network = NetworkMonitor()
+    @State private var toasts = ToastCenter()
 
     var body: some Scene {
         WindowGroup {
             RootView()
+                .safeAreaInset(edge: .top, spacing: 0) {
+                    if !network.isOnline { OfflineBanner() }
+                }
+                .toasts(toasts)
+                .tint(Theme.primary)
         }
     }
 }

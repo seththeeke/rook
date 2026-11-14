@@ -41,6 +41,7 @@ struct RookApp: App {
                 .toasts(toasts)
                 .environment(toasts)
                 .tint(Theme.primary)
+                .preferredColorScheme(.dark)
         }
     }
 }

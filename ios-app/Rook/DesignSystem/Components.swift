@@ -2,37 +2,41 @@ import SwiftUI
 
 // MARK: - Buttons
 
-/// Full-width filled button. Use `.buttonStyle(.rookPrimary)`; pair with `isLoading` via `RookButton`.
+/// Full-width filled button. Default fill is the purple accent gradient; pass `tint` for a solid color
+/// (e.g. destructive red).
 struct RookPrimaryButtonStyle: ButtonStyle {
-    var tint: Color = Theme.primary
+    var tint: Color?
     @Environment(\.isEnabled) private var isEnabled
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.headline)
-            .foregroundStyle(.white)
-            .frame(maxWidth: .infinity, minHeight: 52)
-            .background(tint.opacity(isEnabled ? 1 : 0.45), in: RoundedRectangle(cornerRadius: Theme.Radius.control))
+            .foregroundStyle(.white.opacity(isEnabled ? 1 : 0.5))
+            .frame(maxWidth: .infinity, minHeight: 54)
+            .background {
+                RoundedRectangle(cornerRadius: Theme.Radius.control)
+                    .fill(tint.map { AnyShapeStyle($0) } ?? AnyShapeStyle(Theme.accentGradient))
+                    .opacity(isEnabled ? 1 : 0.35)
+            }
+            .shadow(color: (tint ?? Theme.primary).opacity(isEnabled ? 0.35 : 0), radius: 12, y: 4)
             .opacity(configuration.isPressed ? 0.85 : 1)
             .scaleEffect(configuration.isPressed ? 0.98 : 1)
             .animation(.easeOut(duration: 0.12), value: configuration.isPressed)
     }
 }
 
-/// Full-width outlined button for secondary actions.
+/// Full-width gunmetal button with a hairline border, for secondary actions.
 struct RookSecondaryButtonStyle: ButtonStyle {
-    var tint: Color = Theme.primary
+    var tint: Color = Theme.textPrimary
     @Environment(\.isEnabled) private var isEnabled
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.headline)
-            .foregroundStyle(tint.opacity(isEnabled ? 1 : 0.45))
-            .frame(maxWidth: .infinity, minHeight: 52)
-            .background(
-                RoundedRectangle(cornerRadius: Theme.Radius.control)
-                    .strokeBorder(tint.opacity(isEnabled ? 0.6 : 0.25), lineWidth: 1.5)
-            )
+            .foregroundStyle(tint.opacity(isEnabled ? 1 : 0.35))
+            .frame(maxWidth: .infinity, minHeight: 54)
+            .background(Theme.surfaceElevated.opacity(isEnabled ? 1 : 0.5), in: RoundedRectangle(cornerRadius: Theme.Radius.control))
+            .overlay(RoundedRectangle(cornerRadius: Theme.Radius.control).strokeBorder(Theme.border, lineWidth: 1))
             .contentShape(Rectangle())
             .opacity(configuration.isPressed ? 0.7 : 1)
     }
@@ -40,7 +44,8 @@ struct RookSecondaryButtonStyle: ButtonStyle {
 
 extension ButtonStyle where Self == RookPrimaryButtonStyle {
     static var rookPrimary: RookPrimaryButtonStyle { .init() }
-    static var rookSuccess: RookPrimaryButtonStyle { .init(tint: Theme.accentGreen) }
+    /// Completion actions use the same purple accent as every primary action.
+    static var rookSuccess: RookPrimaryButtonStyle { .init() }
     static var rookDestructive: RookPrimaryButtonStyle { .init(tint: Theme.danger) }
 }
 
@@ -75,7 +80,7 @@ struct CardModifier: ViewModifier {
             .padding(Theme.Spacing.m)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.Radius.card))
-            .shadow(color: .black.opacity(0.05), radius: 6, y: 2)
+            .overlay(RoundedRectangle(cornerRadius: Theme.Radius.card).strokeBorder(Theme.border, lineWidth: 1))
     }
 }
 
@@ -103,7 +108,7 @@ struct RookTextField: View {
         VStack(alignment: .leading, spacing: Theme.Spacing.xs) {
             Text(label)
                 .font(.subheadline.weight(.medium))
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Theme.textSecondary)
             HStack {
                 field
                     .textContentType(contentType)
@@ -117,17 +122,18 @@ struct RookTextField: View {
                         isRevealed.toggle()
                     } label: {
                         Image(systemName: isRevealed ? "eye.slash" : "eye")
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(Theme.textSecondary)
                     }
                     .accessibilityLabel(isRevealed ? "Hide password" : "Show password")
                 }
             }
             .padding(.horizontal, Theme.Spacing.m)
-            .frame(minHeight: 50)
+            .frame(minHeight: 52)
+            .foregroundStyle(Theme.textPrimary)
             .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.Radius.control))
             .overlay(
                 RoundedRectangle(cornerRadius: Theme.Radius.control)
-                    .strokeBorder(error == nil ? Color.secondary.opacity(0.25) : Theme.danger, lineWidth: 1)
+                    .strokeBorder(error == nil ? Theme.border : Theme.danger, lineWidth: 1)
             )
             if let error {
                 Text(error)
@@ -180,21 +186,22 @@ struct EmptyStateView: View {
     var body: some View {
         VStack(spacing: Theme.Spacing.s) {
             Image(systemName: systemImage)
-                .font(.system(size: 28, weight: .semibold))
-                .foregroundStyle(Theme.primary)
+                .font(.system(size: 26, weight: .semibold))
+                .foregroundStyle(Theme.primaryLight)
                 .frame(width: 56, height: 56)
-                .background(Theme.primary.opacity(0.12), in: Circle())
+                .background(Theme.primary.opacity(0.16), in: RoundedRectangle(cornerRadius: 16))
                 .accessibilityHidden(true)
             Text(title).font(.headline)
             if let message {
                 Text(message)
                     .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Theme.textSecondary)
                     .multilineTextAlignment(.center)
             }
             if let actionTitle, let action {
                 Button(actionTitle, action: action)
                     .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(Theme.primaryLight)
                     .padding(.top, Theme.Spacing.xs)
             }
         }
@@ -216,7 +223,7 @@ struct ErrorStateView: View {
                 .accessibilityHidden(true)
             Text(message)
                 .multilineTextAlignment(.center)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Theme.textSecondary)
             Button("Try again", action: retry)
                 .buttonStyle(.rookSecondary)
                 .frame(maxWidth: 220)
@@ -257,4 +264,5 @@ struct OfflineBanner: View {
         .padding()
     }
     .background(Theme.background)
+    .preferredColorScheme(.dark)
 }

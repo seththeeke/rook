@@ -54,8 +54,6 @@ targets:
           UIApplicationSupportsMultipleScenes: false
         UILaunchScreen:
           UIColorName: LaunchBackground
-          UIImageName: LaunchMark
-          UIImageRespectsSafeAreaInsets: true
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
         UIRequiredDeviceCapabilities: [arm64]
         RookAPIBaseURL: $(ROOK_API_BASE_URL)

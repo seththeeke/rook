@@ -65,18 +65,35 @@ struct BrandSplashView: View {
 
     var body: some View {
         ZStack {
-            Color("LaunchBackground").ignoresSafeArea()
+            Theme.background.ignoresSafeArea()
             VStack(spacing: Theme.Spacing.l) {
-                Image("LaunchMark")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 200, height: 200)
+                BrandMark(size: 120)
                     .accessibilityLabel("Rook")
-                ProgressView().tint(.white).opacity(showsProgress ? 1 : 0)
+                Text("ROOK")
+                    .font(.system(size: 22, weight: .semibold))
+                    .tracking(10)
+                    .foregroundStyle(Theme.textPrimary)
+                    .accessibilityHidden(true)
+                ProgressView().tint(Theme.primaryLight).opacity(showsProgress ? 1 : 0)
             }
         }
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("root.brand")
+    }
+}
+
+/// The R monogram on a rounded gunmetal tile.
+struct BrandMark: View {
+    var size: CGFloat = 72
+
+    var body: some View {
+        Image("LaunchMark")
+            .resizable()
+            .scaledToFit()
+            .frame(width: size, height: size)
+            .clipShape(RoundedRectangle(cornerRadius: size * 0.24, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: size * 0.24, style: .continuous).strokeBorder(Theme.border))
+            .shadow(color: Theme.primary.opacity(0.35), radius: size * 0.2, y: size * 0.06)
     }
 }
 
@@ -86,17 +103,20 @@ struct BiometricLockView: View {
 
     var body: some View {
         ZStack {
-            Color("LaunchBackground").ignoresSafeArea()
+            Theme.background.ignoresSafeArea()
             VStack(spacing: Theme.Spacing.m) {
                 Image(systemName: "lock.fill")
-                    .font(.system(size: 44, weight: .semibold))
-                    .foregroundStyle(.white)
+                    .font(.system(size: 30, weight: .semibold))
+                    .foregroundStyle(Theme.primaryLight)
+                    .frame(width: 72, height: 72)
+                    .background(Theme.surface, in: RoundedRectangle(cornerRadius: 20))
+                    .overlay(RoundedRectangle(cornerRadius: 20).strokeBorder(Theme.border))
                     .accessibilityHidden(true)
                 Text("Rook is locked")
                     .font(.title2.bold())
                     .foregroundStyle(.white)
                 Text("Unlock to continue.")
-                    .foregroundStyle(.white.opacity(0.8))
+                    .foregroundStyle(Theme.textSecondary)
                 if let error = appModel.unlockError {
                     Text(error)
                         .font(.footnote)
@@ -109,14 +129,14 @@ struct BiometricLockView: View {
                 } label: {
                     Label("Unlock", systemImage: "faceid")
                 }
-                .buttonStyle(RookPrimaryButtonStyle(tint: .white.opacity(0.25)))
+                .buttonStyle(.rookPrimary)
                 .padding(.horizontal, Theme.Spacing.xl)
                 .padding(.top, Theme.Spacing.m)
                 Button("Sign in with password instead") {
                     Task { await appModel.signOut() }
                 }
                 .font(.footnote.weight(.medium))
-                .foregroundStyle(.white.opacity(0.9))
+                .foregroundStyle(Theme.textSecondary)
             }
         }
         .task { await appModel.unlock() }

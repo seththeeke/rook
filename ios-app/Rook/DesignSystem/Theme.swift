@@ -1,30 +1,55 @@
 import SwiftUI
 import UIKit
 
-/// Brand color tokens (unchanged from the web app's Tailwind theme), with dark-mode variants.
+/// Rook's dark "gunmetal" design language: near-black canvas, layered gunmetal surfaces with hairline
+/// borders, white text, and purple used as the accent (actions, selection, progress), not as a fill.
+/// The app always renders in dark mode (`.preferredColorScheme(.dark)` at the root).
 enum Theme {
-    static let primary = Color(light: 0x7C3AED, dark: 0x8B5CF6)
-    static let primaryLight = Color(hex: 0x8B5CF6)
-    static let primaryDark = Color(hex: 0x6D28D9)
-    static let accentOrange = Color(hex: 0xF97316)
-    static let accentGreen = Color(hex: 0x22C55E)
-    static let danger = Color(light: 0xDC2626, dark: 0xF87171)
-    static let warning = Color(hex: 0xF59E0B)
+    // MARK: Accent
 
-    /// App background behind cards.
-    static let background = Color(light: 0xF8F7FF, dark: 0x0F0F1A)
-    /// Card / grouped surface.
-    static let surface = Color(light: 0xFFFFFF, dark: 0x1C1B29)
-    /// Always-dark background of the workout execution screen.
-    static let executionBackground = Color(hex: 0x0F0F1A)
+    /// Purple accent for primary actions, selection, and progress.
+    static let primary = Color(hex: 0x7C5CFA)
+    static let primaryLight = Color(hex: 0x9F86FF)
+    static let primaryDark = Color(hex: 0x5B3FD6)
+    /// Gradient used on primary buttons and the accent icon tiles.
+    static let accentGradient = LinearGradient(
+        colors: [Color(hex: 0x8B6CFF), Color(hex: 0x6A4BE8)], startPoint: .topLeading, endPoint: .bottomTrailing
+    )
 
+    // MARK: Semantic
+
+    static let accentOrange = Color(hex: 0xFF8A3D)
+    static let accentGreen = Color(hex: 0x34D399)
+    static let danger = Color(hex: 0xF87171)
+    static let warning = Color(hex: 0xFBBF24)
+
+    // MARK: Surfaces
+
+    /// App canvas.
+    static let background = Color(hex: 0x0B0B0E)
+    /// Cards and grouped rows (gunmetal).
+    static let surface = Color(hex: 0x17171C)
+    /// Raised controls inside cards (steppers, chips, round buttons).
+    static let surfaceElevated = Color(hex: 0x222229)
+    /// Hairline border around cards and fields.
+    static let border = Color.white.opacity(0.07)
+    /// Workout execution screen background (same canvas, kept as its own token).
+    static let executionBackground = background
+
+    // MARK: Text
+
+    static let textPrimary = Color.white
+    static let textSecondary = Color(hex: 0x9A9AA6)
+    static let textTertiary = Color(hex: 0x5E5E69)
+
+    /// Subtle top-of-screen glow behind headers (replaces the old solid purple header).
     static let headerGradient = LinearGradient(
-        colors: [primary, primaryDark], startPoint: .top, endPoint: .bottom
+        colors: [Color(hex: 0x1C1A26), background], startPoint: .top, endPoint: .bottom
     )
 
     enum Radius {
-        static let card: CGFloat = 16
-        static let control: CGFloat = 12
+        static let card: CGFloat = 18
+        static let control: CGFloat = 14
     }
 
     enum Spacing {
@@ -45,18 +70,24 @@ extension Color {
             blue: Double(hex & 0xFF) / 255
         )
     }
-
-    /// A color that adapts to light/dark appearance.
-    init(light: UInt32, dark: UInt32) {
-        self.init(UIColor { traits in
-            UIColor(Color(hex: traits.userInterfaceStyle == .dark ? dark : light))
-        })
-    }
 }
 
 extension Font {
     /// Large numeric display (timers, stats) using the rounded SF variant.
     static func rookNumber(_ size: CGFloat, weight: Font.Weight = .bold) -> Font {
         .system(size: size, weight: weight, design: .rounded).monospacedDigit()
+    }
+}
+
+extension View {
+    /// Gunmetal list styling: hides the system grouped background so rows sit on the Rook canvas.
+    func rookListStyle() -> some View {
+        scrollContentBackground(.hidden)
+            .background(Theme.background.ignoresSafeArea())
+    }
+
+    /// Row background for gunmetal lists and forms.
+    func rookRow() -> some View {
+        listRowBackground(Theme.surface)
     }
 }

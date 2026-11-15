@@ -2,12 +2,182 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --color-primary: #7c3aed;
-  --color-surface-secondary: #f8f7ff;
+/*
+ * Rook marketing site. Dark only, like the iOS app: gunmetal canvas, purple accent.
+ * Keyframes and the few effects Tailwind can't express live here.
+ */
+
+@property --rk-angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+
+html {
+  scroll-behavior: smooth;
+  background: #0c0c12;
+  color-scheme: dark;
 }
 
 body {
   margin: 0;
-  font-family: system-ui, -apple-system, sans-serif;
+  background: #0c0c12;
+  color: #fff;
+  font-family: 'DM Sans', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: rgba(124, 92, 250, 0.45);
+}
+
+/* Ambient page background: soft purple/heat glows plus film grain. */
+.rk-page-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 110% 70% at 50% -20%, rgba(124, 92, 250, 0.2), transparent 55%),
+    radial-gradient(ellipse 70% 45% at 100% 45%, rgba(92, 200, 255, 0.06), transparent 50%),
+    radial-gradient(ellipse 60% 40% at 0% 85%, rgba(255, 122, 69, 0.06), transparent 45%),
+    #0c0c12;
+}
+.rk-page-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+}
+
+/* Shimmering accent gradient for headline words. */
+.rk-gradient-text {
+  background: linear-gradient(100deg, #b9a8ff 0%, #7c5cfa 25%, #ff9a6b 50%, #7c5cfa 75%, #b9a8ff 100%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: rk-shimmer 6s linear infinite;
+}
+
+/* Hero vignette so the canvas fades into the page. */
+.rk-vignette {
+  background:
+    radial-gradient(ellipse 75% 65% at 50% 45%, transparent 30%, #0c0c12 100%),
+    linear-gradient(to bottom, transparent 70%, #0c0c12);
+}
+
+/* Primary CTA with a spinning conic rim: the link paints the gradient, its inner span the fill. */
+.rk-rim {
+  position: relative;
+  isolation: isolate;
+  padding: 2px;
+  background: conic-gradient(from var(--rk-angle), #7c5cfa, #ff9a6b, #5cc8ff, #7c5cfa);
+  animation: rk-spin 4s linear infinite;
+}
+.rk-rim::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: inherit;
+  filter: blur(16px);
+  opacity: 0.5;
+}
+
+/* Infinite marquee: the track holds two copies of the content. */
+.rk-marquee {
+  mask-image: linear-gradient(to right, transparent, #000 10%, #000 90%, transparent);
+}
+.rk-marquee-track {
+  animation: rk-marquee 40s linear infinite;
+}
+.rk-marquee-track.rk-reverse {
+  animation-direction: reverse;
+}
+
+/* Subtle grid for the bento cards. */
+.rk-grid-lines {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+.rk-caret::after {
+  content: '';
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  margin-left: 2px;
+  vertical-align: -0.15em;
+  background: #9f86ff;
+  animation: rk-blink 1s steps(1) infinite;
+}
+
+@keyframes rk-rise {
+  from {
+    opacity: 0;
+    transform: translateY(0.55em);
+    filter: blur(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: blur(0);
+  }
+}
+@keyframes rk-shimmer {
+  to {
+    background-position: 200% 0;
+  }
+}
+@keyframes rk-spin {
+  to {
+    --rk-angle: 360deg;
+  }
+}
+@keyframes rk-marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+@keyframes rk-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+@keyframes rk-blink {
+  50% {
+    opacity: 0;
+  }
+}
+@keyframes rk-ping {
+  from {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  to {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

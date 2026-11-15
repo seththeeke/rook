@@ -3,10 +3,9 @@
   "short_name": "Rook",
   "description": "Train smarter. Get stronger.",
   "start_url": "/",
-  "display": "standalone",
-  "background_color": "#111118",
-  "theme_color": "#111118",
-  "orientation": "portrait-primary",
+  "display": "browser",
+  "background_color": "#0c0c12",
+  "theme_color": "#0c0c12",
   "icons": [
     {
       "src": "/favicon.png",

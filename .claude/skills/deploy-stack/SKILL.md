@@ -14,11 +14,9 @@ Run these from the repo root and stop on any failure:
 
 ```bash
 aws sts get-caller-identity          # credentials present? (deploy needs the account that owns repwisefit.com in Route 53)
-test -f packages/web/.env.production || echo "MISSING packages/web/.env.production"
 git status --short                   # tell the user if they're deploying uncommitted changes
 ```
 
-- If `.env.production` is missing, copy `packages/web/.env.production.example` and confirm the values with the user. The website is built from it, and a missing value ships a broken web app.
 - Optional Sign in with Apple: deploy reads `APPLE_SERVICES_ID`, `APPLE_TEAM_ID`, `APPLE_KEY_ID`, `APPLE_PRIVATE_KEY` from the environment. If they're unset, the Apple IdP is left out. Mention this only if the user cares about Apple sign-in.
 
 ## 2. Build
@@ -27,7 +25,7 @@ git status --short                   # tell the user if they're deploying uncomm
 pnpm build
 ```
 
-This builds every package, including `vite build` for `packages/web/dist`. The CDK `BucketDeployment` uploads that folder, so a stale or missing `dist` means a stale website. Lambdas are re-bundled by esbuild during deploy, but `pnpm build` still type checks them.
+This builds every package, including `vite build` of the static marketing site into `packages/web/dist` (it needs no env vars). The CDK `BucketDeployment` uploads that folder, so a stale or missing `dist` means a stale website. Lambdas are re-bundled by esbuild during deploy, but `pnpm build` still type checks them.
 
 ## 3. Review (recommended)
 
@@ -48,7 +46,7 @@ Use the project-local CDK through the pnpm script, never a global `cdk`. The fir
 ## 5. After deploy
 
 - Report the stack outputs: `WebsiteUrl`, `ApiUrl`, `AiWorkoutStreamUrl`, `UserPoolId`, `UserPoolClientId`, `CognitoOAuthDomain`, `CloudFrontDistributionId`.
-- If `AiWorkoutStreamUrl`, `UserPoolId`, `UserPoolClientId`, or `CognitoOAuthDomain` changed, update `packages/web/.env.production` (and `.env.local` / `.env.ios` if present). Then rebuild and redeploy, and run `pnpm build:ios` for the native app.
+- If `AiWorkoutStreamUrl`, `UserPoolId`, `UserPoolClientId`, or `CognitoOAuthDomain` changed, tell the user: the native app reads these from `ios-app/Config/Base.xcconfig`, which needs updating and a new build.
 - BucketDeployment invalidates CloudFront. If the site still looks stale: `aws cloudfront create-invalidation --distribution-id <CloudFrontDistributionId> --paths "/*"`.
 - New environment and empty catalog only: seed exercises with `WORKOUTS_TABLE=repwise-workouts pnpm --filter @repwise/exercise seed full-exercise-database.json`. The default file is `catalog-minimal.json`.
 - Offer to run the integration tests (`pnpm --filter @repwise/integration-tests test`). They hit production data with the test users.

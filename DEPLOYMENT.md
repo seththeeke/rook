@@ -1,6 +1,6 @@
 # Rook — Deployment & Development Guide
 
-This document covers how to build, deploy, and run Rook (web, iOS, and backend). For a product overview, see [README.md](README.md).
+This document covers how to build, deploy, and run Rook (iOS app, marketing website, and backend). For a product overview, see [README.md](README.md).
 
 ---
 
@@ -10,7 +10,8 @@ This document covers how to build, deploy, and run Rook (web, iOS, and backend).
 |-------|------------|
 | **Backend** | Node.js 20.x, TypeScript, AWS Lambda, API Gateway (HTTP API), DynamoDB, Cognito |
 | **AI** | AWS Bedrock (Converse API; Nova and Claude models, chosen in the admin builder config), SSE via a Lambda Function URL |
-| **Frontend** | React 18, TypeScript, Vite, Tailwind CSS, React Router, Zustand, TanStack Query, AWS Amplify (Cognito); native iOS via Capacitor |
+| **App** | Native iOS (SwiftUI) in `ios-app/` |
+| **Website** | Static marketing page: React 18, TypeScript, Vite, Tailwind CSS, framer-motion |
 | **Infrastructure** | AWS CDK (TypeScript), single stack `RepwiseStack`; deployed manually (no CI/CD yet) |
 | **Monitoring** | CloudWatch Logs only today; alarms/dashboard are specced in `specs/monitoring-spec.md` but not built |
 | **Package manager** | pnpm |
@@ -39,8 +40,7 @@ The project is a **pnpm monorepo**:
 │   │   ├── ai/                 # AI workout generation (SSE via Function URL) + admin builder config
 │   │   ├── cleanup-user-data/  # Account deletion (DELETE /users/me)
 │   │   └── cognito-post-confirm/
-│   ├── capacitor-workout-live-activity/  # Local Capacitor plugin for Live Activity / Dynamic Island
-│   ├── web/                    # React frontend + Capacitor iOS project (web/ios)
+│   ├── web/                    # Marketing website (static, no sign-in)
 │   └── integration-tests/     # Vitest integration tests (run against deployed API)
 ├── specs/                      # Implementation specs, plans, polishing ideas, bug tracker
 │   ├── backend-spec.md         # Backend & infrastructure
@@ -90,15 +90,14 @@ pnpm -r build
 ```
 
 - **Deploy (backend + website):**  
-  Create `packages/web/.env.production` from `.env.production.example` (the website is built from it), run `pnpm -r build`, then from `packages/cdk`: `pnpm run deploy -- --require-approval never`.  
+  Run `pnpm -r build` (this also builds the marketing site into `packages/web/dist`), then from `packages/cdk`: `pnpm run deploy -- --require-approval never`.  
   Always use the project's CDK CLI through pnpm. A global `cdk` can cause schema version mismatches. Bedrock model access must be enabled in the account for the AI builder. Seed the exercise catalog once per new environment (see `packages/lambdas/exercise/scripts/`). See [packages/cdk/README.md](packages/cdk/README.md) for domains, OAuth, and Sign in with Apple.
 
-- **Run frontend:**  
-  `pnpm --filter web run dev`  
-  Copy `packages/web/.env.example` to `packages/web/.env.local` and set `VITE_COGNITO_USER_POOL_ID` and `VITE_COGNITO_CLIENT_ID` (same values as integration tests) so the Amplify login/signup/forgot-password flow works. Set `VITE_API_BASE_URL` when the API is deployed.
+- **Run the marketing site locally:**  
+  `pnpm --filter web run dev`. It is a static page with no sign-in and needs no env vars.
 
-- **Build & run iOS app (Capacitor):**  
-  Repwise can run natively on iPhone via Capacitor. See [specs/capacitor-ios-plan.md](specs/capacitor-ios-plan.md) for full details. Quick flow: ensure `packages/web/.env.production` (or `.env.ios`) has the same `VITE_*` values as production; then `pnpm build:ios` (builds web + syncs to iOS), and `pnpm --filter web cap:open:ios` to open Xcode. Requires macOS and Xcode.
+- **Build & run the iOS app:**  
+  The app is the native SwiftUI project in `ios-app/`. See [specs/ios-native-rebuild-plan.md](specs/ios-native-rebuild-plan.md) for build and TestFlight steps.
 
 ---
 

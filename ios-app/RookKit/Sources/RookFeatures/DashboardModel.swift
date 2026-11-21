@@ -8,8 +8,9 @@ import RookWidgetData
 /// The dashboard's data and derived figures.
 ///
 /// Fixes relative to the web dashboard (spec §6.6–6.8): "last 30 days" figures are computed from
-/// workouts actually completed in the last 30 days; units come from the profile/exercise; the week strip
-/// compares by the server's UTC day keys.
+/// workouts actually completed in the last 30 days; units come from the profile/exercise. The week strip
+/// places each loaded workout on the local day of its `completedAt`, not the server's UTC day keys
+/// (`GlobalMetrics.completedDates`), which put late-evening sessions on the following day.
 @MainActor
 @Observable
 public final class DashboardModel {
@@ -158,19 +159,18 @@ public final class DashboardModel {
     }
 
     public var currentWeek: [WeekDay] {
-        var sessions: [DayKey: [Bool]] = [:] // day → isSauna for each loaded workout
+        var sessions: [DayKey: [Bool]] = [:] // local day → isSauna for each loaded workout
         for workout in completedWorkouts {
             guard let completedAt = workout.completedAt else { continue }
-            sessions[DayKey(utcDayOf: completedAt), default: []].append(Sauna.isSaunaWorkout(workout))
+            sessions[DayKey(localDay: completedAt, calendar: calendar), default: []].append(Sauna.isSaunaWorkout(workout))
         }
-        let completedDays = DayKey.set(from: global.completedDates)
         let today = DayKey(localDay: clock.now(), calendar: calendar)
         let letters = ["M", "T", "W", "T", "F", "S", "S"]
         return CalendarMath.mondayWeek(containing: clock.now(), calendar: calendar).enumerated().map { index, date in
             let key = DayKey(localDay: date, calendar: calendar)
             return WeekDay(
                 date: date, key: key, letter: letters[index], isToday: key == today,
-                activity: Self.activity(sessions[key] ?? [], completedOnServer: completedDays.contains(key))
+                activity: Self.activity(sessions[key] ?? [])
             )
         }
     }
@@ -196,9 +196,9 @@ public final class DashboardModel {
         )
     }
 
-    static func activity(_ sessions: [Bool], completedOnServer: Bool) -> DayActivity {
+    static func activity(_ sessions: [Bool]) -> DayActivity {
         switch sessions.count {
-        case 0: completedOnServer ? .multiple : .none
+        case 0: .none
         case 1: sessions[0] ? .sauna : .workout
         default: .multiple
         }

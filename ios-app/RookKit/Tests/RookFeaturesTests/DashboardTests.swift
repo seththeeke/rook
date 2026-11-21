@@ -141,16 +141,32 @@ struct DashboardModelTests {
         #expect(model.personalRecords[2].unit == .lbs) // falls back to the profile unit
     }
 
-    @Test func weekStripMarksUTCDaysAndToday() async {
+    @Test func weekStripRunsMondayToSundayAndMarksToday() async {
+        // Server day keys alone don't mark days: they're UTC and shift late-evening sessions forward.
         api.global = GlobalMetrics(totalWorkouts: 2, completedDates: ["2026-03-09", "2026-03-14", "bad"])
         let model = makeModel()
         await model.load()
         let week = model.currentWeek
         #expect(week.map(\.key.description) == ["2026-03-09", "2026-03-10", "2026-03-11", "2026-03-12", "2026-03-13", "2026-03-14", "2026-03-15"])
-        #expect(week.filter(\.hasWorkout).map(\.letter) == ["M", "S"])
-        // Completed per the server, but those workouts weren't loaded: a generic checkmark.
-        #expect(week.filter(\.hasWorkout).map(\.activity) == [.multiple, .multiple])
+        #expect(week.allSatisfy { !$0.hasWorkout })
         #expect(week.first { $0.isToday }?.key.description == "2026-03-14")
+    }
+
+    @Test func weekStripUsesTheLocalDayForLateEveningSessions() async {
+        // New York is UTC-4 this week (DST began 2026-03-08).
+        api.global = GlobalMetrics(totalWorkouts: 3, completedDates: ["2026-03-09", "2026-03-11", "2026-03-16"])
+        api.workoutPages = [nil: WorkoutListPage(items: [
+            // Sunday 15th, 10pm local = Monday 16th 02:00 UTC: still this week's Sunday.
+            .completed("sun-night", completedAt: ISO8601.parse("2026-03-16T02:00:00Z")!),
+            // Tuesday 10th, 9pm local = Wednesday 11th 01:00 UTC: Tuesday, not Wednesday.
+            .completed("tue-night-sauna", completedAt: ISO8601.parse("2026-03-11T01:00:00Z")!, exercises: [Sauna.exercise(minutes: 20)]),
+            // Sunday 8th, 10pm local = Monday 9th 02:00 UTC: last week, so not shown.
+            .completed("last-sun-night", completedAt: ISO8601.parse("2026-03-09T02:00:00Z")!),
+        ], nextToken: nil)]
+        let model = makeModel()
+        await model.load()
+        #expect(model.currentWeek.map(\.activity) == [.none, .sauna, .none, .none, .none, .none, .workout])
+        #expect(model.widgetSnapshot(steps: nil)?.days == ["2026-03-10": .sauna, "2026-03-15": .workout])
     }
 
     @Test func saunaSessionsAreCountedSeparately() async {

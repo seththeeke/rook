@@ -2,11 +2,10 @@ import Foundation
 
 /// A calendar day as the backend stores it: "YYYY-MM-DD".
 ///
-/// The metrics processor derives day keys with `new Date().toISOString().split('T')[0]`, i.e. in **UTC**.
-/// To stay consistent with `GlobalMetrics.completedDates`, timestamps are converted to day keys in UTC
-/// (`init(utcDayOf:)`). Days the user *sees* in a calendar are local calendar days; their key is simply
-/// that local date's components (`init(localDay:calendar:)`). The two meet when comparing strings —
-/// which reproduces the server's behavior, including its known late-evening shift (see spec §6.7).
+/// The metrics processor derives day keys with `new Date().toISOString().split('T')[0]`, i.e. in **UTC**
+/// (`init(utcDayOf:)` reproduces that). Those keys put late-evening sessions on the following day, so
+/// anything the user *sees* keys timestamps by their local calendar day instead
+/// (`init(localDay:calendar:)`), and `GlobalMetrics.completedDates` isn't used to place sessions on days.
 public struct DayKey: Hashable, Comparable, Sendable, CustomStringConvertible {
     public let year: Int
     public let month: Int

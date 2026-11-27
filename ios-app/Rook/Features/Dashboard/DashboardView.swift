@@ -3,7 +3,7 @@ import RookFormatting
 import RookModels
 import SwiftUI
 
-/// Home screen: streak, stats, PRs, this week, recent workouts.
+/// Home screen: streak, stats, PRs, this week, recent exercises, recent workouts.
 struct DashboardView: View {
     let model: DashboardModel
     let steps: StepsModel
@@ -121,6 +121,9 @@ struct DashboardView: View {
                 }
                 WeekStrip(days: model.currentWeek)
                     .accessibilityIdentifier("dashboard.week")
+                if !model.recentExercises.isEmpty {
+                    RecentExercisesCard(exercises: model.recentExercises)
+                }
                 RecentWorkoutsCard(workouts: model.recentWorkouts, unit: profile.preferredUnit, onStart: onNewWorkout)
             }
         }
@@ -238,25 +241,94 @@ private struct PersonalRecordsCard: View {
                 .font(.headline)
                 .labelStyle(TintedIconLabelStyle(tint: Color(hex: 0xFBBF24)))
             ForEach(records) { record in
-                HStack {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(record.exerciseName).font(.subheadline.weight(.semibold))
-                        Text(record.sessions == 1 ? "1 session" : "\(record.sessions) sessions")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
+                NavigationLink(value: AppRoute.exerciseTrend(id: record.id, name: record.exerciseName)) {
+                    HStack {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(record.exerciseName).font(.subheadline.weight(.semibold))
+                            Text(record.sessions == 1 ? "1 session" : "\(record.sessions) sessions")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        Spacer()
+                        // The sparkline sits under the weight, within the height of the two-line title.
+                        VStack(alignment: .trailing, spacing: 3) {
+                            Text(RookFormat.weight(record.weight, unit: record.unit))
+                                .font(.rookNumber(17))
+                                .foregroundStyle(Theme.textPrimary)
+                            if record.trend.count >= 2 {
+                                Sparkline(values: record.trend)
+                                    .frame(width: 56, height: 12)
+                            }
+                        }
                     }
-                    Spacer()
-                    Text(RookFormat.weight(record.weight, unit: record.unit))
-                        .font(.rookNumber(17))
-                        .foregroundStyle(Theme.textPrimary)
+                    .padding(.vertical, 6)
+                    .contentShape(Rectangle())
+                    .accessibilityElement(children: .combine)
+                    .accessibilityHint("Shows this exercise's trend")
                 }
-                .padding(.vertical, 6)
-                .accessibilityElement(children: .combine)
+                .buttonStyle(.plain)
                 if record.id != records.last?.id { Divider() }
             }
         }
         .rookCard()
         .accessibilityIdentifier("dashboard.records")
+    }
+}
+
+private struct RecentExercisesCard: View {
+    let exercises: [DashboardModel.RecentExercise]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: Theme.Spacing.s) {
+            Label("Recent Exercises", systemImage: "chart.line.uptrend.xyaxis")
+                .font(.headline)
+                .labelStyle(TintedIconLabelStyle(tint: Theme.primaryLight))
+            ForEach(exercises) { exercise in
+                NavigationLink(value: AppRoute.exerciseTrend(id: exercise.id, name: exercise.exerciseName)) {
+                    row(exercise)
+                }
+                .buttonStyle(.plain)
+                if exercise.id != exercises.last?.id { Divider() }
+            }
+        }
+        .rookCard()
+        .accessibilityIdentifier("dashboard.recentExercises")
+    }
+
+    private func row(_ exercise: DashboardModel.RecentExercise) -> some View {
+        HStack(spacing: Theme.Spacing.s) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(exercise.exerciseName)
+                    .font(.subheadline.weight(.semibold))
+                    .lineLimit(1)
+                if let date = exercise.lastPerformed {
+                    Text(RookFormat.relativeDay(date))
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            Spacer(minLength: Theme.Spacing.s)
+            VStack(alignment: .trailing, spacing: 2) {
+                if let latest = exercise.latest {
+                    Text(exercise.metric.format(latest))
+                        .font(.rookNumber(16))
+                        .foregroundStyle(Theme.textPrimary)
+                }
+                if let delta = exercise.delta, delta != 0 {
+                    Text(exercise.metric.formatDelta(delta))
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(delta > 0 ? Theme.accentGreen : Theme.danger)
+                }
+            }
+            Image(systemName: "chevron.right")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(Theme.textTertiary)
+                .accessibilityHidden(true)
+        }
+        .padding(.vertical, 6)
+        .contentShape(Rectangle())
+        .accessibilityElement(children: .combine)
+        .accessibilityHint("Shows this exercise's trend")
     }
 }
 

@@ -9,6 +9,7 @@ enum AppRoute: Hashable {
     case settings
     case history
     case workoutDetail(WorkoutInstance)
+    case exerciseTrend(id: String, name: String)
 }
 
 /// The signed-in app shell: dashboard at the root of a navigation stack, the builder and the
@@ -135,6 +136,11 @@ struct SignedInView: View {
             )
         case .workoutDetail(let workout):
             WorkoutDetailView(workout: workout, unit: profile.preferredUnit)
+        case .exerciseTrend(let id, let name):
+            ExerciseTrendView(model: ExerciseTrendModel(
+                exerciseId: id, exerciseName: name, api: dependencies.api, unit: profile.preferredUnit,
+                cache: dashboard.sessionCache
+            ) { await appModel.sessionExpired() })
         }
     }
 }

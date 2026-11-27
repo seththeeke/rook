@@ -1,6 +1,6 @@
 # Exercise Trends
 
-**Status:** In progress · **Created:** 2026-11-27 · **Owner:** seththeeke
+**Status:** Built 2026-11-27; awaiting backend deploy + backfill (§6) · **Created:** 2026-11-27 · **Owner:** seththeeke
 
 See how each exercise has progressed over time. Three ways in:
 

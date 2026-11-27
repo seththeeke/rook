@@ -88,8 +88,12 @@ struct TrendMathTests {
     @Test func xDomain() {
         let points = TrendMath.points([session(40, 95), session(10, 115)], metric: .weight(.lbs))
         let thirty = TrendMath.xDomain(points, range: .days30, now: dashNow, calendar: nyCalendar)
-        #expect(thirty == nyCalendar.date(byAdding: .day, value: -30, to: dashNow)!...dashNow)
-        #expect(TrendMath.xDomain(points, range: .allTime, now: dashNow, calendar: nyCalendar) == daysAgo(40)...dashNow)
+        let thirtyStart = nyCalendar.date(byAdding: .day, value: -30, to: dashNow)!
+        #expect(thirty == thirtyStart...dashNow.addingTimeInterval(dashNow.timeIntervalSince(thirtyStart) * 0.04))
+        #expect(TrendMath.xDomain(points, range: .allTime, now: dashNow, calendar: nyCalendar) == daysAgo(40)...daysAgo(-1.6))
+        // Short spans still get at least 12 hours of room.
+        let twoDays = TrendMath.xDomain([TrendPoint(date: daysAgo(2), value: 1)], range: .allTime, now: dashNow, calendar: nyCalendar)
+        #expect(twoDays == daysAgo(2)...daysAgo(-0.5))
         // A single session today pads a day either side so the point isn't on the edge.
         let single = TrendMath.xDomain([TrendPoint(date: dashNow, value: 1)], range: .allTime, now: dashNow, calendar: nyCalendar)
         #expect(single == daysAgo(1)...daysAgo(-1))
@@ -144,7 +148,7 @@ struct ExerciseTrendModelTests {
         #expect(model.best == 135)
         #expect(model.latest?.value == 135)
         #expect(model.yDomain == 111...139)
-        #expect(model.xDomain.upperBound == dashNow)
+        #expect(model.xDomain.upperBound > dashNow)
         #expect(model.visibleSessions.map(\.weight) == [135, 125, 115])
         model.range = .days30
         #expect(model.visiblePoints.map(\.value) == [125, 135])

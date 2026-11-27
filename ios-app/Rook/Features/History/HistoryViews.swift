@@ -93,18 +93,15 @@ struct WorkoutDetailView: View {
                 }
                 VStack(alignment: .leading, spacing: 0) {
                     ForEach(Array(workout.orderedExercises.enumerated()), id: \.offset) { index, exercise in
-                        HStack {
-                            Text(exercise.exerciseName)
-                                .font(.subheadline.weight(.semibold))
-                                .foregroundStyle(exercise.skipped ? Theme.textTertiary : Theme.textPrimary)
-                                .strikethrough(exercise.skipped)
-                            Spacer()
-                            Text(WorkoutPresentation.detail(for: exercise, fallbackUnit: unit))
-                                .font(.subheadline)
-                                .foregroundStyle(Theme.textSecondary)
+                        if Sauna.isSauna(exercise) {
+                            exerciseRow(exercise, linked: false)
+                        } else {
+                            NavigationLink(value: AppRoute.exerciseTrend(id: exercise.exerciseId, name: exercise.exerciseName)) {
+                                exerciseRow(exercise, linked: true)
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityHint("Shows this exercise's trend")
                         }
-                        .padding(.vertical, 12)
-                        .accessibilityElement(children: .combine)
                         if index < workout.exercises.count - 1 { Divider() }
                     }
                 }
@@ -123,6 +120,28 @@ struct WorkoutDetailView: View {
         .background(Theme.background.ignoresSafeArea())
         .navigationTitle(WorkoutPresentation.title(for: workout))
         .navigationBarTitleDisplayMode(.inline)
+    }
+
+    private func exerciseRow(_ exercise: WorkoutExercise, linked: Bool) -> some View {
+        HStack {
+            Text(exercise.exerciseName)
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(exercise.skipped ? Theme.textTertiary : Theme.textPrimary)
+                .strikethrough(exercise.skipped)
+            Spacer()
+            Text(WorkoutPresentation.detail(for: exercise, fallbackUnit: unit))
+                .font(.subheadline)
+                .foregroundStyle(Theme.textSecondary)
+            if linked {
+                Image(systemName: "chevron.right")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(Theme.textTertiary)
+                    .accessibilityHidden(true)
+            }
+        }
+        .padding(.vertical, 12)
+        .contentShape(Rectangle())
+        .accessibilityElement(children: .combine)
     }
 
     private func metric(_ value: String, _ label: String) -> some View {

@@ -148,14 +148,15 @@ public enum TrendMath {
         return lower...(high + pad)
     }
 
-    /// X axis: the filter's start to now, or first session to now for all time (padded for a single day).
+    /// X axis: the filter's start to now, or first session to now for all time. The end is padded by 4%
+    /// of the span (at least 12 hours) so the newest point isn't cut off at the plot edge.
     public static func xDomain(_ points: [TrendPoint], range: TrendRange, now: Date, calendar: Calendar) -> ClosedRange<Date> {
         let start = range.start(now: now, calendar: calendar) ?? points.first?.date ?? now
         let end = max(now, points.last?.date ?? now)
         if end.timeIntervalSince(start) < 86_400 {
             return start.addingTimeInterval(-86_400)...end.addingTimeInterval(86_400)
         }
-        return start...end
+        return start...end.addingTimeInterval(max(end.timeIntervalSince(start) * 0.04, 43_200))
     }
 
     public static func change(_ points: [TrendPoint]) -> TrendChange? {
@@ -200,8 +201,9 @@ public final class ExerciseTrendModel {
     public private(set) var sessions: [ExerciseSession] = []
     public var range: TrendRange = .days90
 
+    /// The profile's unit; weights are shown in it.
+    public let unit: WeightUnit
     private let api: RookAPI
-    private let unit: WeightUnit
     private let cache: ExerciseSessionCache
     private let clock: Clock
     private let calendar: Calendar

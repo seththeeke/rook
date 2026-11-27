@@ -1,6 +1,6 @@
 # Exercise Trends
 
-**Status:** Built 2026-11-27; awaiting backend deploy + backfill (§6) · **Created:** 2026-11-27 · **Owner:** seththeeke
+**Status:** Backend deployed and backfilled 2026-11-27 (202 sessions, 3 users); app build pending · **Created:** 2026-11-27 · **Owner:** seththeeke
 
 See how each exercise has progressed over time. Three ways in:
 

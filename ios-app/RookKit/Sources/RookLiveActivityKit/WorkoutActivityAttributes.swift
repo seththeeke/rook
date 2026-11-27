@@ -1,5 +1,5 @@
 import Foundation
-#if canImport(ActivityKit)
+#if canImport(ActivityKit) && os(iOS)
 import ActivityKit
 #endif
 
@@ -109,6 +109,6 @@ public struct WorkoutActivityAttributes: Codable, Hashable, Sendable {
     }
 }
 
-#if canImport(ActivityKit)
+#if canImport(ActivityKit) && os(iOS)
 extension WorkoutActivityAttributes: ActivityAttributes {}
 #endif

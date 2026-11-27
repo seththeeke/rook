@@ -2,6 +2,8 @@ import Foundation
 import Testing
 @testable import RookModels
 
+private let dateA = Date(timeIntervalSince1970: 1_773_500_000)
+
 @Suite("API response decoding")
 struct DecodingTests {
     @Test func decodesOnboardedProfile() throws {
@@ -76,6 +78,28 @@ struct DecodingTests {
         let exercises = try Fixture.decode([ExerciseMetricsSummary].self, from: "metrics-exercises")
         #expect(exercises[1].maxWeightUnit == .kg)
         #expect(exercises[1].lastUsedWeight == nil)
+        #expect(exercises[1].recentSessions.isEmpty)
+        #expect(exercises[1].lastPerformedAt == nil)
+        #expect(exercises[0].lastPerformedAt == ISO8601.parse("2026-03-13T23:40:12.345Z"))
+        #expect(exercises[0].recentSessions.map(\.weight) == [215, 225.5])
+        #expect(exercises[0].recentSessions[0].reps == 5)
+        #expect(exercises[0].lastUsedWeightUnit == .lbs)
+    }
+
+    @Test func decodesExerciseSessions() throws {
+        let json = #"{"exerciseId":"plank","sessions":[{"completedAt":"2026-03-14T15:00:00Z","workoutInstanceId":"w1","modality":"duration","sets":1,"durationSeconds":90},{"completedAt":"2026-03-15T15:00:00.000Z","weight":0}]}"#
+        let response = try RookJSON.makeDecoder().decode(ExerciseSessionsResponse.self, from: Data(json.utf8))
+        #expect(response.exerciseId == "plank")
+        #expect(response.sessions[0].weight == 0) // missing weight decodes as 0
+        #expect(response.sessions[0].modality == .duration)
+        #expect(response.sessions[0].durationSeconds == 90)
+        #expect(response.sessions[0].workoutInstanceId == "w1")
+        #expect(response.sessions[1].id == ISO8601.parse("2026-03-15T15:00:00Z"))
+        let recent = RecentSession(completedAt: dateA, weight: 10, weightUnit: .kg, reps: 8, durationSeconds: 30)
+        let session = ExerciseSession(recent)
+        #expect(session.weight == 10 && session.weightUnit == .kg && session.reps == 8 && session.durationSeconds == 30)
+        let roundTrip = try RookJSON.makeDecoder().decode(ExerciseSessionsResponse.self, from: RookJSON.makeEncoder().encode(response))
+        #expect(roundTrip == response)
     }
 
     @Test func metricsDecodeWithMissingFields() throws {

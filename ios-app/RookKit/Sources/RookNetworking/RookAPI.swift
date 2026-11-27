@@ -14,6 +14,8 @@ public protocol RookAPI: Sendable {
     /// Global metrics, or `.empty` for users who haven't completed a workout (server returns 404).
     func fetchGlobalMetrics() async throws -> GlobalMetrics
     func fetchExerciseMetrics() async throws -> [ExerciseMetricsSummary]
+    /// Every completed session of one exercise, oldest first.
+    func fetchExerciseSessions(exerciseId: String) async throws -> [ExerciseSession]
 
     func fetchExercises(muscleGroup: String?, search: String?) async throws -> [ExerciseCatalogItem]
 
@@ -50,6 +52,9 @@ public final class LiveRookAPI: RookAPI {
     }
     public func fetchExerciseMetrics() async throws -> [ExerciseMetricsSummary] {
         try await client.send(Endpoints.exerciseMetrics)
+    }
+    public func fetchExerciseSessions(exerciseId: String) async throws -> [ExerciseSession] {
+        try await client.send(Endpoints.exerciseSessions(exerciseId: exerciseId)).sessions
     }
 
     public func fetchExercises(muscleGroup: String?, search: String?) async throws -> [ExerciseCatalogItem] {

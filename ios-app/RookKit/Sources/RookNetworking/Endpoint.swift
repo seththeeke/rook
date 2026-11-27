@@ -53,6 +53,10 @@ public enum Endpoints {
     // MARK: Metrics
     public static let globalMetrics = Endpoint<GlobalMetrics>(method: .get, path: "/metrics/me/global")
     public static let exerciseMetrics = Endpoint<[ExerciseMetricsSummary]>(method: .get, path: "/metrics/me/exercises")
+    /// One exercise's full session history, oldest first. Range filters are applied on the client.
+    public static func exerciseSessions(exerciseId: String) -> Endpoint<ExerciseSessionsResponse> {
+        .init(method: .get, path: "/metrics/me/exercises/\(pathEscaped(exerciseId))/sessions")
+    }
 
     // MARK: Exercises
     public static func listExercises(muscleGroup: String? = nil, search: String? = nil) -> Endpoint<[ExerciseCatalogItem]> {

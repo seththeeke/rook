@@ -36,6 +36,8 @@ struct LiveRookAPITests {
             case ("GET", "/users/me/gyms"): return .json(200, #"{"gyms":[],"defaultGymId":null}"#)
             case ("POST", "/users/me/gyms"): return .json(201, #"{"gymId":"g","name":"My Gym","equipmentTypes":[]}"#)
             case ("GET", "/metrics/me/exercises"), ("GET", "/exercises"): return .json(200, "[]")
+            case ("GET", "/metrics/me/exercises/bench%20press/sessions"):
+                return .json(200, #"{"exerciseId":"bench press","sessions":[{"completedAt":"2026-03-14T15:00:00.000Z","weight":135,"weightUnit":"LBS","sets":3,"reps":8}]}"#)
             case ("GET", "/workout-instances"): return .json(200, #"{"items":[]}"#)
             default: return .json(200, workout)
             }
@@ -47,6 +49,9 @@ struct LiveRookAPITests {
         _ = try await api.fetchGyms()
         _ = try await api.createGym(.init(name: "My Gym", equipmentTypes: []))
         _ = try await api.fetchExerciseMetrics()
+        let sessions = try await api.fetchExerciseSessions(exerciseId: "bench press")
+        #expect(sessions.map(\.weight) == [135])
+        #expect(sessions.first?.reps == 8)
         _ = try await api.fetchExercises(muscleGroup: "chest", search: nil)
         _ = try await api.fetchWorkouts(limit: 20, nextToken: nil)
         _ = try await api.fetchWorkout(id: "w")
@@ -55,7 +60,7 @@ struct LiveRookAPITests {
         let calls = log.requests.map { "\($0.httpMethod!) \($0.url!.path())" }
         #expect(calls == [
             "GET /users/me", "PATCH /users/me", "DELETE /users/me", "GET /users/me/gyms", "POST /users/me/gyms",
-            "GET /metrics/me/exercises", "GET /exercises", "GET /workout-instances", "GET /workout-instances/w",
+            "GET /metrics/me/exercises", "GET /metrics/me/exercises/bench%20press/sessions", "GET /exercises", "GET /workout-instances", "GET /workout-instances/w",
             "POST /workout-instances", "PATCH /workout-instances/w",
         ])
     }

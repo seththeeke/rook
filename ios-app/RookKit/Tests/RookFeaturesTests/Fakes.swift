@@ -52,7 +52,7 @@ final class FakeAuth: AuthService, @unchecked Sendable {
 /// Configurable fake backend. Each operation returns its configured result (or throws `failures[op]`)
 /// and appends its name to `calls`.
 final class FakeAPI: RookAPI, @unchecked Sendable {
-    enum Op: String { case profile, updateProfile, delete, gyms, createGym, global, exerciseMetrics, exercises, workouts, workout, create, update }
+    enum Op: String { case profile, updateProfile, delete, gyms, createGym, global, exerciseMetrics, sessions, exercises, workouts, workout, create, update }
 
     let calls = Locked<[String]>([])
     let failures = Locked<[Op: Error]>([:])
@@ -66,6 +66,7 @@ final class FakeAPI: RookAPI, @unchecked Sendable {
     var gyms = GymsListResponse(gyms: [], defaultGymId: nil)
     var global = GlobalMetrics.empty
     var exerciseMetrics: [ExerciseMetricsSummary] = []
+    var exerciseSessions: [String: [ExerciseSession]] = [:]
     var exercises: [ExerciseCatalogItem] = []
     /// Pages returned in order for `fetchWorkouts` (keyed by incoming nextToken; nil = first page).
     var workoutPages: [String?: WorkoutListPage] = [nil: WorkoutListPage(items: [], nextToken: nil)]
@@ -99,6 +100,10 @@ final class FakeAPI: RookAPI, @unchecked Sendable {
     }
     func fetchGlobalMetrics() async throws -> GlobalMetrics { try record(.global); return global }
     func fetchExerciseMetrics() async throws -> [ExerciseMetricsSummary] { try record(.exerciseMetrics); return exerciseMetrics }
+    func fetchExerciseSessions(exerciseId: String) async throws -> [ExerciseSession] {
+        try record(.sessions, exerciseId)
+        return exerciseSessions[exerciseId] ?? []
+    }
     func fetchExercises(muscleGroup: String?, search: String?) async throws -> [ExerciseCatalogItem] {
         try record(.exercises)
         exerciseQueries.mutate { $0.append((muscleGroup, search)) }

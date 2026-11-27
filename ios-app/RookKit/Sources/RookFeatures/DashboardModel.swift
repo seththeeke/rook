@@ -36,6 +36,8 @@ public final class DashboardModel {
         public var weight: Double
         public var unit: WeightUnit
         public var sessions: Int
+        /// The last (up to 10) sessions' values, oldest first, in `unit` (the row's sparkline).
+        public var trend: [Double] = []
     }
 
     public struct WeekDay: Equatable, Identifiable, Sendable {
@@ -60,7 +62,9 @@ public final class DashboardModel {
 
     private let api: RookAPI
     private let clock: Clock
-    private let calendar: Calendar
+    let calendar: Calendar
+    /// Exercise session histories; cleared on every load so trend screens refetch after a workout.
+    public let sessionCache: ExerciseSessionCache
     private let onSessionExpired: @MainActor () async -> Void
 
     public init(
@@ -68,12 +72,14 @@ public final class DashboardModel {
         unit: WeightUnit,
         clock: Clock = .system,
         calendar: Calendar = .current,
+        sessionCache: ExerciseSessionCache = ExerciseSessionCache(),
         onSessionExpired: @escaping @MainActor () async -> Void
     ) {
         self.api = api
         self.unit = unit
         self.clock = clock
         self.calendar = calendar
+        self.sessionCache = sessionCache
         self.onSessionExpired = onSessionExpired
     }
 
@@ -110,6 +116,7 @@ public final class DashboardModel {
             let (g, e, h) = try await (metrics, perExercise, history)
             global = g
             exerciseMetrics = e
+            sessionCache.removeAll()
             completedWorkouts = h
             state = .loaded
         } catch is CancellationError {
@@ -151,9 +158,11 @@ public final class DashboardModel {
             .sorted { Self.pounds($0.maxWeight, $0.maxWeightUnit) > Self.pounds($1.maxWeight, $1.maxWeightUnit) }
             .prefix(5)
             .map {
-                PersonalRecord(
+                let recordUnit = $0.maxWeightUnit ?? unit
+                return PersonalRecord(
                     id: $0.exerciseId, exerciseName: $0.exerciseName, weight: $0.maxWeight,
-                    unit: $0.maxWeightUnit ?? unit, sessions: $0.totalSessions
+                    unit: recordUnit, sessions: $0.totalSessions,
+                    trend: Self.sparkline($0, unit: recordUnit)
                 )
             }
     }

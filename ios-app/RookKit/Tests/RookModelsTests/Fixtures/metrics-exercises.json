@@ -1,4 +1,8 @@
 [
-  { "exerciseId": "squat", "exerciseName": "Back Squat", "totalSessions": 14, "maxWeight": 275, "maxWeightUnit": "LBS", "lastPerformedDate": "2026-03-13", "lastUsedWeight": 225.5 },
+  { "exerciseId": "squat", "exerciseName": "Back Squat", "totalSessions": 14, "maxWeight": 275, "maxWeightUnit": "LBS", "lastPerformedDate": "2026-03-13", "lastPerformedAt": "2026-03-13T23:40:12.345Z", "lastUsedWeight": 225.5, "lastUsedWeightUnit": "LBS",
+    "recentSessions": [
+      { "completedAt": "2026-03-10T15:00:00.000Z", "weight": 215, "weightUnit": "LBS", "reps": 5 },
+      { "completedAt": "2026-03-13T23:40:12.345Z", "weight": 225.5, "weightUnit": "LBS", "reps": 5 }
+    ] },
   { "exerciseId": "deadlift", "exerciseName": "Deadlift", "totalSessions": 3, "maxWeight": 140, "maxWeightUnit": "KG" }
 ]

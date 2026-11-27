@@ -8,3 +8,4 @@ export * from './goalHelpers';
 export * from './feedFanout';
 export * from './catalogQuery';
 export * from './accountDeletion';
+export * from './exerciseSessions';

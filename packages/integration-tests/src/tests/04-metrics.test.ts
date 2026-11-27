@@ -61,4 +61,31 @@ describe.skipIf(!process.env.API_BASE_URL)('Metrics', () => {
     expect(Array.isArray(res.data.trendData)).toBe(true);
     expect(Array.isArray(res.data.personalRecordHistory)).toBe(true);
   });
+  it('GET /metrics/me/exercises items carry recentSessions and lastPerformedAt', async () => {
+    const res = await client.get('/metrics/me/exercises');
+    expect(res.status).toBe(200);
+    const item = res.data.find((e: { recentSessions?: unknown[] }) => (e.recentSessions ?? []).length > 0);
+    expect(item).toBeDefined();
+    expect(item.recentSessions.length).toBeLessThanOrEqual(10);
+    expect(typeof item.lastPerformedAt).toBe('string');
+    expect(item.trendData).toBeUndefined();
+  });
+
+  it('GET /metrics/me/exercises/:id/sessions returns time-ordered sessions', async () => {
+    const list = await client.get('/metrics/me/exercises');
+    const exerciseId = list.data[0].exerciseId;
+    const res = await client.get(`/metrics/me/exercises/${exerciseId}/sessions`);
+    expect(res.status).toBe(200);
+    expect(res.data.exerciseId).toBe(exerciseId);
+    expect(res.data.sessions.length).toBeGreaterThanOrEqual(1);
+    const times = res.data.sessions.map((s: { completedAt: string }) => s.completedAt);
+    expect([...times].sort()).toEqual(times);
+
+    const future = await client.get(`/metrics/me/exercises/${exerciseId}/sessions?from=2999-01-01`);
+    expect(future.status).toBe(200);
+    expect(future.data.sessions).toEqual([]);
+
+    const bad = await client.get(`/metrics/me/exercises/${exerciseId}/sessions?from=yesterday`);
+    expect(bad.status).toBe(400);
+  });
 });

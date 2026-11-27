@@ -9,6 +9,8 @@ import {
   getUserId,
   type GlobalMetrics,
   type ExerciseMetrics,
+  type ExerciseSessionItem,
+  sessionSkPrefix,
 } from '@repwise/shared';
 import * as res from '@repwise/shared';
 
@@ -39,8 +41,54 @@ function toExerciseSummary(em: ExerciseMetrics): Record<string, unknown> {
     maxWeight: em.maxWeight,
     maxWeightUnit: em.maxWeightUnit,
     lastPerformedDate: em.lastPerformedDate,
+    lastPerformedAt: em.lastPerformedAt,
     lastUsedWeight: em.lastUsedWeight,
+    lastUsedWeightUnit: em.lastUsedWeightUnit,
+    recentSessions: em.recentSessions ?? [],
   };
+}
+
+/** Attributes the summary list needs: leaves the large `trendData`/`personalRecordHistory` off the wire. */
+const SUMMARY_PROJECTION = [
+  'exerciseId',
+  'exerciseName',
+  'totalSessions',
+  'maxWeight',
+  'maxWeightUnit',
+  'lastPerformedDate',
+  'lastPerformedAt',
+  'lastUsedWeight',
+  'lastUsedWeightUnit',
+  'recentSessions',
+];
+
+function toSessionResponse(s: ExerciseSessionItem): Record<string, unknown> {
+  return {
+    completedAt: s.completedAt,
+    workoutInstanceId: s.workoutInstanceId,
+    modality: s.modality,
+    weight: s.weight,
+    weightUnit: s.weightUnit,
+    sets: s.sets,
+    reps: s.reps,
+    durationSeconds: s.durationSeconds,
+  };
+}
+
+const DAY_KEY = /^\d{4}-\d{2}-\d{2}$/;
+
+/** Runs a Query to completion, following `LastEvaluatedKey`. */
+async function queryAll(
+  input: ConstructorParameters<typeof QueryCommand>[0]
+): Promise<Record<string, unknown>[]> {
+  const items: Record<string, unknown>[] = [];
+  let lastKey: Record<string, unknown> | undefined;
+  do {
+    const out = await ddb.send(new QueryCommand({ ...input, ExclusiveStartKey: lastKey }));
+    items.push(...(out.Items ?? []));
+    lastKey = out.LastEvaluatedKey;
+  } while (lastKey);
+  return items;
 }
 
 function toExerciseDetail(
@@ -103,18 +151,40 @@ export const handler = async (
     }
 
     if (method === 'GET' && path === '/metrics/me/exercises') {
-      const out = await ddb.send(
-        new QueryCommand({
-          TableName: METRICS_TABLE,
-          KeyConditionExpression: 'PK = :pk AND begins_with(SK, :sk)',
-          ExpressionAttributeValues: {
-            ':pk': pk,
-            ':sk': METRIC_EXERCISE_PREFIX,
-          },
-        })
-      );
-      const items = (out.Items ?? []) as ExerciseMetrics[];
+      const items = (await queryAll({
+        TableName: METRICS_TABLE,
+        KeyConditionExpression: 'PK = :pk AND begins_with(SK, :sk)',
+        ProjectionExpression: SUMMARY_PROJECTION.map((_, i) => `#p${i}`).join(', '),
+        ExpressionAttributeNames: Object.fromEntries(
+          SUMMARY_PROJECTION.map((name, i) => [`#p${i}`, name])
+        ),
+        ExpressionAttributeValues: {
+          ':pk': pk,
+          ':sk': METRIC_EXERCISE_PREFIX,
+        },
+      })) as unknown as ExerciseMetrics[];
       return res.ok(items.map(toExerciseSummary));
+    }
+
+    if (method === 'GET' && exerciseIdParam && path.endsWith('/sessions')) {
+      const from = queryParams.from;
+      if (from !== undefined && !DAY_KEY.test(from)) {
+        return res.badRequest('from must be YYYY-MM-DD');
+      }
+      const prefix = sessionSkPrefix(exerciseIdParam);
+      const items = (await queryAll({
+        TableName: METRICS_TABLE,
+        KeyConditionExpression: from
+          ? 'PK = :pk AND SK BETWEEN :start AND :end'
+          : 'PK = :pk AND begins_with(SK, :prefix)',
+        ExpressionAttributeValues: from
+          ? { ':pk': pk, ':start': `${prefix}${from}`, ':end': `${prefix}~` }
+          : { ':pk': pk, ':prefix': prefix },
+      })) as unknown as ExerciseSessionItem[];
+      return res.ok({
+        exerciseId: exerciseIdParam,
+        sessions: items.map(toSessionResponse),
+      });
     }
 
     if (method === 'GET' && exerciseIdParam) {

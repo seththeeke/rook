@@ -10,6 +10,7 @@ import {
   GoalTimeframe,
   GoalStatus,
 } from './enums';
+import type { RecentSession } from './exerciseSessions';
 
 /** User-owned gym: name + equipment types for filtering exercises. */
 export interface Gym {
@@ -152,8 +153,12 @@ export interface ExerciseMetrics {
   maxWeightUnit: WeightUnit;
   maxWeightDate: string;
   lastPerformedDate: string;
+  /** ISO `completedAt` of the latest session (exact recency ordering). */
+  lastPerformedAt?: string;
   lastUsedWeight: number;
   lastUsedWeightUnit: WeightUnit;
+  /** Last `RECENT_SESSIONS_LIMIT` sessions, oldest first (sparklines). */
+  recentSessions?: RecentSession[];
   avgWeightLast30?: number;
   avgWeightLast90?: number;
   avgWeightLast180?: number;

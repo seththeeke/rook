@@ -18,6 +18,11 @@ import {
   type PRRecord,
   WeightUnit,
   evaluateGoals,
+  loggedExercisesById,
+  toSessionItem,
+  toRecentSession,
+  mergeRecentSessions,
+  TREND_DATA_RETENTION_DAYS,
 } from '@repwise/shared';
 
 const METRIC_GLOBAL_SK = 'METRIC#GLOBAL';
@@ -73,6 +78,14 @@ async function countWorkoutsInRange(
     lastKey = out.LastEvaluatedKey;
   } while (lastKey);
   return count;
+}
+
+/** Keeps only the points inside the retention window so the summary row stays a bounded size. */
+function trimTrendData(trendData: TrendDataPoint[]): TrendDataPoint[] {
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - TREND_DATA_RETENTION_DAYS);
+  const cutoffStr = cutoff.toISOString().split('T')[0];
+  return trendData.filter((p) => p.date >= cutoffStr);
 }
 
 function avgWeightInWindow(
@@ -158,12 +171,11 @@ async function processWorkoutCompletion(
     updatedAt: now,
   };
 
-  const nonSkipped = (workout.exercises ?? []).filter(
-    (e: WorkoutExercise) => !e.skipped
-  );
+  const logged: WorkoutExercise[] = loggedExercisesById(workout);
   const exerciseMetricsItems: Record<string, unknown>[] = [];
+  const sessionItems: Record<string, unknown>[] = [];
 
-  for (const ex of nonSkipped) {
+  for (const ex of logged) {
     const sk = `${METRIC_EXERCISE_PREFIX}${ex.exerciseId}`;
     const existingEmOut = await ddb.send(
       new GetCommand({
@@ -200,7 +212,10 @@ async function processWorkoutCompletion(
       ];
     }
 
-    const trendData = [...(existingEm?.trendData ?? []), trendPoint];
+    const sessionItem = toSessionItem(workout, ex, weightUnit);
+    sessionItems.push(sessionItem as unknown as Record<string, unknown>);
+
+    const trendData = trimTrendData([...(existingEm?.trendData ?? []), trendPoint]);
     const updatedEm: ExerciseMetrics = {
       PK: `USER#${userId}`,
       SK: sk,
@@ -212,6 +227,7 @@ async function processWorkoutCompletion(
       maxWeightUnit: weightUnit,
       maxWeightDate,
       lastPerformedDate: today,
+      lastPerformedAt: sessionItem.completedAt,
       lastUsedWeight: weight,
       lastUsedWeightUnit: weightUnit,
       avgWeightLast30: avgWeightInWindow(trendData, 30),
@@ -219,6 +235,10 @@ async function processWorkoutCompletion(
       avgWeightLast180: avgWeightInWindow(trendData, 180),
       personalRecordHistory,
       trendData,
+      recentSessions: mergeRecentSessions(
+        existingEm?.recentSessions,
+        toRecentSession(sessionItem)
+      ),
       updatedAt: now,
     };
     exerciseMetricsItems.push(updatedEm as unknown as Record<string, unknown>);
@@ -231,7 +251,7 @@ async function processWorkoutCompletion(
         Item: updatedGlobal as unknown as Record<string, unknown>,
       },
     },
-    ...exerciseMetricsItems.map((item) => ({
+    ...[...exerciseMetricsItems, ...sessionItems].map((item) => ({
       Put: {
         TableName: METRICS_TABLE,
         Item: item,

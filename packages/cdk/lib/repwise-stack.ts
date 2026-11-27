@@ -285,6 +285,7 @@ export class RepwiseStack extends cdk.Stack {
     api.addRoute(apigwv2.HttpMethod.GET, '/metrics/me/global', metricsLambda, true);
     api.addRoute(apigwv2.HttpMethod.GET, '/metrics/me/exercises', metricsLambda, true);
     api.addRoute(apigwv2.HttpMethod.GET, '/metrics/me/exercises/{exerciseId}', metricsLambda, true);
+    api.addRoute(apigwv2.HttpMethod.GET, '/metrics/me/exercises/{exerciseId}/sessions', metricsLambda, true);
     api.addRoute(apigwv2.HttpMethod.GET, '/goals/me', goalsLambda, true);
     api.addRoute(apigwv2.HttpMethod.POST, '/goals/me', goalsLambda, true);
     api.addRoute(apigwv2.HttpMethod.POST, '/goals/me/suggest', goalsAiLambda, true);

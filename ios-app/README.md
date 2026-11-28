@@ -33,5 +33,5 @@ make build       # debug simulator build
 ## Rules
 
 - No mock data, placeholder features, or dev toggles in the `Rook` target. Fakes belong in test targets only.
-- No Repwise branding: `make lint` fails if "repwise" appears outside the backend endpoint values in `Config/`.
+- No legacy branding: `make lint` fails if the old brand name appears anywhere in the app source or `Config/`.
 - Backend code in `packages/` is never modified for this app.

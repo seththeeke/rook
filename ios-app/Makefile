@@ -47,9 +47,9 @@ build: generate
 	xcodebuild build -project $(PROJECT) -scheme $(SCHEME) -destination '$(DESTINATION)' \
 		$(XCODE_FLAGS) -quiet
 
-# Fails if the old brand appears anywhere except backend endpoint values in Config/.
+# Fails if the old brand appears anywhere in the app source or config.
 lint:
-	@if grep -rniI "repwise" --exclude-dir=Config --exclude-dir=build --exclude-dir=.build \
+	@if grep -rniI "repwise" --exclude-dir=build --exclude-dir=.build \
 		--exclude-dir='*.xcodeproj' --exclude=Makefile --exclude=README.md . ; then \
 		echo "error: 'repwise' found above — Rook must not ship Repwise branding."; exit 1; \
 	else echo "brand check: ok"; fi

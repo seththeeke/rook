@@ -18,7 +18,7 @@ The stack provisions **ACM** (DNS validation in Route 53) and:
 
 ### Cognito OAuth domain (managed)
 
-The stack creates a **Cognito-managed** hosted UI domain (`rook<account>.auth.<region>.amazoncognito.com`) so Amplify can use `signInWithRedirect` (Sign in with Apple, etc.). Stack output **`CognitoOAuthDomain`** is the **full hostname** (no `https://`) — set **`VITE_COGNITO_OAUTH_DOMAIN`** in the web app to that exact value.
+The stack creates a **Cognito-managed** hosted UI domain (`repwise<account>.auth.<region>.amazoncognito.com`, kept from the old name because a pool can only hold one such domain) so Amplify can use `signInWithRedirect` (Sign in with Apple, etc.). Stack output **`CognitoOAuthDomain`** is the **full hostname** (no `https://`) — set **`VITE_COGNITO_OAUTH_DOMAIN`** in the web app to that exact value.
 
 **Callback / sign-out URLs** registered on the app client include `http://localhost:5173/` and `https://rookjournal.com/`. The Rook iOS app signs in with SRP and does not use these.
 

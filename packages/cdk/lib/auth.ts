@@ -26,7 +26,7 @@ export interface AuthConstructProps {
 export class AuthConstruct extends Construct {
   public readonly userPool: cognito.UserPool;
   public readonly userPoolClient: cognito.UserPoolClient;
-  /** Hosted UI hostname only, e.g. `rook123456789012.auth.us-east-1.amazoncognito.com` (no scheme). */
+  /** Hosted UI hostname only, e.g. `repwise123456789012.auth.us-east-1.amazoncognito.com` (no scheme). */
   public readonly cognitoOAuthDomain: cognito.UserPoolDomain;
 
   constructor(scope: Construct, id: string, props: AuthConstructProps) {
@@ -53,7 +53,9 @@ export class AuthConstruct extends Construct {
     });
 
     const account = cdk.Stack.of(this).account;
-    const domainPrefix = `rook${account}`;
+    // Kept as `repwise…`: a pool can hold only one Cognito-prefix domain, so CloudFormation's
+    // create-before-delete replacement fails. Unused by the Rook app (it signs in with SRP).
+    const domainPrefix = `repwise${account}`;
     this.cognitoOAuthDomain = this.userPool.addDomain('HostedUIDomain', {
       cognitoDomain: {
         domainPrefix,

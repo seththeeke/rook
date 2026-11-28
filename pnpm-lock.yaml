@@ -73,7 +73,7 @@ importers:
       '@aws-sdk/lib-dynamodb':
         specifier: ^3.700.0
         version: 3.1009.0(@aws-sdk/client-dynamodb@3.1009.0)
-      '@repwise/shared':
+      '@rook/shared':
         specifier: workspace:*
         version: link:../shared
       aws-jwt-verify:
@@ -101,7 +101,7 @@ importers:
       '@aws-sdk/lib-dynamodb':
         specifier: ^3.700.0
         version: 3.1009.0(@aws-sdk/client-dynamodb@3.1009.0)
-      '@repwise/shared':
+      '@rook/shared':
         specifier: workspace:*
         version: link:../shared
     devDependencies:
@@ -123,7 +123,7 @@ importers:
       '@aws-sdk/lib-dynamodb':
         specifier: ^3.700.0
         version: 3.1009.0(@aws-sdk/client-dynamodb@3.1009.0)
-      '@repwise/shared':
+      '@rook/shared':
         specifier: workspace:*
         version: link:../shared
     devDependencies:
@@ -145,7 +145,7 @@ importers:
       '@aws-sdk/lib-dynamodb':
         specifier: ^3.700.0
         version: 3.1009.0(@aws-sdk/client-dynamodb@3.1009.0)
-      '@repwise/shared':
+      '@rook/shared':
         specifier: workspace:*
         version: link:../shared
     devDependencies:
@@ -167,7 +167,7 @@ importers:
       '@aws-sdk/lib-dynamodb':
         specifier: ^3.700.0
         version: 3.1009.0(@aws-sdk/client-dynamodb@3.1009.0)
-      '@repwise/shared':
+      '@rook/shared':
         specifier: workspace:*
         version: link:../shared
     devDependencies:
@@ -189,7 +189,7 @@ importers:
       '@aws-sdk/lib-dynamodb':
         specifier: ^3.700.0
         version: 3.1009.0(@aws-sdk/client-dynamodb@3.1009.0)
-      '@repwise/shared':
+      '@rook/shared':
         specifier: workspace:*
         version: link:../shared
     devDependencies:
@@ -208,7 +208,7 @@ importers:
       '@aws-sdk/client-bedrock-runtime':
         specifier: ^3.700.0
         version: 3.1009.0
-      '@repwise/shared':
+      '@rook/shared':
         specifier: workspace:*
         version: link:../shared
     devDependencies:
@@ -230,7 +230,7 @@ importers:
       '@aws-sdk/lib-dynamodb':
         specifier: ^3.700.0
         version: 3.1009.0(@aws-sdk/client-dynamodb@3.1009.0)
-      '@repwise/shared':
+      '@rook/shared':
         specifier: workspace:*
         version: link:../shared
     devDependencies:
@@ -252,7 +252,7 @@ importers:
       '@aws-sdk/lib-dynamodb':
         specifier: ^3.700.0
         version: 3.1009.0(@aws-sdk/client-dynamodb@3.1009.0)
-      '@repwise/shared':
+      '@rook/shared':
         specifier: workspace:*
         version: link:../shared
     devDependencies:
@@ -277,7 +277,7 @@ importers:
       '@aws-sdk/util-dynamodb':
         specifier: ^3.700.0
         version: 3.996.2(@aws-sdk/client-dynamodb@3.1009.0)
-      '@repwise/shared':
+      '@rook/shared':
         specifier: workspace:*
         version: link:../shared
     devDependencies:
@@ -318,7 +318,7 @@ importers:
       '@aws-sdk/lib-dynamodb':
         specifier: ^3.700.0
         version: 3.1009.0(@aws-sdk/client-dynamodb@3.1009.0)
-      '@repwise/shared':
+      '@rook/shared':
         specifier: workspace:*
         version: link:../shared
     devDependencies:
@@ -343,7 +343,7 @@ importers:
       '@aws-sdk/lib-dynamodb':
         specifier: ^3.700.0
         version: 3.1009.0(@aws-sdk/client-dynamodb@3.1009.0)
-      '@repwise/shared':
+      '@rook/shared':
         specifier: workspace:*
         version: link:../shared
     devDependencies:

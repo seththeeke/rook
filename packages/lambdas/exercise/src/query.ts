@@ -1,5 +1,5 @@
 import { QueryCommand, ScanCommand } from '@aws-sdk/lib-dynamodb';
-import { WORKOUTS_TABLE, ddb, type ExerciseCatalogItem } from '@repwise/shared';
+import { WORKOUTS_TABLE, ddb, type ExerciseCatalogItem } from '@rook/shared';
 
 const EXERCISE_PK_PREFIX = 'EXERCISE#';
 const METADATA_SK = 'METADATA';

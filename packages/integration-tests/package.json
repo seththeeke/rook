@@ -1,5 +1,5 @@
 {
-  "name": "@repwise/integration-tests",
+  "name": "@rook/integration-tests",
   "version": "0.1.0",
   "private": true,
   "scripts": {

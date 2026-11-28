@@ -1,5 +1,5 @@
 {
-  "name": "@repwise/shared",
+  "name": "@rook/shared",
   "version": "0.1.0",
   "private": true,
   "main": "dist/index.js",

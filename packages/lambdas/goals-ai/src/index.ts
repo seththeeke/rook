@@ -1,8 +1,8 @@
 import type { APIGatewayProxyEventV2WithJWTAuthorizer, APIGatewayProxyResultV2 } from 'aws-lambda';
 import { BedrockRuntimeClient, ConverseCommand } from '@aws-sdk/client-bedrock-runtime';
-import { getUserId } from '@repwise/shared';
-import * as res from '@repwise/shared';
-import { GoalType, GoalTimeframe } from '@repwise/shared';
+import { getUserId } from '@rook/shared';
+import * as res from '@rook/shared';
+import { GoalType, GoalTimeframe } from '@rook/shared';
 
 const BEDROCK_MODEL = 'amazon.nova-micro-v1:0';
 

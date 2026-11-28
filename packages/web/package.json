@@ -3,7 +3,7 @@
   "version": "0.2.0",
   "private": true,
   "type": "module",
-  "description": "Rook marketing site (repwisefit.com). Static, no sign-in.",
+  "description": "Rook marketing site (rookjournal.com). Static, no sign-in.",
   "scripts": {
     "dev": "vite",
     "build": "vite build",

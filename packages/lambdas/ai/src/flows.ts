@@ -17,7 +17,7 @@ import {
   GoalStatus,
   type ExerciseModality,
   WeightUnit,
-} from '@repwise/shared';
+} from '@rook/shared';
 
 const DEFAULT_BEDROCK_MODEL = 'amazon.nova-micro-v1:0';
 const WORKOUT_SK_PREFIX = 'WORKOUT#';

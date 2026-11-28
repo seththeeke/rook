@@ -1,7 +1,7 @@
 import type { APIGatewayProxyEventV2WithJWTAuthorizer, APIGatewayProxyResultV2 } from 'aws-lambda';
 import { GetCommand, PutCommand, QueryCommand, UpdateCommand } from '@aws-sdk/lib-dynamodb';
-import { ddb, USERS_TABLE, getUserId, type UserProfile } from '@repwise/shared';
-import * as res from '@repwise/shared';
+import { ddb, USERS_TABLE, getUserId, type UserProfile } from '@rook/shared';
+import * as res from '@rook/shared';
 
 const PROFILE_SK = 'PROFILE';
 

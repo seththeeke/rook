@@ -1,5 +1,5 @@
 {
-  "name": "@repwise/cognito-post-confirm",
+  "name": "@rook/cognito-post-confirm",
   "version": "0.1.0",
   "private": true,
   "main": "dist/index.js",
@@ -8,7 +8,7 @@
     "build": "tsc"
   },
   "dependencies": {
-    "@repwise/shared": "workspace:*",
+    "@rook/shared": "workspace:*",
     "@aws-sdk/client-dynamodb": "^3.700.0",
     "@aws-sdk/lib-dynamodb": "^3.700.0"
   },

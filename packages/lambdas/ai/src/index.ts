@@ -7,9 +7,9 @@ import {
   DEFAULT_BUILDER_AI_CONFIG,
   type RegenerateContext,
 } from './flows';
-import { BUILDER_AI_CONFIG_TABLE, ddb, WeightUnit } from '@repwise/shared';
-import type { WorkoutExercise } from '@repwise/shared';
-import * as res from '@repwise/shared';
+import { BUILDER_AI_CONFIG_TABLE, ddb, WeightUnit } from '@rook/shared';
+import type { WorkoutExercise } from '@rook/shared';
+import * as res from '@rook/shared';
 
 interface LambdaResponseStream {
   write(chunk: string): void;

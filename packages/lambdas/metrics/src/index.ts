@@ -11,8 +11,8 @@ import {
   type ExerciseMetrics,
   type ExerciseSessionItem,
   sessionSkPrefix,
-} from '@repwise/shared';
-import * as res from '@repwise/shared';
+} from '@rook/shared';
+import * as res from '@rook/shared';
 
 const METRIC_GLOBAL_SK = 'METRIC#GLOBAL';
 const METRIC_EXERCISE_PREFIX = 'METRIC#EXERCISE#';

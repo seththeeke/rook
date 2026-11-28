@@ -20,8 +20,8 @@ import {
   WorkoutSource,
   PermissionType,
   WeightUnit,
-} from '@repwise/shared';
-import * as res from '@repwise/shared';
+} from '@rook/shared';
+import * as res from '@rook/shared';
 
 const WORKOUT_SK_PREFIX = 'WORKOUT#';
 const PROFILE_SK = 'PROFILE';

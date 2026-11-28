@@ -18,8 +18,8 @@ import {
   GoalStatus,
   GoalTimeframe,
   type ExerciseCatalogItem,
-} from '@repwise/shared';
-import * as res from '@repwise/shared';
+} from '@rook/shared';
+import * as res from '@rook/shared';
 
 const GOAL_PREFIX = 'GOAL#';
 const EXERCISE_PK_PREFIX = 'EXERCISE#';

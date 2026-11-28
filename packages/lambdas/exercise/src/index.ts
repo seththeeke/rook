@@ -1,8 +1,8 @@
 import type { APIGatewayProxyEventV2WithJWTAuthorizer, APIGatewayProxyResultV2 } from 'aws-lambda';
 import { GetCommand } from '@aws-sdk/lib-dynamodb';
-import { ddb, WORKOUTS_TABLE, type ExerciseCatalogItem } from '@repwise/shared';
+import { ddb, WORKOUTS_TABLE, type ExerciseCatalogItem } from '@rook/shared';
 import { queryExercises } from './query';
-import * as res from '@repwise/shared';
+import * as res from '@rook/shared';
 
 const EXERCISE_PK_PREFIX = 'EXERCISE#';
 const METADATA_SK = 'METADATA';

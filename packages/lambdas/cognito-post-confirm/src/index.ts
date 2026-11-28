@@ -8,7 +8,7 @@ import {
   type GlobalMetrics,
   WeightUnit,
   PermissionType,
-} from '@repwise/shared';
+} from '@rook/shared';
 
 export const handler = async (
   event: PostConfirmationTriggerEvent

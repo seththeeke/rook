@@ -1,5 +1,5 @@
 {
-  "name": "@repwise/ai",
+  "name": "@rook/ai",
   "version": "0.1.0",
   "private": true,
   "main": "dist/index.js",
@@ -10,7 +10,7 @@
     "@aws-sdk/client-bedrock-runtime": "^3.700.0",
     "@aws-sdk/client-dynamodb": "^3.700.0",
     "@aws-sdk/lib-dynamodb": "^3.700.0",
-    "@repwise/shared": "workspace:*",
+    "@rook/shared": "workspace:*",
     "aws-jwt-verify": "^4.0.1"
   },
   "devDependencies": {

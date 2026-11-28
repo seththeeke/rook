@@ -7,8 +7,8 @@ import {
   BUILDER_SESSIONS_TABLE,
   getUserId,
   deleteAllUserAppData,
-} from '@repwise/shared';
-import * as res from '@repwise/shared';
+} from '@rook/shared';
+import * as res from '@rook/shared';
 
 const cognitoClient = new CognitoIdentityProviderClient({});
 

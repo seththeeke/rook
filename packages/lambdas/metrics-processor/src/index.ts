@@ -23,7 +23,7 @@ import {
   toRecentSession,
   mergeRecentSessions,
   TREND_DATA_RETENTION_DAYS,
-} from '@repwise/shared';
+} from '@rook/shared';
 
 const METRIC_GLOBAL_SK = 'METRIC#GLOBAL';
 const METRIC_EXERCISE_PREFIX = 'METRIC#EXERCISE#';

@@ -3,8 +3,8 @@ import type {
   APIGatewayProxyResultV2,
 } from 'aws-lambda';
 import { QueryCommand } from '@aws-sdk/lib-dynamodb';
-import { ddb, USERS_TABLE, getUserId, type FeedItem } from '@repwise/shared';
-import * as res from '@repwise/shared';
+import { ddb, USERS_TABLE, getUserId, type FeedItem } from '@rook/shared';
+import * as res from '@rook/shared';
 
 function toFeedItemResponse(item: FeedItem): Record<string, unknown> {
   return {

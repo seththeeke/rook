@@ -138,7 +138,7 @@ data: {"message": "..."}
 |------|--------|
 | Backend – stream + multi-step | `packages/lambdas/workout/src/index.ts` (or split: stream handler in `ai` package that workout invokes, or single Lambda with streamifyResponse and branching on body). Intent LLM + catalog query + main selection LLM; SSE writes. |
 | Backend – catalog access | Reuse `packages/lambdas/exercise/src/query.ts` (e.g. import in AI/workout Lambda) or shared DDB queries; no new route. |
-| Backend – CDK | `packages/cdk/lib/repwise-stack.ts`: Workout Lambda `invokeMode: RESPONSE_STREAM`; API integration supports stream. |
+| Backend – CDK | `packages/cdk/lib/rook-stack.ts`: Workout Lambda `invokeMode: RESPONSE_STREAM`; API integration supports stream. |
 | Frontend – API | `packages/web/src/api/workouts.ts` or `ai.ts`: `streamWorkoutGeneration`, optional `streamWorkoutRegenerate`. |
 | Frontend – UI | `AIWorkoutScreen`: use stream API, show progress checklist. Review screen: Regenerate button(s) + call stream with `regenerateContext`. |
 | Spec | This file: `specs/ai-workout-sse-plan.md`. |

@@ -48,7 +48,7 @@ Rebuild the iPhone app as a native **Swift / SwiftUI** app called **Rook** (rebr
 |---|---|
 | **No backend changes** | Nothing in `packages/lambdas`, `packages/cdk`, or the Cognito setup changes. Every backend quirk the app must live with is listed in §6. |
 | **Production-ready, no mocks** | The app target has no mock data, placeholder screens, admin tools, dev toggles, or "coming soon" items. Everything on screen is backed by a real endpoint or real local state, or it isn't shown. Fakes live **only** in test targets. |
-| **Rebrand, no Repwise anywhere** | Nothing a user can see says "Repwise": app name, copy, icon, launch screen, Live Activity, permission prompts (`NSFaceIDUsageDescription`), App Store metadata. Internal identifiers use `rook` too (bundle IDs, `os.Logger` subsystem, UserDefaults and file names). The color palette stays. Backend names (`repwise-*` tables, `api.repwisefit.com`, the Cognito pool) are never shown to users and stay as they are. A grep check in `make lint` fails the build if "repwise" (any case) appears in `ios-app/` outside `Config/*.xcconfig` endpoint values. |
+| **Rebrand, no Repwise anywhere** | Nothing a user can see says "Repwise": app name, copy, icon, launch screen, Live Activity, permission prompts (`NSFaceIDUsageDescription`), App Store metadata. Internal identifiers use `rook` too (bundle IDs, `os.Logger` subsystem, UserDefaults and file names). The color palette stays. Backend names (`repwise-*` tables, `api.rookjournal.com`, the Cognito pool) are never shown to users and stay as they are. A grep check in `make lint` fails the build if "repwise" (any case) appears in `ios-app/` outside `Config/*.xcconfig` endpoint values. |
 | **Built in pieces** | Each phase in §7 ships something that runs, is tested, and works end to end before the next phase starts. |
 | **Well tested** | Every phase includes the tests for its own code (see §8). A phase isn't done until its tests pass. |
 
@@ -136,7 +136,7 @@ This is the full list of what ships today in `packages/web/src`, with where each
 
 ### 3.3 Endpoints used by the rebuild
 
-All requests go to `https://api.repwisefit.com` with `Authorization: Bearer <Cognito ID token>`, except the AI stream.
+All requests go to `https://api.rookjournal.com` with `Authorization: Bearer <Cognito ID token>`, except the AI stream.
 
 | Endpoint | Used for | Phase |
 |---|---|---|
@@ -262,7 +262,7 @@ struct WorkoutSessionState: Codable, Equatable {
 8. **Weight units:** profiles have a `weightUnit` (`LBS`/`KG`), but the web app hard-codes `LBS` everywhere. The rebuild reads the profile unit for input, display, and the AI request (`weightUnit`), and stores `weightUnit` on each exercise it writes. Settings offers a unit picker (`PATCH /users/me {weightUnit}`, which the server already supports). PRs show each exercise's own `maxWeightUnit`.
 9. **Gyms:** onboarding creates "My Gym" with the selected equipment types, then PATCHes `defaultGymId` and `onboardingCompletedAt`. The equipment IDs are `dumbbells, free_weights, cables, weight_rack, cardio, machines`, with presets commercial, home, and minimalist.
 10. **AI stream:** there are five `progress` steps (`analyzing_goals, reviewing_history, scanning_catalog, balancing_muscles, optimizing_structure`). The app **shows the `message` the server sends** rather than hard-coded labels. The generation request has a 120 s Lambda timeout, and the client uses a 130 s timeout plus a Cancel button.
-11. **Password AutoFill:** the app has no associated domain, so iOS won't automatically suggest passwords saved for repwisefit.com. Fields use `.username` / `.password` / `.newPassword` content types, so the keyboard's password key still opens Passwords, and iOS offers to save credentials after sign-in. Domain-matched suggestions would need a `webcredentials` entry for the new app ID in the AASA file (a CDK change), which this plan doesn't make.
+11. **Password AutoFill:** the app has no associated domain, so iOS won't automatically suggest passwords saved for rookjournal.com. Fields use `.username` / `.password` / `.newPassword` content types, so the keyboard's password key still opens Passwords, and iOS offers to save credentials after sign-in. Domain-matched suggestions would need a `webcredentials` entry for the new app ID in the AASA file (a CDK change), which this plan doesn't make.
 12. **`permissionType`:** new workouts are sent as `FOLLOWERS_ONLY` (the current default). No UI exposes it.
 
 ---

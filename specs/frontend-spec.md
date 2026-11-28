@@ -69,7 +69,7 @@ export * from '../../../lambdas/shared/src/goalUtils';
 ```json
 {
   "dependencies": {
-    "@repwise/shared": "workspace:../lambdas/shared"
+    "@rook/shared": "workspace:../lambdas/shared"
   }
 }
 ```

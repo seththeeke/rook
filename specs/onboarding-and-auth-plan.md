@@ -140,7 +140,7 @@ sequenceDiagram
 | New Lambda: **gyms** (or extend user Lambda) | Implement GET/POST/PATCH/DELETE for `/users/me/gyms` and `/users/me/gyms/:gymId`; store gyms with PK=USER#userId, SK=GYM#gymId |
 | [packages/lambdas/user/src/index.ts](packages/lambdas/user/src/index.ts) | Add `defaultGymId`, `onboardingCompletedAt` to `toMeProfile` and to PATCH `allowed` list |
 | New Lambda: **GoalsAILambda** | Single handler: POST body `{ freeText }` -> Bedrock -> JSON array of goal suggestions; no DB writes |
-| CDK [packages/cdk/lib/repwise-stack.ts](packages/cdk/lib/repwise-stack.ts) | Add Gyms Lambda + routes for `/users/me/gyms`; add GoalsAILambda + route `POST /goals/me/suggest`; grant Bedrock to GoalsAILambda only |
+| CDK [packages/cdk/lib/rook-stack.ts](packages/cdk/lib/rook-stack.ts) | Add Gyms Lambda + routes for `/users/me/gyms`; add GoalsAILambda + route `POST /goals/me/suggest`; grant Bedrock to GoalsAILambda only |
 | Workout Lambda + AI Lambda | Accept `gymId` / `gymName` (and equipmentTypes from selected gym) when creating/generating workout; persist `gymId`, `gymName` on WorkoutInstance |
 | [packages/web/src/api/users.ts](packages/web/src/api/users.ts) | Extend `patchMe` with `defaultGymId`, `onboardingCompletedAt`; add `gymsApi`: list, create, update, delete, setDefault (via patchMe) |
 | [packages/web/src/api](packages/web/src/api) | Add `goalsApi.suggestFromText(freeText)` calling `POST /goals/me/suggest` |

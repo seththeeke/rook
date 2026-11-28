@@ -130,7 +130,7 @@ The stack does not create test users. After deploying:
 3. **Run the Cognito auth integration test:**
 
    ```bash
-   pnpm --filter @repwise/integration-tests test -- src/tests/00-cognito-auth.test.ts
+   pnpm --filter @rook/integration-tests test -- src/tests/00-cognito-auth.test.ts
    ```
 
 ---

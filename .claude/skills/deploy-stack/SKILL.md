@@ -1,6 +1,6 @@
 ---
 name: deploy-stack
-description: Build and deploy the Repwise CDK stack (API, Lambdas, tables, Cognito, website) to AWS production. Use when the user asks to deploy, ship, push changes live, or update the live stack/website.
+description: Build and deploy the Rook CDK stack (`RepwiseStack`) (API, Lambdas, tables, Cognito, website) to AWS production. Use when the user asks to deploy, ship, push changes live, or update the live stack/website.
 disable-model-invocation: true
 ---
 
@@ -13,7 +13,7 @@ Deploys `RepwiseStack` (single CloudFormation stack, us-east-1 by default) to th
 Run these from the repo root and stop on any failure:
 
 ```bash
-aws sts get-caller-identity          # credentials present? (deploy needs the account that owns repwisefit.com in Route 53)
+aws sts get-caller-identity          # credentials present? (deploy needs the account that owns rookjournal.com in Route 53)
 git status --short                   # tell the user if they're deploying uncommitted changes
 ```
 
@@ -48,8 +48,8 @@ Use the project-local CDK through the pnpm script, never a global `cdk`. The fir
 - Report the stack outputs: `WebsiteUrl`, `ApiUrl`, `AiWorkoutStreamUrl`, `UserPoolId`, `UserPoolClientId`, `CognitoOAuthDomain`, `CloudFrontDistributionId`.
 - If `AiWorkoutStreamUrl`, `UserPoolId`, `UserPoolClientId`, or `CognitoOAuthDomain` changed, tell the user: the native app reads these from `ios-app/Config/Base.xcconfig`, which needs updating and a new build.
 - BucketDeployment invalidates CloudFront. If the site still looks stale: `aws cloudfront create-invalidation --distribution-id <CloudFrontDistributionId> --paths "/*"`.
-- New environment and empty catalog only: seed exercises with `WORKOUTS_TABLE=repwise-workouts pnpm --filter @repwise/exercise seed full-exercise-database.json`. The default file is `catalog-minimal.json`.
-- Offer to run the integration tests (`pnpm --filter @repwise/integration-tests test`). They hit production data with the test users.
+- New environment and empty catalog only: seed exercises with `WORKOUTS_TABLE=repwise-workouts pnpm --filter @rook/exercise seed full-exercise-database.json`. The default file is `catalog-minimal.json`.
+- Offer to run the integration tests (`pnpm --filter @rook/integration-tests test`). They hit production data with the test users.
 
 ## Synth only
 

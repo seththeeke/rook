@@ -1,6 +1,6 @@
 # Integration tests
 
-Vitest-based integration tests against the **deployed** Repwise API. See [specs/integration-test-spec.md](../../specs/integration-test-spec.md) for full details.
+Vitest-based integration tests against the **deployed** Rook API. See [specs/integration-test-spec.md](../../specs/integration-test-spec.md) for full details.
 
 ## Setup
 
@@ -12,13 +12,13 @@ Vitest-based integration tests against the **deployed** Repwise API. See [specs/
 
 ```bash
 # From repo root
-pnpm --filter @repwise/integration-tests test
+pnpm --filter @rook/integration-tests test
 
 # Watch mode
-pnpm --filter @repwise/integration-tests test:watch
+pnpm --filter @rook/integration-tests test:watch
 
 # Single file
-pnpm --filter @repwise/integration-tests test 03-workouts
+pnpm --filter @rook/integration-tests test 03-workouts
 ```
 
 Tests run **sequentially** so that metrics tests run after workout tests (shared test user data).

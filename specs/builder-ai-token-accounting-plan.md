@@ -98,8 +98,8 @@ Store usage records in the existing **repwise-workout-builder-ai-config** Dynamo
 
 | File | Changes |
 |------|---------|
-| `packages/cdk/lib/repwise-stack.ts` | Grant AI Lambda `grantReadWriteData` on builderAiConfigTable (instead of grantReadData). |
-| `packages/cdk/lib/repwise-stack.ts` | Add GET `/admin/builder-ai-config/usage` route → builderAiConfigLambda. |
+| `packages/cdk/lib/rook-stack.ts` | Grant AI Lambda `grantReadWriteData` on builderAiConfigTable (instead of grantReadData). |
+| `packages/cdk/lib/rook-stack.ts` | Add GET `/admin/builder-ai-config/usage` route → builderAiConfigLambda. |
 | `packages/lambdas/ai/src/flows.ts` | Add `recordTokenUsage()`, call after selectExercises and pickReplacementExercises; ensure userId + runType passed. |
 | `packages/lambdas/ai/src/index.ts` | Extend builderAiConfigHandler to detect path `/admin/builder-ai-config/usage` and return aggregated usage; add Query + aggregation logic. |
 | `packages/web/src/api/builderAiConfig.ts` | Add `getUsage()`. |

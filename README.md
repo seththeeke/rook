@@ -1,6 +1,6 @@
 # Rook
 
-**Train smarter. Get stronger.** · **[repwisefit.com](https://repwisefit.com)**
+**Train smarter. Get stronger.** · **[rookjournal.com](https://rookjournal.com)**
 
 Rook is a fitness app for building and running workouts. Build a workout with AI or by hand (or restart a recent one in a tap), log every set mid-workout, and watch your streaks and personal records update automatically.
 
@@ -21,7 +21,7 @@ Rook is a fitness app for building and running workouts. Build a workout with AI
 | | |
 |---|---|
 | **iOS** (`ios-app/`) | Native SwiftUI app with the Live Activity / Dynamic Island. See [ios-app/README.md](ios-app/README.md) and the [rebuild plan](specs/ios-native-rebuild-plan.md). |
-| **Website** (`packages/web/`) | Static marketing site served at [repwisefit.com](https://repwisefit.com). No sign-in; the app is iPhone-only. |
+| **Website** (`packages/web/`) | Static marketing site served at [rookjournal.com](https://rookjournal.com). No sign-in; the app is iPhone-only. |
 
 Both use the same serverless backend.
 

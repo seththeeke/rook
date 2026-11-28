@@ -28,7 +28,7 @@ pnpm add amazon-cognito-identity-js
 **`packages/integration-tests/package.json`**
 ```json
 {
-  "name": "@repwise/integration-tests",
+  "name": "@rook/integration-tests",
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest"
@@ -79,7 +79,7 @@ packages/integration-tests/.env.test
 
 ## CDK: Provision Test Users
 
-Add to `packages/cdk/lib/repwise-stack.ts`. Test users are created once at deploy time and never torn down.
+Add to `packages/cdk/lib/rook-stack.ts`. Test users are created once at deploy time and never torn down.
 
 ```typescript
 // Only create test users in non-production environments
@@ -557,13 +557,13 @@ describe('Social', () => {
 
 ```bash
 # From monorepo root
-pnpm --filter @repwise/integration-tests test
+pnpm --filter @rook/integration-tests test
 
 # Watch mode during development
-pnpm --filter @repwise/integration-tests test:watch
+pnpm --filter @rook/integration-tests test:watch
 
 # Run a single file
-pnpm --filter @repwise/integration-tests test 03-workouts
+pnpm --filter @rook/integration-tests test 03-workouts
 ```
 
 ---

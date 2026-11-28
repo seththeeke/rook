@@ -1,6 +1,6 @@
-# Repwise CDK Stack
+# Rook CDK Stack
 
-Backend (API, Lambdas, Auth, Tables) and frontend (S3 + CloudFront) for Repwise.
+Backend (API, Lambdas, Auth, Tables) and frontend (S3 + CloudFront) for Rook.
 
 ## Custom domains (production)
 
@@ -8,23 +8,23 @@ The stack provisions **ACM** (DNS validation in Route 53) and:
 
 | Host | Purpose |
 |------|---------|
-| `repwisefit.com`, `www.repwisefit.com` | CloudFront (SPA) |
-| `api.repwisefit.com` | HTTP API (API Gateway) |
+| `rookjournal.com`, `www.rookjournal.com` | CloudFront (SPA) |
+| `api.rookjournal.com` | HTTP API (API Gateway) |
 
 **Before the first deploy**
 
-1. **Route 53 hosted zone** for `repwisefit.com` must exist in the same AWS account (or delegate NS from the registrar to this zone). The stack uses `HostedZone.fromLookup` for `repwisefit.com`.
+1. **Route 53 hosted zone** for `rookjournal.com` must exist in the same AWS account (or delegate NS from the registrar to this zone). The stack uses `HostedZone.fromLookup` for `rookjournal.com`.
 2. **First deploy** can take extra time while ACM validates the certificate.
 
 ### Cognito OAuth domain (managed)
 
-The stack creates a **Cognito-managed** hosted UI domain (`repwise<account>.auth.<region>.amazoncognito.com`) so Amplify can use `signInWithRedirect` (Sign in with Apple, etc.). Stack output **`CognitoOAuthDomain`** is the **full hostname** (no `https://`) — set **`VITE_COGNITO_OAUTH_DOMAIN`** in the web app to that exact value.
+The stack creates a **Cognito-managed** hosted UI domain (`rook<account>.auth.<region>.amazoncognito.com`) so Amplify can use `signInWithRedirect` (Sign in with Apple, etc.). Stack output **`CognitoOAuthDomain`** is the **full hostname** (no `https://`) — set **`VITE_COGNITO_OAUTH_DOMAIN`** in the web app to that exact value.
 
-**Callback / sign-out URLs** registered on the app client include `http://localhost:5173/`, `https://repwisefit.com/`, and `com.repwise.app://callback` (iOS custom scheme).
+**Callback / sign-out URLs** registered on the app client include `http://localhost:5173/` and `https://rookjournal.com/`. The Rook iOS app signs in with SRP and does not use these.
 
 ### Sign in with Apple (optional)
 
-1. In **Apple Developer**: create a **Services ID** (e.g. `com.repwise.web`) for Sign in with Apple; set **Return URLs** to  
+1. In **Apple Developer**: create a **Services ID** (e.g. `com.rookfitness.web`) for Sign in with Apple; set **Return URLs** to  
    `https://<CognitoOAuthDomain>/oauth2/idpresponse` (use the managed domain from the stack output).
 2. Create a **Sign in with Apple** key and note **Team ID**, **Key ID**, and download the **.p8** private key.
 3. Deploy the CDK stack with environment variables (do not commit the key):
@@ -41,7 +41,7 @@ The stack creates a **Cognito-managed** hosted UI domain (`repwise<account>.auth
 
 4. In the web app, set **`VITE_APPLE_SIGNIN_ENABLED=true`** (and **`VITE_COGNITO_OAUTH_DOMAIN`**) after deploy.
 
-### Cognito custom domain (`auth.repwisefit.com`) — optional, manual
+### Cognito custom domain (`auth.rookjournal.com`) — optional, manual
 
 You can still add a **branded** custom domain in the Cognito console for hosted UI URLs; the managed domain above is sufficient for OAuth. If you use a custom domain, update **`VITE_COGNITO_OAUTH_DOMAIN`** to that hostname and align Apple Return URLs with the custom domain’s `/oauth2/idpresponse` endpoint.
 
@@ -63,7 +63,7 @@ API Gateway and Lambda Function URLs **do not** accept `capacitor://` (or simila
 
    Production URLs:
 
-   - `VITE_API_BASE_URL` — `https://api.repwisefit.com` (or stack output `ApiUrl`)
+   - `VITE_API_BASE_URL` — `https://api.rookjournal.com` (or stack output `ApiUrl`)
    - `VITE_COGNITO_USER_POOL_ID` / `VITE_COGNITO_CLIENT_ID` — stack outputs
    - `VITE_AI_WORKOUT_STREAM_URL` — stack output `AiWorkoutStreamUrl` (Lambda Function URL)
 
@@ -79,7 +79,7 @@ API Gateway and Lambda Function URLs **do not** accept `capacitor://` (or simila
 
 After deploy, stack outputs include:
 
-- `WebsiteUrl` — `https://repwisefit.com`
+- `WebsiteUrl` — `https://rookjournal.com`
 - `CloudFrontDistributionId` — For cache invalidation (`aws cloudfront create-invalidation --distribution-id <id> --paths "/*"`)
 - `ApiUrl`, `UserPoolId`, `UserPoolClientId`, `CognitoOAuthDomain`, `AiWorkoutStreamUrl` — Backend/auth / OAuth
 

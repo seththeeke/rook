@@ -65,7 +65,7 @@ These metrics are published automatically to CloudWatch by each service. No agen
 
 **Location:** `packages/cdk/lib/monitoring.ts`
 
-This is a single CDK `Construct` class that accepts references to all other resources and wires up all alarms, log groups, and the dashboard. It is instantiated once in `packages/cdk/lib/repwise-stack.ts`.
+This is a single CDK `Construct` class that accepts references to all other resources and wires up all alarms, log groups, and the dashboard. It is instantiated once in `packages/cdk/lib/rook-stack.ts`.
 
 ### Constructor Interface
 
@@ -125,7 +125,7 @@ export class MonitoringConstruct extends Construct {
 ### Instantiation in Main Stack
 
 ```typescript
-// packages/cdk/lib/repwise-stack.ts (addition to existing stack)
+// packages/cdk/lib/rook-stack.ts (addition to existing stack)
 
 const monitoring = new MonitoringConstruct(this, 'Monitoring', {
   userLambda: lambdas.user,

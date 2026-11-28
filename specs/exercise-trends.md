@@ -75,7 +75,7 @@ It can be limited to one user with `--user <userId>`, and `--dry-run` prints the
                   "weight": 95, "weightUnit": "LBS", "sets": 3, "reps": 8, "modality": "sets_reps" } ] }
 ```
 - Sorted oldest first. `from` is optional and inclusive, and it limits the query by key range, not with a filter.
-- Served by the existing `metrics` Lambda. The route is added in `repwise-stack.ts`.
+- Served by the existing `metrics` Lambda. The route is added in `rook-stack.ts`.
 - Returns an empty `sessions` array, not a 404, when there's no history.
 
 ### Unchanged

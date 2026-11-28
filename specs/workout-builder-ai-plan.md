@@ -105,7 +105,7 @@ Make AI workout generation + regenerate honor the user’s request (e.g. push da
 1. **Cognito admin group**:
   - In CDK `packages/cdk/lib/auth.ts`, add a User Pool Group (e.g. `builder-admin`).
 2. **Admin-only API endpoints**:
-  - Add one or more new lambdas in `packages/cdk/lib/repwise-stack.ts`:
+  - Add one or more new lambdas in `packages/cdk/lib/rook-stack.ts`:
     - GET builder AI config
     - PUT builder AI config (update templates + modelId)
   - Protect routes via the existing Cognito JWT authorizer AND enforce group membership inside the lambda by reading JWT claims.

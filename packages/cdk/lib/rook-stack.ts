@@ -14,20 +14,24 @@ import { TablesConstruct } from './tables';
 import { WebsiteConstruct } from './website';
 
 /**
- * Repwise stack. Tables, auth, API, and Lambdas per specs/backend-spec.md.
+ * Rook stack. Tables, auth, API, and Lambdas per specs/backend-spec.md.
  * Integration test users are created manually in the User Pool (see README).
+ *
+ * The CloudFormation stack is still deployed as `RepwiseStack` (see bin/app.ts) and the
+ * DynamoDB tables / Cognito user pool keep their `repwise-*` names: those are stateful and
+ * renaming them would replace them and lose user data.
  */
-const ROOT_DOMAIN = 'repwisefit.com';
+const ROOT_DOMAIN = 'rookjournal.com';
 
-export class RepwiseStack extends cdk.Stack {
+export class RookStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    const hostedZone = route53.HostedZone.fromLookup(this, 'RepwiseHostedZone', {
+    const hostedZone = route53.HostedZone.fromLookup(this, 'HostedZone', {
       domainName: ROOT_DOMAIN,
     });
 
-    const certificate = new acm.Certificate(this, 'RepwiseCertificate', {
+    const certificate = new acm.Certificate(this, 'Certificate', {
       domainName: ROOT_DOMAIN,
       subjectAlternativeNames: [`*.${ROOT_DOMAIN}`],
       validation: acm.CertificateValidation.fromDns(hostedZone),
@@ -313,12 +317,12 @@ export class RepwiseStack extends cdk.Stack {
     new cdk.CfnOutput(this, 'UserPoolId', {
       value: auth.userPool.userPoolId,
       description: 'Cognito User Pool ID for integration tests (.env.test COGNITO_USER_POOL_ID)',
-      exportName: 'RepwiseUserPoolId',
+      exportName: 'RookUserPoolId',
     });
     new cdk.CfnOutput(this, 'UserPoolClientId', {
       value: auth.userPoolClient.userPoolClientId,
       description: 'Cognito User Pool Client ID for integration tests (.env.test COGNITO_CLIENT_ID)',
-      exportName: 'RepwiseUserPoolClientId',
+      exportName: 'RookUserPoolClientId',
     });
     const cognitoOAuthHost = cdk.Fn.join('', [
       auth.cognitoOAuthDomain.domainName,
@@ -330,17 +334,17 @@ export class RepwiseStack extends cdk.Stack {
       value: cognitoOAuthHost,
       description:
         'Cognito hosted UI hostname for Amplify (VITE_COGNITO_OAUTH_DOMAIN, no https://)',
-      exportName: 'RepwiseCognitoOAuthDomain',
+      exportName: 'RookCognitoOAuthDomain',
     });
     new cdk.CfnOutput(this, 'ApiUrl', {
       value: api.publicBaseUrl,
       description: 'HTTPS API base URL (custom domain) for integration tests and frontend',
-      exportName: 'RepwiseApiUrl',
+      exportName: 'RookApiUrl',
     });
     new cdk.CfnOutput(this, 'AiWorkoutStreamUrl', {
       value: aiFunctionUrl.url,
       description: 'AI workout generation SSE endpoint (POST with aiPrompt or regenerateContext; send Authorization header)',
-      exportName: 'RepwiseAiWorkoutStreamUrl',
+      exportName: 'RookAiWorkoutStreamUrl',
     });
 
     const website = new WebsiteConstruct(this, 'Website', {
@@ -351,12 +355,12 @@ export class RepwiseStack extends cdk.Stack {
     new cdk.CfnOutput(this, 'WebsiteUrl', {
       value: website.url,
       description: `Frontend at https://${ROOT_DOMAIN}. Set VITE_* in packages/web/.env.production before build.`,
-      exportName: 'RepwiseWebsiteUrl',
+      exportName: 'RookWebsiteUrl',
     });
     new cdk.CfnOutput(this, 'CloudFrontDistributionId', {
       value: website.distribution.distributionId,
       description: 'CloudFront distribution ID for cache invalidation',
-      exportName: 'RepwiseCloudFrontDistributionId',
+      exportName: 'RookCloudFrontDistributionId',
     });
   }
 }

@@ -12,12 +12,12 @@ import { Construct } from 'constructs';
 export interface WebsiteDomainProps {
   readonly hostedZone: route53.IHostedZone;
   readonly certificate: acm.ICertificate;
-  /** Apex hostname, e.g. repwisefit.com */
+  /** Apex hostname, e.g. rookjournal.com */
   readonly apexDomainName: string;
 }
 
 /**
- * Static website (S3 + CloudFront) for the Repwise frontend (Vite/React SPA).
+ * Static website (S3 + CloudFront) for the Rook marketing site (Vite/React).
  * Deploys contents of packages/web/dist. Run `pnpm --filter web build` before deploy.
  */
 export class WebsiteConstruct extends Construct {
@@ -85,7 +85,7 @@ export class WebsiteConstruct extends Construct {
     }
 
     const webDistPath = path.join(__dirname, '../../web/dist');
-    /** iOS Password AutoFill / app–site association (Capacitor hostname must match apex domain). */
+    /** iOS app–site association for the Rook app (bundle com.rookfitness.app). */
     const appleTeamId = '2C568CVX27';
     const sources: s3deploy.ISource[] = [s3deploy.Source.asset(webDistPath)];
     if (domain) {
@@ -94,7 +94,7 @@ export class WebsiteConstruct extends Construct {
           applinks: {
             details: [
               {
-                appID: `${appleTeamId}.com.repwisefit.app`,
+                appID: `${appleTeamId}.com.rookfitness.app`,
                 paths: ['*'],
               },
             ],

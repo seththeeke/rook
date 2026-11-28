@@ -26,7 +26,7 @@ export interface AuthConstructProps {
 export class AuthConstruct extends Construct {
   public readonly userPool: cognito.UserPool;
   public readonly userPoolClient: cognito.UserPoolClient;
-  /** Hosted UI hostname only, e.g. `repwise123456789012.auth.us-east-1.amazoncognito.com` (no scheme). */
+  /** Hosted UI hostname only, e.g. `rook123456789012.auth.us-east-1.amazoncognito.com` (no scheme). */
   public readonly cognitoOAuthDomain: cognito.UserPoolDomain;
 
   constructor(scope: Construct, id: string, props: AuthConstructProps) {
@@ -35,6 +35,7 @@ export class AuthConstruct extends Construct {
     const { postConfirmLambda, appleSignIn } = props;
 
     this.userPool = new cognito.UserPool(this, 'UserPool', {
+      // Stateful: the pool name can't change without replacing the pool (and every user).
       userPoolName: 'repwise-user-pool',
       selfSignUpEnabled: true,
       signInAliases: { email: true },
@@ -52,7 +53,7 @@ export class AuthConstruct extends Construct {
     });
 
     const account = cdk.Stack.of(this).account;
-    const domainPrefix = `repwise${account}`;
+    const domainPrefix = `rook${account}`;
     this.cognitoOAuthDomain = this.userPool.addDomain('HostedUIDomain', {
       cognitoDomain: {
         domainPrefix,
@@ -89,18 +90,8 @@ export class AuthConstruct extends Construct {
           cognito.OAuthScope.EMAIL,
           cognito.OAuthScope.PROFILE,
         ],
-        callbackUrls: [
-          'http://localhost:5173/',
-          'https://repwisefit.com/',
-          'com.repwisefit.app://callback',
-          'com.repwise.app://callback',
-        ],
-        logoutUrls: [
-          'http://localhost:5173/',
-          'https://repwisefit.com/',
-          'com.repwisefit.app://callback',
-          'com.repwise.app://callback',
-        ],
+        callbackUrls: ['http://localhost:5173/', 'https://rookjournal.com/'],
+        logoutUrls: ['http://localhost:5173/', 'https://rookjournal.com/'],
       },
       supportedIdentityProviders,
     });
@@ -113,7 +104,7 @@ export class AuthConstruct extends Construct {
     new cognito.CfnUserPoolGroup(this, 'BuilderAdminGroup', {
       userPoolId: this.userPool.userPoolId,
       groupName: 'builder-admin',
-      description: 'Admin access to Repwise workout builder AI configuration',
+      description: 'Admin access to Rook workout builder AI configuration',
       precedence: 1,
     });
   }

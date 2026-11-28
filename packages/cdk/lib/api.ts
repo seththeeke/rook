@@ -13,7 +13,7 @@ export interface ApiConstructProps {
   readonly userPoolClient: cognito.UserPoolClient;
   /** CORS `allowOrigins` (often `['*']` so Capacitor native shells work; API Gateway rejects capacitor://). */
   readonly corsAllowOrigins: string[];
-  /** Optional: api.repwisefit.com with ACM + Route53 alias. */
+  /** Optional: api.rookjournal.com with ACM + Route53 alias. */
   readonly customApiDomain?: {
     readonly domainName: string;
     readonly certificate: acm.ICertificate;
@@ -33,7 +33,7 @@ export class ApiConstruct extends Construct {
     const { userPool, userPoolClient, corsAllowOrigins, customApiDomain } = props;
 
     this.api = new apigwv2.HttpApi(this, 'HttpApi', {
-      apiName: 'repwise-api',
+      apiName: 'rook-api',
       corsPreflight: {
         allowHeaders: ['Authorization', 'Content-Type'],
         allowMethods: [apigwv2.CorsHttpMethod.ANY],
